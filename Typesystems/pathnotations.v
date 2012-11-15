@@ -5,7 +5,6 @@ Add Rec LoadPath "../hlevel2".
 
 Require Import hSet.
 
-
 Module Import PathNotations.
 
 Notation "a == b" := (paths a b) (at level 70, no associativity).
