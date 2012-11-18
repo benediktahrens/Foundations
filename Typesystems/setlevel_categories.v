@@ -9,18 +9,33 @@ Require Import hSet.
 Require Import pathnotations.
 Import pathnotations.PathNotations.
 
-
+Print hfp.
 Definition hfp_pair {X X' Y : UU} (f : X -> Y) (f' : X' -> Y) 
           x y (p : f' y == f x):
       hfp f f' := tpair _ (dirprodpair x y) p.
 
-Record category (ob : hSet) (mor : hSet) (s t : mor -> ob)
-     (comp : hfp s t -> mor) (id : ob -> mor)
-       : UU := {
+
+Record category_data := {
+  ob :> hSet ;
+  mor : hSet ;
+  s : mor -> ob ;
+  t : mor -> ob ;
+  comp : hfp s t -> mor ;
+  id : ob -> mor
+}.
+
+Definition composables (C : category_data) :=
+  hfp (*(mor C) (mor C) (ob C)*) (t C) (s C).
+
+
+
+Record category (*C : category_data*) 
+     (ob : hSet) (mor : hSet) (s t : mor -> ob)
+     (comp : hfp s t -> mor) (id : ob -> mor) : UU := {
   id_s : forall x : ob, s (id x) == x ;
   id_t : forall x : ob, t (id x) == x ;
   comp_s : forall f g (Hfg : t f == s g),
-         s (comp ( hfp_pair s t g f Hfg)) == s f ;
+         s (comp (hfp_pair s t g f Hfg)) == s f ;
   comp_t : forall f g (Hfg : t f == s g),
          t (comp (hfp_pair s t g f Hfg)) == t g ;
   comp_id_l : forall f : mor, 
@@ -46,7 +61,8 @@ Variables (ob mor : hSet) (s t : mor -> ob)
 Definition Hom (X Y : ob) := 
   total2 (fun f : mor => dirprod (s f == X)  (t f == Y)).
 
-
+Definition mor_from_hom (X Y : ob) (f : Hom X Y) : mor := pr1 f.
+Coercion mor_from_hom : Hom >-> pr1hSet. Check pr1hSet.
 
 Record final_obj (pt : ob) := {
   final_map : forall Y : ob, mor ;
@@ -91,6 +107,39 @@ Defined.
 
 
 End Hom_to_pt_contractible.
+
+Record is_pullback (f g h k : mor) := {
+  ttfg : t f == t g ;
+  compfk : t k == s f   ;
+  comphg : t h == s g ;
+  sshk : s h == s k ;
+  pb_square_commutes : comp (hfp_pair s t _ _ comphg) == 
+                       comp (hfp_pair s t f k compfk) ;
+  pb_exist : forall (t1 t2 : mor) (H : s t1 == s t2)
+       (Hft1 : t t1 == s f) (Hgt2 : t t2 == s g)
+   (CC :  comp (hfp_pair s t _ _ Hgt2) == comp (hfp_pair s t _ _ Hft1) ),
+          Hom (s t1) (s k) ;
+  pb_exist_comm_1 : forall (t1 t2 : mor) (H : s t1 == s t2)
+       (Hft1 : t t1 == s f) (Hgt2 : t t2 == s g)
+   (CC :  comp (hfp_pair s t _ _ Hgt2) == comp (hfp_pair s t _ _ Hft1) ),
+      comp (hfp_pair s t k (pb_exist t1 t2 H Hft1 Hgt2 CC) 
+         ( pr2 (pr2 (pb_exist t1 t2 H Hft1 Hgt2 CC)) ))
+          == t1 ;
+  pb_exist_comm_2 : forall (t1 t2 : mor) (H : s t1 == s t2)
+       (Hft1 : t t1 == s f) (Hgt2 : t t2 == s g)
+   (CC :  comp (hfp_pair s t _ _ Hgt2) == comp (hfp_pair s t _ _ Hft1) ),
+      comp (hfp_pair s t h (pb_exist t1 t2 H Hft1 Hgt2 CC) 
+         ( pr2 (pr2 (pb_exist t1 t2 H Hft1 Hgt2 CC)) @ !sshk ))
+          == t2 ;
+          
+  pb_unique : forall Y : ob, forall t1 t2 : Hom Y (s k),
+          forall (Hk : comp (hfp_pair s t k t1 (pr2 (pr2 t1)) ) == 
+                comp (hfp_pair s t k t2 (pr2 (pr2 t2)) )),
+          forall (Hh : comp (hfp_pair s t h t1 (pr2 (pr2 t1) @ !sshk) ) == 
+                comp (hfp_pair s t h t2 (pr2 (pr2 t2)@ !sshk) )), 
+          t1 == t2
+       
+}.
 
 End limits.  
 

@@ -14,6 +14,7 @@ Import pathnotations.PathNotations.
 Print hSet.
 
 Print isofhleveltotal2.
+About is_pullback.
 
 Record cstructure := {
 
@@ -24,18 +25,18 @@ Record cstructure := {
   comp : hfp s t -> mor ; 
   id : total2 ob -> mor ;
   categorical : category (tpair isaset (total2 ob) 
-           (isofhleveltotal2 2 ob isasetnat 
+           (sigset ob isasetnat 
              (fun n : nat => pr2 (ob n)))) mor s t comp id ;
   pt : ob 0 ;
   ft : forall {n : nat}, ob (S n) -> ob n ;
-  canonical : forall n, ob (S n) -> mor ;
+  canonical : forall n, ob (S n) -> mor ; (* refine towards HomSets*)
   can_pb : forall {n : nat} (X : ob (S n)) {m : nat}
        (Y : ob m) (f : mor) 
        (HfY : s f == tpair _ m Y) 
        (HfX : t f == tpair _ n (ft X)),
         ob (S m) ;
   can_pb_map : forall {n : nat} (X : ob (S n)) {m : nat}
-       (Y : ob m) (f : mor) 
+       {Y : ob m} (f : mor) 
        (HfY : s f == tpair _ m Y) 
        (HfX : t f == tpair _ n (ft X)),
        mor ;
@@ -43,18 +44,36 @@ Record cstructure := {
        (Y : ob m) (f : mor) 
        (HfY : s f == tpair _ m Y) 
        (HfX : t f == tpair _ n (ft X)),
-       s (can_pb_map X Y f HfY HfX) == 
+       s (can_pb_map X  f HfY HfX) == 
            tpair _ (S m) (can_pb X Y f HfY HfX) ;
   can_pb_t : forall {n : nat} (X : ob (S n)) {m : nat}
        (Y : ob m) (f : mor) 
        (HfY : s f == tpair _ m Y) 
        (HfX : t f == tpair _ n (ft X)),
-        t (can_pb_map X Y f HfY HfX) == 
+        t (can_pb_map X  f HfY HfX) == 
            tpair _ (S n) X ;
   
   ob0pt : forall X : ob 0, X == pt ;
   
-  (* pt is final object *)
+  pt_final : final_obj (tpair isaset (total2 ob) 
+           (sigset ob isasetnat 
+             (fun n : nat => pr2 (ob n)))) mor s t (tpair _ 0 pt) ;
+  pb_condition : forall (n : nat)(X : ob (S n)) 
+                m {Y : ob m}
+                  (f : Hom (tpair isaset (total2 ob) 
+           (sigset ob isasetnat 
+             (fun n : nat => pr2 (ob n)))) mor s t 
+                (tpair _ m Y)
+                (tpair _ n (ft X)) 
+                ),
+      is_pullback 
+         (tpair isaset (total2 ob) 
+           (sigset ob isasetnat 
+             (fun n : nat => pr2 (ob n)))) 
+         _ s t comp f 
+         (canonical _ X) (can_pb_map X f (pr1 (pr2 f)) (pr2 (pr2 f)) )
+         (canonical _ (can_pb X Y f (pr1 (pr2 f)) (pr2 (pr2 f)) ))
+         
         
 }.
 
