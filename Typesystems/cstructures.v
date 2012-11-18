@@ -72,9 +72,45 @@ Record cstructure := {
              (fun n : nat => pr2 (ob n)))) 
          _ s t comp f 
          (canonical _ X) (can_pb_map X f (pr1 (pr2 f)) (pr2 (pr2 f)) )
-         (canonical _ (can_pb X Y f (pr1 (pr2 f)) (pr2 (pr2 f)) ))
+         (canonical _ (can_pb X Y f (pr1 (pr2 f)) (pr2 (pr2 f)) )) ;
          
-        
+  can_pb_id : forall n (X : ob (S n)), 
+           can_pb X (ft X) (id (tpair _ n (ft X)))
+             (id_s  
+                (tpair isaset (total2 ob) 
+                (sigset ob isasetnat 
+               (fun n : nat => pr2 (ob n))))
+                    mor s t comp id categorical _ )
+
+         (id_t  
+                (tpair isaset (total2 ob) 
+                (sigset ob isasetnat 
+               (fun n : nat => pr2 (ob n))))
+                    mor s t comp id categorical _ )
+           == X ;
+  
+  can_pb_map_id : forall n (X : ob (S n)), 
+           can_pb_map X  (id (tpair _ n (ft X)))
+             (id_s  
+                (tpair isaset (total2 ob) 
+                (sigset ob isasetnat 
+               (fun n : nat => pr2 (ob n))))
+                    mor s t comp id categorical _ )
+
+         (id_t  
+                (tpair isaset (total2 ob) 
+                (sigset ob isasetnat 
+               (fun n : nat => pr2 (ob n))))
+                    mor s t comp id categorical _ )
+           == id (tpair _ (S n) X) ;
+
+  
+  can_pb_comp : forall n (X : ob (S n)), 
+            forall m (Y : 
+
+  can_pb_map_comp : 
+  
 }.
+
 
 Check (fun X : cstructure => ob X).
