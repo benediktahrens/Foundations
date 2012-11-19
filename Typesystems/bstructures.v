@@ -17,7 +17,7 @@ Section Bstructure_def.
 
 
 Check @hfp.
-About hfp.
+Print hfp.
 
 Record Bstructure := {
 
@@ -39,13 +39,13 @@ Record Bstructure := {
   
               -> BB (S (S i + n)) ;
 
-  s : forall (i n : nat), hfp
+  SS : forall (i n : nat), hfp
                 (delta n)
                 (iter _ ft (S i) (S n))
 
               -> B (S i + n) ;
 
-  ss : forall (i n : nat), hfp
+  SSS : forall (i n : nat), hfp
                  (delta n)
                  (funcomp (delta _ )
                           (iter _ ft (S i) (S n)))
@@ -57,11 +57,35 @@ Record Bstructure := {
   ft_T : forall (i n : nat),
            forall YXp : hfp (ft n) (iter _ ft (S i) n),
        
-             (fun i' => 
-                      match i' return (hfp (ft n) (iter _ ft (S i') n) -> Type) with 
-                      | 0 => fun YYY  => ft _ (T _ _ YYY) == pr1 (pr1 YYY)
-                      | _ => fun _ => True
-                      end) i YXp
+    
+ 
+
+         (fun i' => 
+               match i' return (hfp (ft n) (iter _ ft (S i') n) -> Type) with 
+               | 0 => fun YXp' => ft _ (T _ _ YXp') == pr1 (pr1 YXp')
+               | S i'' => fun YXp' => 
+                         ft (S (S i'' + n)) (T (S i'') n YXp') == 
+                                    T i'' n 
+                                      (hfp_pair (ft n) (iter B ft (S i'') n)
+                                                (pr1 (pr1 YXp'))
+                                                (ft _ (pr2 (pr1 YXp')))
+                                  (pr2 YXp'))
+ 
+               end) i YXp
+
+ ;
+  
+  delta_TT : forall (i n : nat),
+               forall (Ysp : hfp (ft n) 
+                       (funcomp (delta _ ) (iter _ ft (S i) _ ) )),
+
+            delta _ (TT _ _ Ysp ) == T i n 
+                               
+        (hfp_pair (ft n) (iter _ ft (S i) n ) (pr1 (pr1 Ysp)) 
+                                          (delta _ (pr2 (pr1 Ysp)))
+                                          (pr2 Ysp)                                  
+        )
+                                              
 
            
 }.
