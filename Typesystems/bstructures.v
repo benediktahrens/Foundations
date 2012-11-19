@@ -30,28 +30,31 @@ Record Bstructure := {
   T : forall (i n : nat), hfp (*(B (S n)) (B (S i + n)) (B n)*)
                 (ft n) (iter _ ft (S i) n) 
        -> B (S (S i + n))
-           ;
+;
 
   TT : forall (i n : nat), hfp
                 (ft n) 
                 (funcomp (delta (i + n) )(iter _ ft (S i) n))
-(*                (fun x : BB (S i + n) => iter _ ft (S i) n (delta _ x)) *)
   
-              -> BB (S (S i + n)) ;
+              -> BB (S (S i + n)) 
+;
 
   SS : forall (i n : nat), hfp
                 (delta n)
                 (iter _ ft (S i) (S n))
 
-              -> B (S i + n) ;
+              -> B (S i + n) 
+;
 
   SSS : forall (i n : nat), hfp
                  (delta n)
                  (funcomp (delta _ )
                           (iter _ ft (S i) (S n)))
-              -> BB (S i + n) ;
+              -> BB (S i + n) 
+;
 
-  diag : forall n, B (S n) -> BB (S (S n)) ;
+  diag : forall n, B (S n) -> BB (S (S n)) 
+;
 
 
   ft_T : forall (i n : nat),
@@ -73,7 +76,7 @@ Record Bstructure := {
  
                end) i YXp
 
- ;
+;
   
   delta_TT : forall (i n : nat),
                forall (Ysp : hfp (ft n) 
@@ -86,10 +89,47 @@ Record Bstructure := {
                                           (pr2 Ysp)                                  
         )
                                               
+;
 
+  ft_SS : forall (i n : nat),
+          forall (rXp : hfp (delta n) (iter _ ft (S i) (S n))), 
+
+
+      ( fun i' => 
+           match i' return (hfp (delta n) (iter _ ft (S i') (S n)) -> Type) with
+           | 0 => fun rXp' => ft n (SS 0 n rXp') == 
+                              ft _ (delta _ (pr1 (pr1 rXp')))
+           | S i'' => fun rXp' => 
+                  
+               ft (S i'' + n) (SS (S i'') n rXp') == 
+                     SS _ _ 
+                         (hfp_pair (delta n)
+                                   (iter _ ft (S i'') (S n) )
+                                   (pr1 (pr1 rXp'))
+                                   (ft _ (pr2 (pr1 rXp')))
+                                   (pr2 rXp'))
+                         
+
+           end ) i rXp
+
+;
+ 
+  delta_SSS : forall (i n : nat),
+              forall (rsp : hfp (delta n) 
+                                (funcomp (delta (i + S n))
+                                         (iter _ ft (S i) (S n)))),
+     delta _ (SSS i n rsp) == SS i n (hfp_pair (delta n) (iter _ ft (S i) (S n))
+                                         (pr1 (pr1 rsp))
+                                         (delta (i + S n) (pr2 (pr1 rsp))) (pr2 rsp))
+
+;
+
+  diag_delta : forall (n : nat) (X : B (S n)),
+          delta _ (diag _ X) == T _ _ (hfp_pair (ft _ ) 
+                                                (iter _ ft 1 _ ) X X (idpath _ ))
            
 }.
-Check TT.
+
 
 
 
