@@ -45,7 +45,17 @@ Proof.
   apply H.
 Defined.
 
-
+Definition forall_isprop {X} (P : X -> UU) :
+  (forall x, isaprop (P x)) -> isaprop (forall x, P x).
+Proof.
+  intros H. 
+  apply invproofirrelevance.
+  intros x x'.
+  apply funextsec.
+  intro t.
+  apply proofirrelevance.
+  apply (H t).
+Defined.
 
 
 

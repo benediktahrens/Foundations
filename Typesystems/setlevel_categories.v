@@ -9,10 +9,186 @@ Require Import hSet.
 Require Import pathnotations.
 Import pathnotations.PathNotations.
 
-Print hfp.
 Definition hfp_pair {X X' Y : UU} (f : X -> Y) (f' : X' -> Y) 
           x y (p : f' y == f x):
       hfp f f' := tpair _ (dirprodpair x y) p.
+
+Definition idop (ob mor : hSet) := ob -> mor.
+Definition borderop (ob mor : hSet) := mor -> ob.
+
+Definition compop (ob mor : hSet) (s t : borderop ob mor) :=
+     hfp s t -> mor.
+
+Definition cell_data := total2
+    (fun obmor : dirprod hSet hSet => 
+        dirprod
+           (dirprod (borderop (pr1 obmor)(pr2 obmor))
+                 (borderop (pr1 obmor)(pr2 obmor)))
+           (idop (pr1 obmor) (pr2 obmor))).
+
+Definition cell_objects (X : cell_data) := pr1 (pr1 X).
+Definition cell_morphisms (X : cell_data) := pr2 (pr1 X).
+Definition cell_source (X : cell_data) := pr1 (pr1 (pr2 X)).
+Definition cell_target (X : cell_data) := pr2 (pr1 (pr2 X)).
+Definition id_cell (X : cell_data) := pr2 (pr2 X).
+
+Definition is_cell_structure (X : cell_data) :=
+   dirprod (forall x : cell_objects X, cell_source X (id_cell X x) == x)
+           (forall x : cell_objects X, cell_target X (id_cell X x) == x) .
+
+Definition cell_structure := total2 (fun X => is_cell_structure X).
+
+Definition nerve2 (X : cell_data) := hfp (cell_source X) (cell_target X).
+
+Definition catqalg_data := 
+  total2 (fun X : cell_data => nerve2 X -> cell_morphisms X).
+
+Definition comp (X : catqalg_data) := pr2 X.
+Definition cell_from_cell_with_comp (X : catqalg_data) : cell_data := pr1 X.
+Coercion cell_from_cell_with_comp : catqalg_data >-> cell_data.
+
+Definition morphisms (X : catqalg_data) := cell_morphisms X.
+Definition composable {X : catqalg_data} (f g : morphisms X) :=
+         cell_target X f == cell_source X g.
+Definition compose {X : catqalg_data} (f g : morphisms X) (H : composable f g) :=
+      comp X (hfp_pair (cell_source X) (cell_target X) g f H).
+
+
+Definition source_of_comp (X : catqalg_data) := 
+       forall f g (H : composable f g), cell_source X (compose f g H) == 
+            cell_source X f.
+
+Lemma isaprop_source_of_comp X : isaprop (source_of_comp X).
+Proof.
+ apply forall_isprop.
+ intro x.
+ apply forall_isprop.
+ intro x'.
+ apply forall_isprop.
+ intro H.
+ apply (pr2 (cell_objects X)).
+Defined.
+  
+
+Definition target_of_comp (X : catqalg_data) := 
+       forall f g (H : composable f g), cell_target X (compose f g H) == 
+            cell_target X g.
+
+Lemma isaprop_target_of_comp X : isaprop (target_of_comp X).
+Proof.
+ apply forall_isprop.
+ intro x.
+ apply forall_isprop.
+ intro x'.
+ apply forall_isprop.
+ intro H.
+ apply (pr2 (cell_objects X)).
+Defined.
+  
+
+Definition is_assoc_compose (X : catqalg_data) 
+       (H : dirprod (source_of_comp X)(target_of_comp X))
+  := forall (f g h: morphisms X) (Hfg : composable f g)
+         (Hgh : composable g h),
+      compose f (compose g h Hgh) (Hfg @ !pr1 H g h Hgh) == 
+        compose (compose f g Hfg ) h (pr2 H f g Hfg @ Hgh) .
+
+Lemma isaprop_is_assoc_compose X H : isaprop (is_assoc_compose X H).
+Proof.
+  apply forall_isprop.
+  intro f.
+  apply forall_isprop.
+  intro g.
+  apply forall_isprop.
+  intro h.
+  apply forall_isprop.
+  intro Hfg.
+  apply forall_isprop.
+  intro Hgh.
+  apply (pr2 (cell_morphisms X)).
+Defined.
+  
+
+Definition assoc_comp (X : catqalg_data) := 
+   total2 (fun H : dirprod (source_of_comp X)(target_of_comp X) => is_assoc_compose X H).
+
+Lemma isaprop_assoc_comp X : isaprop (assoc_comp X).
+Proof.
+  apply isofhleveltotal2.
+  apply isofhleveldirprod.
+  apply isaprop_source_of_comp.
+  apply isaprop_target_of_comp.
+  intro H.
+  apply isaprop_is_assoc_compose.
+Defined.
+  
+  
+
+Definition compose_id_right (X : catqalg_data) (H : is_cell_structure X) :=
+   forall f : morphisms X, 
+        compose f (id_cell X (cell_target X f)) (!pr1 H (cell_target X f) ) == f.
+
+Lemma isaprop_compose_id_right X H : isaprop (compose_id_right X H).
+Proof.
+  apply forall_isprop.
+  intro x.
+  apply (pr2 (cell_morphisms X)).
+Defined.
+
+Definition compose_id_left (X : catqalg_data) (H : is_cell_structure X) :=
+   forall f : morphisms X, 
+        compose (id_cell X (cell_source X f)) f (pr2 H (cell_source X f) ) == f.
+
+Lemma isaprop_compose_id_left X H : isaprop (compose_id_left X H).
+Proof.
+  apply forall_isprop.
+  intro x.
+  apply (pr2 (cell_morphisms X)).
+Defined.
+
+Definition composition_units (X : catqalg_data) :=
+  total2 (fun H : is_cell_structure X => 
+          dirprod (compose_id_right X H) (compose_id_left X H)).
+
+Lemma isaprop_composition_units X : isaprop (composition_units X).
+Proof.
+  apply isofhleveltotal2.
+  apply isofhleveldirprod.
+  apply forall_isprop.
+  intro x.
+  apply (pr2 (cell_objects X)).
+  apply forall_isprop.
+  intro x.
+  apply (pr2 (cell_objects X)).
+
+  intro H.
+  apply isofhleveldirprod.
+  apply isaprop_compose_id_right.
+  apply isaprop_compose_id_left.
+Defined.
+  
+
+Definition is_catqalg (X : catqalg_data) := 
+ dirprod (assoc_comp X) (composition_units X).
+
+Lemma is_hprop_is_catqalg X : isaprop (is_catqalg X).
+Proof.
+  apply isofhleveldirprod.
+  apply isaprop_assoc_comp.
+  apply isaprop_composition_units.
+Defined.
+
+Definition catqalg := total2 (fun X => is_catqalg X).
+
+
+
+Definition target_of_comp (X : cell_with_comp)
+
+Definition compop (ob mor : hSet
+
+Definition category_data := 
+  total2 (fun obmor : dirprod hSet hSet => pr2 obmor -> pr1 obmor).
+
 
 
 Record category_data := {
