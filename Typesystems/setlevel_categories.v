@@ -182,12 +182,7 @@ Definition catqalg := total2 (fun X => is_catqalg X).
 
 
 
-Definition target_of_comp (X : cell_with_comp)
-
-Definition compop (ob mor : hSet
-
-Definition category_data := 
-  total2 (fun obmor : dirprod hSet hSet => pr2 obmor -> pr1 obmor).
+(*
 
 
 
@@ -320,7 +315,7 @@ Record is_pullback (f g h k : mor) := {
 End limits.  
 
 
-
+*)
 
 
 
