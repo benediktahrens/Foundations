@@ -5,9 +5,13 @@ Add Rec LoadPath "../hlevel2".
 Require Import hSet.
 Require Import hnat.
 
+(*
 Require Import pathnotations.
 Import pathnotations.PathNotations.
-
+*)
+Notation "a == b" := (paths a b) (at level 70, no associativity).
+Notation "! p " := (pathsinv0 p) (at level 50).
+Notation "p @ q" := (pathscomp0 p q) (at level 60, right associativity).
 
 (** *** [iter] *)
 (** this function might be useful in various contexts. 
@@ -173,8 +177,9 @@ Definition Baxiom5 (B : Bsystem) : forall n : nat,
      forall X : BB B (S n),
          Bpartial (Bdiag X) == BT (i:=0) X X (idpath _) := pr2 (pr2 (pr2 B)).
 
+(** *** Below only notes *)
 
-
+(*
 
 Definition Baxiom1ieq0 (B : Bsystem_data) := forall n : nat,
    forall Y X : BB B (S n), forall (H : Bft Y == Bft X), 
@@ -482,7 +487,7 @@ Record Bstructure := {
 
 
 
-
+*)
 
 
 

@@ -3,12 +3,19 @@ Add Rec LoadPath "../Generalities".
 Add Rec LoadPath "../hlevel1".
 Add Rec LoadPath "../hlevel2".
 
+(*
 Require Import basic_lemmas_which_should_be_in_uu0.
+*)
 Require Import hSet.
 
+(*
 Require Import pathnotations.
 Import pathnotations.PathNotations.
+*)
 
+Notation "a == b" := (paths a b) (at level 70, no associativity).
+Notation "! p " := (pathsinv0 p) (at level 50).
+Notation "p @ q" := (pathscomp0 p q) (at level 60, right associativity).
 
 
 (** * Definition of a category as a quasi-algebraic structure *)
@@ -105,6 +112,8 @@ Check (fun X : catqalg => @id_morphism X).
 Coercion objects : cell_data >-> hSet.
 
 Check (fun (X : catqalg)(x : X) => id_morphism x).
+
+(** *** Below only notes *)
 
 
 (*
