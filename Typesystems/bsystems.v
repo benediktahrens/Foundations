@@ -5,11 +5,118 @@ Add Rec LoadPath "../hlevel2".
 Require Import hSet.
 Require Import hnat.
 
-Require Import iterations.
-
-Require Import setlevel_categories.
 Require Import pathnotations.
 Import pathnotations.PathNotations.
+
+
+(** *** [iter] *)
+(** this function might be useful in various contexts. 
+     if so, it should go somewhere else *)
+
+Fixpoint iter { B : nat -> hSet } ( f : forall n, B (S n) -> B n ) 
+      ( i : nat ) : forall n, B (i + n) -> B n :=
+  match i return forall n, B (i + n) -> B n with
+  | 0 => fun n x => x
+  | S i' => fun n x => iter f i' n (f (i' + n) x)
+  end.
+
+(** *** B-systems *)
+(**  We define B-systems in several steps:
+     - [preBsystem_data] consists of two sequences of sets with father and partial.
+        This intermediate step allows us to define the operations in the next step 
+        in a convenient way. 
+        A coercion then makes father and partial accessible from [Bsystem_data].
+     - [Bsystem_data] is a [preBsystem_data] with maps 
+        [BT], [BTtilde], [BS], [BStilde], [Bdelta]
+     - [Bsystem] is [Bsystem_data] with axioms
+*)
+
+
+Definition preBsystem_data := total2 (
+  fun BBtilde : dirprod (nat -> hSet) (nat -> hSet) =>
+    dirprod (forall n, pr1 BBtilde ( S n) -> pr1 BBtilde n)  (* ft *)
+            (forall n, pr2 BBtilde (S n) -> pr1 BBtilde (S n))). (* partial *)
+
+Definition BB (X : preBsystem_data) : nat -> hSet := pr1 (pr1 X).
+Definition Btilde (X : preBsystem_data) : nat -> hSet := pr2 (pr1 X).
+Definition Bft {X : preBsystem_data} {n : nat} : BB X (S n) -> BB X n := pr1 (pr2 X) n.
+Definition Bpartial {X : preBsystem_data} {n : nat} : Btilde X (S n) -> BB X (S n) :=
+             pr2 (pr2 X) n.
+
+Definition Bsystem_data := total2 (fun B : preBsystem_data =>
+
+dirprod ( 
+ dirprod (
+  dirprod (forall (i n : nat) (Y : BB B (S n)) (X : BB B (S (i + n))),
+                Bft Y == iter (@Bft B) (S i) n X ->  BB B (S (S i + n)))  (* T *)
+          (forall (i n : nat) (Y : BB B (S n)) (s : Btilde B (S i + n)),
+                Bft Y == iter (@Bft B) (S i) n (Bpartial s) -> Btilde B (S (S i + n)) (* Ttilde *)
+             )
+          )
+         (
+  dirprod (forall (i n : nat) (r : Btilde B (S n)) (X : BB B (S i + S n)),
+                Bpartial r == iter (@Bft B) (S i) (S n) X ->  BB B (S (S i + n)))  (* S *)
+          (forall (i n : nat) (r : Btilde B (S n)) (s : Btilde B (S i + S n)),
+                Bpartial r == iter (@Bft B) (S i) (S n) (Bpartial s) -> Btilde B (S i + n) (* Stilde *)
+             )
+         )
+        )
+        (forall n, BB B (S n) -> Btilde B (S (S n))) (* delta *)
+).
+
+Definition preBsystem_data_from_Bsystem_data (B : Bsystem_data) : preBsystem_data := pr1 B.
+Coercion preBsystem_data_from_Bsystem_data : Bsystem_data >-> preBsystem_data.
+
+Definition BT {B : Bsystem_data} {i n : nat} : 
+    forall (Y : BB B (S n)) (X : BB B (S i + n)),
+          Bft Y == iter (@Bft B) (S i) n X ->  BB B (S (S i + n)) := pr1 (pr1 (pr1 (pr2 B))) i n.
+
+Definition BTtilde {B : Bsystem_data} {i n : nat} : 
+    forall (Y : BB B (S n)) (s : Btilde B (S i + n)),
+          Bft Y == iter (@Bft B) (S i) n (Bpartial s) -> Btilde B (S (S i + n)) := pr2 (pr1 (pr1 (pr2 B))) i n.
+
+Definition BS {B : Bsystem_data} {i n : nat} : 
+    forall (r : Btilde B (S n)) (X : BB B (S i + S n)),
+          Bpartial r == iter (@Bft B) (S i) (S n) X ->  BB B (S (S i + n)) := pr1 (pr2 (pr1 (pr2 B))) i n.
+
+Definition BStilde {B : Bsystem_data} {i n : nat} : 
+    forall (r : Btilde B (S n)) (s : Btilde B (S i + S n)),
+          Bpartial r == iter (@Bft B) (S i) (S n) (Bpartial s) -> Btilde B (S i + n) := pr2 (pr2 (pr1 (pr2 B))) i n.
+
+
+
+Definition Baxiom1ieq0 (B : Bsystem_data) : forall n : nat,
+   forall Y X : BB B (S n), forall (H : Bft Y == Bft X), 
+        Bft (BT (i:=0) Y X H) == Y.
+
+
+(** here we shift by 1 (one) at each appearance of [i], in order to account for 
+    "i" in the text being at least one.
+*)
+
+Definition Baxiom1ig0 (B : Bsystem_data) : forall i n : nat,
+   forall Y : BB B (S n), forall X : BB B (S (S i) + n), 
+   forall (H : Bft Y == iter (@Bft B) (S (S i)) n X),
+        Bft (BT Y X H) == BT Y (Bft X) H.
+
+
+
+
+
+  
+
+
+
+Definition Bsystem_data3 (B : preBsystem_data) := forall n, BB B (S n) -> Btilde B (S (S n)).
+         
+
+  
+  dirprod (forall n, BB ( S n) -> BB n) (* ft *)
+          (dirprod (forall n, Btilde (S n) -> BB (S n)) (* partial *)
+                   (forall (i n : nat) (Y : B (S n)) (X : B (S i + n))
+                        (H :  ).
+
+
 
 
 Definition Bsystem := total2 ( fun

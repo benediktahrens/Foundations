@@ -9,25 +9,29 @@ Require Import hnat.
 (* Require Import pathnotations. *)
 (* Import pathnotations.PathNotations. *)
 
-
+(*
 Definition hset_family := nat -> hSet.
-
+*)
+(*
 Definition hset_fam_map (B : hset_family) :=
       forall n, B (S n) -> B n.
+*)
 
-Section iterations.
 
-Variable B : hset_family.
-Variable f : hset_fam_map B.
+(*
+Variable B : nat -> hSet.
+Variable f : forall n, B (S n) -> B n.
+*)
 
-Fixpoint iter (i : nat) : forall n, B (i + n) -> B n :=
+Fixpoint iter { B : nat -> hSet } ( f : forall n, B (S n) -> B n ) 
+      ( i : nat ) : forall n, B (i + n) -> B n :=
   match i return forall n, B (i + n) -> B n with
   | 0 => fun n x => x
-  | S i' => fun n x => iter i' n (f (i' + n) x)
+  | S i' => fun n x => iter f i' n (f (i' + n) x)
   end.
 
 
-End iterations.
+(*
 
 Section maps_of_families.
 
@@ -37,7 +41,7 @@ Definition map_of_families := forall n, B1 (S n) -> B2 (S n).
 
 End maps_of_families.
 
-
+*)
 
 
 
