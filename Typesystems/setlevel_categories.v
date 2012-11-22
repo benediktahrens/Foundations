@@ -9,15 +9,114 @@ Require Import hSet.
 Require Import pathnotations.
 Import pathnotations.PathNotations.
 
-Definition hfp_pair {X X' Y : UU} (f : X -> Y) (f' : X' -> Y) 
-          x y (p : f' y == f x):
-      hfp f f' := tpair _ (dirprodpair x y) p.
 
-Definition idop (ob mor : hSet) := ob -> mor.
-Definition borderop (ob mor : hSet) := mor -> ob.
 
-Definition compop (ob mor : hSet) (s t : borderop ob mor) :=
-     hfp s t -> mor.
+(** * Definition of a category as a quasi-algebraic structure *)
+
+(** ** We give the definition in several steps
+
+   the first objects we define - [cell_data] - are pairs of sets with
+   source and target maps and identity map / degeneracy
+
+   we specify the first argument of the projections explicitly in order to 
+   avoid confusion with projections (coercions, actually) from [hSet] to [UU]
+*)
+
+Definition cell_data := total2
+    (fun obmor : dirprod hSet hSet => 
+        dirprod
+           (dirprod  (@pr2 hSet _ obmor -> @pr1 hSet _ obmor)
+                     (@pr2 hSet _ obmor -> @pr1 hSet _ obmor))
+           (@pr1 hSet _ obmor -> @pr2 hSet _ obmor)).
+
+(** ** We define [objects], [morphisms], [source], [target], [id_morphism] of a [cell_data]
+
+    this allows us to state composition in a readable way
+
+    We later define coercions from quasi-alg. categories down to 
+    [cell_data], allowing us to reuse the names
+
+    giving the type of the operations explicitly avoids confusion 
+    with coercion from [hSet] to [UU], as mentioned above
+*)
+
+Definition objects (X : cell_data) : hSet := pr1 (pr1 X).
+Definition morphisms (X : cell_data) : hSet := pr2 (pr1 X).
+Definition source {X : cell_data} : morphisms X -> objects X := pr1 (pr1 (pr2 X)).
+Definition target {X : cell_data} : morphisms X -> objects X := pr2 (pr1 (pr2 X)).
+Definition id_morphism {X : cell_data} : objects X -> morphisms X := pr2 (pr2 X).
+
+
+Definition catqalg_data := total2 (fun X : cell_data => 
+   forall f g : morphisms X, target f == source g -> morphisms X).
+
+Definition cell_data_from_catqalg_data (X : catqalg_data) : cell_data := pr1 X.
+Coercion cell_data_from_catqalg_data : catqalg_data >-> cell_data.
+
+Definition compose { X : catqalg_data } : 
+    forall f g : morphisms X, target f == source g -> morphisms X := pr2 X.
+
+(** ** Properties for categories *)
+(** *** Properties of identity maps *)
+(**  To state the unit laws for identity, we need to have [cell_data] where
+      identities have suitable source and target 
+      
+
+*)
+
+
+Definition identity_is_unit ( X : catqalg_data ) := total2 (
+   ( fun H : dirprod ( forall x : objects X, source ( id_morphism x ) == x )
+                     ( forall x : objects X, target ( id_morphism x ) == x ) =>
+   dirprod ( forall f : morphisms X, 
+             compose (id_morphism (source f)) f (pr2 H (source f)) == f ) 
+           ( forall f : morphisms X, 
+             compose f (id_morphism (target f)) (!pr1 H (target f)) == f ))).
+
+
+(** *** Associativity of composition *)
+(**   To state associativity, we need to have [catqalg_data] where
+       [source] and [target] are compatible with [compose] in the
+       obvious sense *)
+
+Definition compose_is_assoc ( X : catqalg_data ) := total2 (
+   ( fun H : dirprod 
+           (forall f g (H : target f == source g), source (compose f g H) == source f)
+           (forall f g (H : target f == source g), target (compose f g H) == target g) =>
+   forall (f g h: morphisms X) (Hfg : target f == source g)
+         (Hgh : target g == source h),
+      compose f (compose g h Hgh) (Hfg @ !pr1 H g h Hgh) == 
+        compose (compose f g Hfg ) h (pr2 H f g Hfg @ Hgh) )).
+
+(** *** We now package these two properties into a nice package to obtain [catqalg]s *)
+
+Definition catqalg := total2 (
+   fun X : catqalg_data => dirprod (identity_is_unit X) (compose_is_assoc X)).
+
+Definition catqalg_data_from_catqalg (X : catqalg) : catqalg_data := pr1 X.
+Coercion catqalg_data_from_catqalg : catqalg >-> catqalg_data.
+
+(** *** Check that coercions work properly *)
+Check (fun X : catqalg => @compose X).
+Check (fun X : catqalg => @id_morphism X).
+
+(** *** The next coercion closes the coercion chain from [catqalg] to [UU] *)
+
+Coercion objects : cell_data >-> hSet.
+
+Check (fun (X : catqalg)(x : X) => id_morphism x).
+
+
+(*
+
+Definition cell_structure := total2 (fun X : cell_data =>
+   dirprod (forall x : objects X, source (id_morphism x) == x)
+           (forall x : objects X, target (id_morphism x) == x) ).
+
+Definition cell_data_from_cell_structure (X : cell_structure) : cell_data := pr1 X.
+Coercion cell_data_from_cell_structure : cell_structure >-> cell_data.
+
+
 
 Definition cell_data := total2
     (fun obmor : dirprod hSet hSet => 
@@ -318,7 +417,7 @@ End limits.
 *)
 
 
-
+*)
 
 
 
