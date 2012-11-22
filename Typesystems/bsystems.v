@@ -97,14 +97,81 @@ Definition Bdiag {B : Bsystem_data} {n : nat} : BB B (S n) -> Btilde B (S (S n))
 
 
 Definition Bsystem := total2 (fun B : Bsystem_data => 
+  dirprod (
    dirprod (dirprod (forall n : nat, forall Y X : BB B (S n), forall (H : Bft Y == Bft X), 
                          Bft (BT (i:=0) Y X H) == Y)  (* Baxiom1ieq0 *)
                     (forall i n : nat, forall Y : BB B (S n), forall X : BB B (S (S i) + n), 
                           forall (H : Bft Y == iter (@Bft B) (S (S i)) n X),
                                  Bft (BT Y X H) == BT Y (Bft X) H) (* Baxiom1ig0 *)
            )
-           ()
+           (dirprod (forall i n : nat, forall Y : BB B (S n), forall s : Btilde B (S i + n),
+                           forall (H : Bft Y == iter (@Bft B) (S i) n (Bpartial s)),
+                      Bpartial (BTtilde Y s H) == BT Y (Bpartial s) H) (* Baxiom2 *)
+                    (dirprod (forall n : nat, forall r : Btilde B (S n), forall X : BB B (S (S n)),
+                                   forall (H : Bpartial r == Bft X), Bft (BS (i:=0) r X H) == Bft (Bpartial r)) 
+                                         (* Baxiom3ieq0 *)
+                             (forall i n : nat, forall r : Btilde B (S n), 
+                                  forall X : BB B (S (S ( (i + S n)))),
+                                  forall (H : Bpartial r == iter (@Bft B) (S (S i)) _ X), 
+                                       Bft (BS (i:= S i) r X H) == BS r (Bft X) H)  (* Baxiom3ig0 *)
+                    )
+            )
+           )
+       (dirprod (forall i n : nat,
+                   forall r : Btilde B (S n), forall s : Btilde B (S i + S n),  
+                   forall H : Bpartial r == iter (@Bft B) (S i) _ (Bpartial s),
+                   Bpartial (BStilde r s H) == BS r (Bpartial s) H) (* Baxiom4 *)
+                (forall n : nat, forall X : BB B (S n),
+                     Bpartial (Bdiag X) == BT (i:=0) X X (idpath _)) (* Baxiom5 *)
+)).
 
+Definition Bsystem_data_from_Bsystem (B : Bsystem) : Bsystem_data := pr1 B.
+Coercion Bsystem_data_from_Bsystem : Bsystem >-> Bsystem_data.
+
+Definition Baxiom1ieq0 (B : Bsystem) : forall n : nat,
+   forall Y X : BB B (S n), forall (H : Bft Y == Bft X), 
+        Bft (BT (i:=0) Y X H) == Y := pr1 (pr1 (pr1 (pr2 B))).
+
+
+(** here we shift by 1 (one) at each appearance of [i], in order to account for 
+    "i" in the text being at least one.
+*)
+
+Definition Baxiom1ig0 (B : Bsystem) : forall i n : nat,
+   forall Y : BB B (S n), forall X : BB B (S (S i) + n), 
+   forall (H : Bft Y == iter (@Bft B) (S (S i)) n X),
+        Bft (BT Y X H) == BT Y (Bft X) H := pr2 (pr1 (pr1 (pr2 B))).
+
+Definition Baxiom2 (B : Bsystem) : forall i n : nat,
+   forall Y : BB B (S n), forall s : Btilde B (S i + n),
+        forall (H : Bft Y == iter (@Bft B) (S i) n (Bpartial s)),
+     Bpartial (BTtilde Y s H) == BT Y (Bpartial s) H := pr1 (pr2 (pr1 (pr2 B))).
+
+Definition Baxiom3ieq0 (B : Bsystem) : forall n : nat,
+   forall r : Btilde B (S n), forall X : BB B (S (S n)),
+       forall (H : Bpartial r == Bft X), 
+             Bft (BS (i:=0) r X H) == Bft (Bpartial r) := pr1 (pr2 (pr2 (pr1 (pr2 B)))).
+
+
+(** here we shift by 1 (one) at each appearance of [i], in order to account for 
+    "i" in the text being at least one.
+*)
+
+
+Definition Baxiom3ig0 (B : Bsystem) : forall i n : nat,
+   forall r : Btilde B (S n), forall X : BB B (S (S ( (i + S n)))),
+      forall (H : Bpartial r == iter (@Bft B) (S (S i)) _ X), 
+       Bft (BS (i:= S i) r X H) == BS r (Bft X) H := pr2 (pr2 (pr2 (pr1 (pr2 B)))).  
+
+
+Definition Baxiom4 (B : Bsystem) : forall i n : nat,
+    forall r : Btilde B (S n), forall s : Btilde B (S i + S n),  
+       forall H : Bpartial r == iter (@Bft B) (S i) _ (Bpartial s),
+      Bpartial (BStilde r s H) == BS r (Bpartial s) H := pr1 (pr2 (pr2 B)).
+
+Definition Baxiom5 (B : Bsystem) : forall n : nat, 
+     forall X : BB B (S n),
+         Bpartial (Bdiag X) == BT (i:=0) X X (idpath _) := pr2 (pr2 (pr2 B)).
 
 
 
