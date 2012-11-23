@@ -18,6 +18,14 @@ Notation "! p " := (pathsinv0 p) (at level 50).
 Notation "p @ q" := (pathscomp0 p q) (at level 60, right associativity).
 
 
+(** * Some remarks *)
+(** 
+    - for improved performance, we can opacify all equality proofs,
+      since we have uip for objects and morphisms
+*)
+
+
+
 (** * Definition of a category as a quasi-algebraic structure *)
 
 (** ** We give the definition in several steps
@@ -110,7 +118,38 @@ Definition catqalg_data_from_catqalg (X : catqalg) : catqalg_data := pr1 X.
 Coercion catqalg_data_from_catqalg : catqalg >-> catqalg_data.
 
 
+Definition catqalg_id_source (C : catqalg) : 
+  forall x : catqalgobjects C, catqalgsource ( catqalgid_morphism x ) == x :=
+          pr1 (pr1 (pr1 (pr2 C))).
 
+Definition catqalg_id_target (C : catqalg) : 
+  forall x : catqalgobjects C, catqalgtarget ( catqalgid_morphism x ) == x :=
+          pr2 (pr1 (pr1 (pr2 C))).
+
+Definition catqalg_comp_source (C : catqalg) : 
+  forall f g (H : catqalgtarget f == catqalgsource g), 
+    catqalgsource (catqalgcompose f g H) == catqalgsource f :=
+          pr1 (pr1 (pr2 (pr2 C))).
+
+Definition catqalg_comp_target (C : catqalg) :
+  forall f g (H : catqalgtarget f == catqalgsource g), 
+    catqalgtarget (catqalgcompose f g H) == catqalgtarget g :=
+          pr2 (pr1 (pr2 (pr2 C))).
+
+Definition catqalg_id_left (C : catqalg) : 
+  forall f : catqalgmorphisms C, 
+             catqalgcompose (catqalgid_morphism (catqalgsource f)) f 
+              (catqalg_id_target _ (catqalgsource f)) == f :=
+          pr1 (pr2 (pr1 (pr2 C))).
+
+Definition catqalg_id_right (C : catqalg) : 
+   forall f : catqalgmorphisms C, 
+             catqalgcompose f (catqalgid_morphism (catqalgtarget f)) 
+            (! catqalg_id_source _  (catqalgtarget f)) == f :=
+          pr2 (pr2 (pr1 (pr2 C))).
+
+
+ 
 (** *** Check that coercions work properly *)
 Check (fun X : catqalg => @catqalgcompose X).
 Check (fun X : catqalg => @catqalgid_morphism X).
@@ -121,12 +160,78 @@ Coercion catqalgobjects : cell_data >-> hSet.
 
 Check (fun (X : catqalg)(x : X) => catqalgid_morphism x).
 
+
+(** ** Proof irrelevance for composition, associativity, source and target of 
+       composition *)
+
+Lemma catqalgobpi (C : catqalg)(a b : C)(p q : a == b) : p == q.
+Proof.
+  apply (uip (pr2 (catqalgobjects C))).
+Defined.
+
+Lemma catqalgmorpi (C : catqalg)(f g : catqalgmorphisms C)(p q : f == g) : p == q.
+Proof.
+  apply (uip (pr2 (catqalgmorphisms C))).
+Defined.
+
+Lemma catqalg_comp_pi (C : catqalg) (f g : catqalgmorphisms C)
+  (H H' : catqalgtarget f == catqalgsource g) : 
+     catqalgcompose f g H == catqalgcompose f g H'.
+Proof.
+  apply maponpaths.
+  apply catqalgobpi.
+Defined.
+
+Lemma catqalg_id_left_pi (C : catqalg) (a : C )(f : catqalgmorphisms C) 
+   (H : catqalgtarget (catqalgid_morphism a) == catqalgsource f):
+   catqalgcompose (catqalgid_morphism a) f H == f.
+Proof.
+  assert (H' : catqalgsource f == a).
+  rewrite <- H.
+  apply catqalg_id_target.
+  destruct H'.
+  rewrite <- catqalg_id_left.
+  apply maponpaths.
+  apply catqalgobpi.
+Defined.
+
 (** *** Hom notation for quasi-algebraic categories *)
 
 Definition catqalghom { C : catqalg } (a b : C) := total2 (
     fun f : catqalgmorphisms C =>
        dirprod (catqalgsource f == a) (catqalgtarget f == b)).
 
+Definition catqalgmorphism_from_catqalghom (C : catqalg) (a b : C) (f : catqalghom a b) :
+         catqalgmorphisms C := pr1 f.
+Coercion catqalgmorphism_from_catqalghom : catqalghom >-> pr1hSet.
+
+(** ** Isomorphism between two equal objects *)
+
+Definition catqalgmoralongeq (C : catqalg) (a b : C)(H : a == b) : catqalghom a b.
+Proof.
+  exists (catqalgid_morphism a).
+  exists (catqalg_id_source C a).
+  exact (catqalg_id_target C a @ H).
+Defined.
+
+Definition catqalgmoralongeqinv (C : catqalg) (a b : C)(H : a == b) : catqalghom b a.
+Proof.
+  exists (catqalgid_morphism a).
+  exists (catqalg_id_source C a @ H).
+  exact (catqalg_id_target C a).
+Defined.
+
+Lemma is_inv_catqalgmoralongeqinv (C : catqalg) (a b : C)(H : a == b) :
+  catqalgcompose (catqalgmoralongeq C a b H) (catqalgmoralongeqinv C a b H) 
+        (pr2 (pr2 (catqalgmoralongeq C a b H)) @ ! pr1 (pr2 (catqalgmoralongeqinv C a b H)))
+          ==
+          catqalgid_morphism a.
+Proof.
+  unfold catqalgmoralongeq.
+  simpl.
+  rewrite catqalg_id_left_pi.
+  reflexivity.
+Defined.
 
 
 (** ** HLevel of [catqalg] *)
