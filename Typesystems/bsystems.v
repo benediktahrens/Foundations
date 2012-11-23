@@ -106,7 +106,7 @@ Definition Bsystem := total2 (fun B : Bsystem_data =>
                          Bft (BT (i:=0) Y X H) == Y)  (* Baxiom1ieq0 *)
                     (forall i n : nat, forall Y : BB B (S n), forall X : BB B (S (S i) + n), 
                           forall (H : Bft Y == iter (@Bft B) (S (S i)) n X),
-                                 Bft (BT Y X H) == BT Y (Bft X) H) (* Baxiom1ig0 *)
+                                 Bft (BT Y X H) == BT Y (Bft X) H) (* Baxiom1igt0 *)
            )
            (dirprod (forall i n : nat, forall Y : BB B (S n), forall s : Btilde B (S i + n),
                            forall (H : Bft Y == iter (@Bft B) (S i) n (Bpartial s)),
@@ -117,7 +117,7 @@ Definition Bsystem := total2 (fun B : Bsystem_data =>
                              (forall i n : nat, forall r : Btilde B (S n), 
                                   forall X : BB B (S (S ( (i + S n)))),
                                   forall (H : Bpartial r == iter (@Bft B) (S (S i)) _ X), 
-                                       Bft (BS (i:= S i) r X H) == BS r (Bft X) H)  (* Baxiom3ig0 *)
+                                       Bft (BS (i:= S i) r X H) == BS r (Bft X) H)  (* Baxiom3igt0 *)
                     )
             )
            )
@@ -141,7 +141,7 @@ Definition Baxiom1ieq0 (B : Bsystem) : forall n : nat,
     "i" in the text being at least one.
 *)
 
-Definition Baxiom1ig0 (B : Bsystem) : forall i n : nat,
+Definition Baxiom1igt0 (B : Bsystem) : forall i n : nat,
    forall Y : BB B (S n), forall X : BB B (S (S i) + n), 
    forall (H : Bft Y == iter (@Bft B) (S (S i)) n X),
         Bft (BT Y X H) == BT Y (Bft X) H := pr2 (pr1 (pr1 (pr2 B))).
@@ -162,7 +162,7 @@ Definition Baxiom3ieq0 (B : Bsystem) : forall n : nat,
 *)
 
 
-Definition Baxiom3ig0 (B : Bsystem) : forall i n : nat,
+Definition Baxiom3igt0 (B : Bsystem) : forall i n : nat,
    forall r : Btilde B (S n), forall X : BB B (S (S ( (i + S n)))),
       forall (H : Bpartial r == iter (@Bft B) (S (S i)) _ X), 
        Bft (BS (i:= S i) r X H) == BS r (Bft X) H := pr2 (pr2 (pr2 (pr1 (pr2 B)))).  
@@ -176,6 +176,9 @@ Definition Baxiom4 (B : Bsystem) : forall i n : nat,
 Definition Baxiom5 (B : Bsystem) : forall n : nat, 
      forall X : BB B (S n),
          Bpartial (Bdiag X) == BT (i:=0) X X (idpath _) := pr2 (pr2 (pr2 B)).
+
+
+(** *** 
 
 (** *** Below only notes *)
 

@@ -35,6 +35,11 @@ Definition cell_data := total2
            (dirprod  (@pr2 hSet _ obmor -> @pr1 hSet _ obmor)
                      (@pr2 hSet _ obmor -> @pr1 hSet _ obmor))
            (@pr1 hSet _ obmor -> @pr2 hSet _ obmor)).
+Print isaset.
+
+(**  compute hlevel of [cell_data]: to be done
+
+*)
 
 (** ** We define [objects], [morphisms], [source], [target], [id_morphism] of a [cell_data]
 
@@ -47,21 +52,22 @@ Definition cell_data := total2
     with coercion from [hSet] to [UU], as mentioned above
 *)
 
-Definition objects (X : cell_data) : hSet := pr1 (pr1 X).
-Definition morphisms (X : cell_data) : hSet := pr2 (pr1 X).
-Definition source {X : cell_data} : morphisms X -> objects X := pr1 (pr1 (pr2 X)).
-Definition target {X : cell_data} : morphisms X -> objects X := pr2 (pr1 (pr2 X)).
-Definition id_morphism {X : cell_data} : objects X -> morphisms X := pr2 (pr2 X).
+Definition catqalgobjects (X : cell_data) : hSet := pr1 (pr1 X).
+Definition catqalgmorphisms (X : cell_data) : hSet := pr2 (pr1 X).
+Definition catqalgsource {X : cell_data} : catqalgmorphisms X -> catqalgobjects X := 
+                 pr1 (pr1 (pr2 X)).
+Definition catqalgtarget {X : cell_data} : catqalgmorphisms X -> catqalgobjects X := pr2 (pr1 (pr2 X)).
+Definition catqalgid_morphism {X : cell_data} : catqalgobjects X -> catqalgmorphisms X := pr2 (pr2 X).
 
 
 Definition catqalg_data := total2 (fun X : cell_data => 
-   forall f g : morphisms X, target f == source g -> morphisms X).
+   forall f g : catqalgmorphisms X, catqalgtarget f == catqalgsource g -> catqalgmorphisms X).
 
 Definition cell_data_from_catqalg_data (X : catqalg_data) : cell_data := pr1 X.
 Coercion cell_data_from_catqalg_data : catqalg_data >-> cell_data.
 
-Definition compose { X : catqalg_data } : 
-    forall f g : morphisms X, target f == source g -> morphisms X := pr2 X.
+Definition catqalgcompose { X : catqalg_data } : 
+    forall f g : catqalgmorphisms X, catqalgtarget f == catqalgsource g -> catqalgmorphisms X := pr2 X.
 
 (** ** Properties for categories *)
 (** *** Properties of identity maps *)
@@ -72,13 +78,13 @@ Definition compose { X : catqalg_data } :
 *)
 
 
-Definition identity_is_unit ( X : catqalg_data ) := total2 (
-   ( fun H : dirprod ( forall x : objects X, source ( id_morphism x ) == x )
-                     ( forall x : objects X, target ( id_morphism x ) == x ) =>
-   dirprod ( forall f : morphisms X, 
-             compose (id_morphism (source f)) f (pr2 H (source f)) == f ) 
-           ( forall f : morphisms X, 
-             compose f (id_morphism (target f)) (!pr1 H (target f)) == f ))).
+Definition catqalgidentity_is_unit ( X : catqalg_data ) := total2 (
+   ( fun H : dirprod ( forall x : catqalgobjects X, catqalgsource ( catqalgid_morphism x ) == x )
+                     ( forall x : catqalgobjects X, catqalgtarget ( catqalgid_morphism x ) == x ) =>
+   dirprod ( forall f : catqalgmorphisms X, 
+             catqalgcompose (catqalgid_morphism (catqalgsource f)) f (pr2 H (catqalgsource f)) == f ) 
+           ( forall f : catqalgmorphisms X, 
+             catqalgcompose f (catqalgid_morphism (catqalgtarget f)) (!pr1 H (catqalgtarget f)) == f ))).
 
 
 (** *** Associativity of composition *)
@@ -86,32 +92,38 @@ Definition identity_is_unit ( X : catqalg_data ) := total2 (
        [source] and [target] are compatible with [compose] in the
        obvious sense *)
 
-Definition compose_is_assoc ( X : catqalg_data ) := total2 (
+Definition catqalgcompose_is_assoc ( X : catqalg_data ) := total2 (
    ( fun H : dirprod 
-           (forall f g (H : target f == source g), source (compose f g H) == source f)
-           (forall f g (H : target f == source g), target (compose f g H) == target g) =>
-   forall (f g h: morphisms X) (Hfg : target f == source g)
-         (Hgh : target g == source h),
-      compose f (compose g h Hgh) (Hfg @ !pr1 H g h Hgh) == 
-        compose (compose f g Hfg ) h (pr2 H f g Hfg @ Hgh) )).
+           (forall f g (H : catqalgtarget f == catqalgsource g), catqalgsource (catqalgcompose f g H) == catqalgsource f)
+           (forall f g (H : catqalgtarget f == catqalgsource g), catqalgtarget (catqalgcompose f g H) == catqalgtarget g) =>
+   forall (f g h: catqalgmorphisms X) (Hfg : catqalgtarget f == catqalgsource g)
+         (Hgh : catqalgtarget g == catqalgsource h),
+      catqalgcompose f (catqalgcompose g h Hgh) (Hfg @ !pr1 H g h Hgh) == 
+        catqalgcompose (catqalgcompose f g Hfg ) h (pr2 H f g Hfg @ Hgh) )).
 
 (** *** We now package these two properties into a nice package to obtain [catqalg]s *)
 
 Definition catqalg := total2 (
-   fun X : catqalg_data => dirprod (identity_is_unit X) (compose_is_assoc X)).
+   fun X : catqalg_data => dirprod (catqalgidentity_is_unit X) (catqalgcompose_is_assoc X)).
 
 Definition catqalg_data_from_catqalg (X : catqalg) : catqalg_data := pr1 X.
 Coercion catqalg_data_from_catqalg : catqalg >-> catqalg_data.
 
 (** *** Check that coercions work properly *)
-Check (fun X : catqalg => @compose X).
-Check (fun X : catqalg => @id_morphism X).
+Check (fun X : catqalg => @catqalgcompose X).
+Check (fun X : catqalg => @catqalgid_morphism X).
 
 (** *** The next coercion closes the coercion chain from [catqalg] to [UU] *)
 
-Coercion objects : cell_data >-> hSet.
+Coercion catqalgobjects : cell_data >-> hSet.
 
-Check (fun (X : catqalg)(x : X) => id_morphism x).
+Check (fun (X : catqalg)(x : X) => catqalgid_morphism x).
+
+
+(** ** HLevel of [catqalg] *)
+
+(** remains to be done *)  
+
 
 (** *** Below only notes *)
 
