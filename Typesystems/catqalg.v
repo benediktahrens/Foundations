@@ -3,9 +3,9 @@ Add Rec LoadPath "../Generalities".
 Add Rec LoadPath "../hlevel1".
 Add Rec LoadPath "../hlevel2".
 
-(*
+
 Require Import basic_lemmas_which_should_be_in_uu0.
-*)
+
 Require Import hSet.
 
 (*
@@ -148,6 +148,13 @@ Definition catqalg_id_right (C : catqalg) :
             (! catqalg_id_source _  (catqalgtarget f)) == f :=
           pr2 (pr2 (pr1 (pr2 C))).
 
+Definition catqalg_assoc (C : catqalg) : 
+ forall (f g h: catqalgmorphisms C) (Hfg : catqalgtarget f == catqalgsource g)
+         (Hgh : catqalgtarget g == catqalgsource h),
+   catqalgcompose f (catqalgcompose g h Hgh) (Hfg @ !catqalg_comp_source C g h Hgh) == 
+     catqalgcompose (catqalgcompose f g Hfg ) h ( catqalg_comp_target C f g Hfg @ Hgh) 
+  := pr2 (pr2 (pr2 C)).
+
 
  
 (** *** Check that coercions work properly *)
@@ -167,12 +174,21 @@ Check (fun (X : catqalg)(x : X) => catqalgid_morphism x).
 Lemma catqalgobpi (C : catqalg)(a b : C)(p q : a == b) : p == q.
 Proof.
   apply (uip (pr2 (catqalgobjects C))).
-Defined.
+Qed.
+
+Lemma catqalgpairofobpi (C : catqalg) (a b c d : C) 
+        (p q : dirprod (a == b) (c == d)) : p == q.
+Proof.
+  assert (H : pr1 p == pr1 q).
+  apply catqalgobpi.
+  apply (total2_paths H).
+  apply catqalgobpi.
+Qed.
 
 Lemma catqalgmorpi (C : catqalg)(f g : catqalgmorphisms C)(p q : f == g) : p == q.
 Proof.
   apply (uip (pr2 (catqalgmorphisms C))).
-Defined.
+Qed.
 
 Lemma catqalg_comp_pi (C : catqalg) (f g : catqalgmorphisms C)
   (H H' : catqalgtarget f == catqalgsource g) : 
@@ -180,7 +196,7 @@ Lemma catqalg_comp_pi (C : catqalg) (f g : catqalgmorphisms C)
 Proof.
   apply maponpaths.
   apply catqalgobpi.
-Defined.
+Qed.
 
 Lemma catqalg_id_left_pi (C : catqalg) (a : C )(f : catqalgmorphisms C) 
    (H : catqalgtarget (catqalgid_morphism a) == catqalgsource f):
@@ -193,7 +209,25 @@ Proof.
   rewrite <- catqalg_id_left.
   apply maponpaths.
   apply catqalgobpi.
-Defined.
+Qed.
+
+
+Lemma catqalg_id_right_pi (C : catqalg) (b : C )(f : catqalgmorphisms C) 
+   (H : catqalgtarget f == catqalgsource (catqalgid_morphism b)):
+   catqalgcompose f (catqalgid_morphism b) H == f.
+Proof.
+  assert (H' : catqalgtarget f == b).
+  rewrite H.
+  apply catqalg_id_source.
+  destruct H'.
+  assert (H2:=catqalg_id_right C f).
+  rewrite <- H2.
+  apply maponpaths.
+  apply catqalgobpi.
+Qed.
+
+
+
 
 (** *** Hom notation for quasi-algebraic categories *)
 
@@ -201,9 +235,98 @@ Definition catqalghom { C : catqalg } (a b : C) := total2 (
     fun f : catqalgmorphisms C =>
        dirprod (catqalgsource f == a) (catqalgtarget f == b)).
 
+Lemma isaset_catqalghom (C : catqalg) (a b : C) : isaset (catqalghom a b).
+Proof.
+  change (isaset) with (isofhlevel 2).
+  apply isofhleveltotal2.
+  apply (pr2 (catqalgmorphisms C)).
+  intro x.
+  apply isofhleveldirprod.
+  set (H:= pr2 (catqalgobjects C)).
+  simpl in H.
+  unfold isaset in H.
+  apply hlevelntosn.
+  apply H.
+  apply hlevelntosn.
+  apply (pr2 (catqalgobjects C)).
+Defined.
+
+Definition catqalghomset { C : catqalg } (a b : C) : hSet := 
+   tpair _ (catqalghom a b) (isaset_catqalghom C a b).
+
 Definition catqalgmorphism_from_catqalghom (C : catqalg) (a b : C) (f : catqalghom a b) :
          catqalgmorphisms C := pr1 f.
 Coercion catqalgmorphism_from_catqalghom : catqalghom >-> pr1hSet.
+
+(** **  Identity and Composition in terms of homsets *)
+
+Definition catqalghomid {C : catqalg} (c : C) : catqalghom c c.
+Proof.
+  exists (catqalgid_morphism c).
+  exists (catqalg_id_source C c).
+  exact (catqalg_id_target C c).
+Defined.
+
+
+
+Definition catqalghomcomp {C : catqalg} {a b c : C} : catqalghom a b -> 
+     catqalghom b c -> catqalghom a c.
+Proof.
+  intros f g.
+  exists (catqalgcompose f g (pr2 (pr2 f) @ !pr1 (pr2 g))).
+  exists (catqalg_comp_source _ _ _ _ @ pr1 (pr2 f) ).
+  exact (catqalg_comp_target _ _ _ _ @ pr2 (pr2 g)).
+Defined.
+
+Lemma catqalghom_id_left (C : catqalg) (a b : C) (f : catqalghom a b) :
+     catqalghomcomp (catqalghomid a) f == f.
+Proof.
+  assert (H : pr1 (catqalghomcomp (catqalghomid a) f) == pr1 f).
+  destruct f as [f [p1 p2]].
+  simpl.
+  apply catqalg_id_left_pi.
+  apply (total2_paths H).
+  apply (catqalgpairofobpi).
+Defined.
+
+Lemma catqalghom_id_right (C : catqalg) (a b : C) (f : catqalghom a b) :
+     catqalghomcomp f (catqalghomid b) == f.
+Proof.
+  assert (H : pr1 (catqalghomcomp f (catqalghomid b)) == pr1 f).
+  destruct f as [f [p1 p2]].
+  simpl.
+  apply catqalg_id_right_pi.
+  apply (total2_paths H).
+  apply (catqalgpairofobpi).
+Qed.
+
+Lemma catqalghom_assoc (C : catqalg) :
+ forall (a b c d : C) (f : catqalghom a b) (g : catqalghom b c)
+  (h : catqalghom c d),
+   catqalghomcomp f (catqalghomcomp g h) ==
+   catqalghomcomp (catqalghomcomp f g) h.
+Proof.
+  intros a b c d f g h.
+  set (H:= catqalg_assoc C f g h 
+       (pr2 (pr2 f) @ !pr1 (pr2 g)) (pr2 (pr2 g) @ !pr1 (pr2 h))).
+  assert (HOHO : pr1 (catqalghomcomp f (catqalghomcomp g h)) == 
+              pr1 (catqalghomcomp (catqalghomcomp f g) h)).
+  simpl.
+  apply (pathscomp0 (b:=catqalgcompose f (catqalgcompose g h (pr2 (pr2 g) @ !pr1 (pr2 h)))
+      ((pr2 (pr2 f) @ !pr1 (pr2 g)) @
+       !catqalg_comp_source C g h (pr2 (pr2 g) @ !pr1 (pr2 h))))).
+  apply maponpaths.
+  apply catqalgobpi.
+  
+  apply (pathscomp0 (b:=catqalgcompose (catqalgcompose f g (pr2 (pr2 f) @ !pr1 (pr2 g))) h
+      (catqalg_comp_target C f g (pr2 (pr2 f) @ !pr1 (pr2 g)) @
+       pr2 (pr2 g) @ !pr1 (pr2 h)))).
+  apply H.
+  apply maponpaths.
+  apply catqalgobpi.
+  apply (total2_paths HOHO).
+  apply catqalgpairofobpi.
+Qed.
 
 (** ** Isomorphism between two equal objects *)
 
@@ -221,6 +344,8 @@ Proof.
   exact (catqalg_id_target C a).
 Defined.
 
+
+
 Lemma is_inv_catqalgmoralongeqinv (C : catqalg) (a b : C)(H : a == b) :
   catqalgcompose (catqalgmoralongeq C a b H) (catqalgmoralongeqinv C a b H) 
         (pr2 (pr2 (catqalgmoralongeq C a b H)) @ ! pr1 (pr2 (catqalgmoralongeqinv C a b H)))
@@ -231,7 +356,7 @@ Proof.
   simpl.
   rewrite catqalg_id_left_pi.
   reflexivity.
-Defined.
+Qed.
 
 
 (** ** HLevel of [catqalg] *)

@@ -58,6 +58,9 @@ Proof.
 Defined.
 
 
+Definition isaset_if_isofhlevel2 (X : UU) :
+        isofhlevel 2 X -> isaset X := fun x => x.
+
 
 
 
