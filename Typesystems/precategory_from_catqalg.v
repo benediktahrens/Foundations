@@ -50,6 +50,7 @@ unfold precategory_compose. simpl.
 apply catqalghom_assoc.
 Defined.
 
+End precat_from_catqalg.
 
 
 
