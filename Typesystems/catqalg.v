@@ -109,6 +109,8 @@ Definition catqalg := total2 (
 Definition catqalg_data_from_catqalg (X : catqalg) : catqalg_data := pr1 X.
 Coercion catqalg_data_from_catqalg : catqalg >-> catqalg_data.
 
+
+
 (** *** Check that coercions work properly *)
 Check (fun X : catqalg => @catqalgcompose X).
 Check (fun X : catqalg => @catqalgid_morphism X).
@@ -118,6 +120,13 @@ Check (fun X : catqalg => @catqalgid_morphism X).
 Coercion catqalgobjects : cell_data >-> hSet.
 
 Check (fun (X : catqalg)(x : X) => catqalgid_morphism x).
+
+(** *** Hom notation for quasi-algebraic categories *)
+
+Definition catqalghom { C : catqalg } (a b : C) := total2 (
+    fun f : catqalgmorphisms C =>
+       dirprod (catqalgsource f == a) (catqalgtarget f == b)).
+
 
 
 (** ** HLevel of [catqalg] *)
