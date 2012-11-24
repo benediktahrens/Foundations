@@ -359,6 +359,33 @@ Proof.
 Qed.
 
 
+(** ** Final object for [catqalg]s *)
+
+Definition isfinal_in_catqalg (C : catqalg)(pt : C) :=
+     forall X : C, iscontr (catqalghom X pt).
+
+Definition final_morphism_catqalg C pt (H : isfinal_in_catqalg C pt) X :
+    catqalghom X pt :=  pr1 (H X).
+
+
+(** Unicity of [final_morphism_catqalg].
+      We can close by [Qed.]. *)
+
+Lemma final_is_unique_catqalg C pt (H : isfinal_in_catqalg C pt) :
+   forall X, forall f : catqalghom X pt, 
+       f == final_morphism_catqalg C pt H X.
+Proof.
+  intros X f.
+  set (H':= pr2 (H X)).
+  simpl in H'.
+  rewrite H'.
+  rewrite (H' f).
+  reflexivity.
+Qed.
+  
+
+
+
 (** ** HLevel of [catqalg] *)
 
 (** remains to be done *)  

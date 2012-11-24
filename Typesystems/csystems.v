@@ -7,16 +7,79 @@ Add Rec LoadPath "../hlevel2".
 Require Import hSet.
 Require Import hnat.
 
-Require Import setlevel_categories.
+Require Import catqalg.
 Require Import pathnotations.
 Import pathnotations.PathNotations.
 
-About Hom.
 
-Reserved Notation "'Ob'".
+(** * Definition of C-Systems [Csystem] *)
+(** Definition is given in several steps:
+   - [Csystem_predata] : a [catqalg] with length [Clength], 
+                          point [Cpt] and father [Cft]
+   - [Csystem_data] : predata + canonical projections + 
+                        data which later forms pullbacks of can. projs.
+*)
+
+
+(** ** Csystem-predata *)
+
+Definition Csystem_predata := total2 ( fun C : catqalg =>
+  dirprod (catqalgobjects C -> nat)
+          (dirprod (catqalgobjects C)
+                   (catqalgobjects C -> catqalgobjects C))).
+
+Definition catqalg_from_csystem_predata (C : Csystem_predata) : 
+      catqalg := pr1 C.
+Coercion catqalg_from_csystem_predata : Csystem_predata >-> catqalg.
+
+Definition Clength {C : Csystem_predata} : C -> nat := pr1 (pr2 C).
+Definition Cpt (C : Csystem_predata) : C := pr1 (pr2 (pr2 C)).
+Definition Cft {C : Csystem_predata} : C -> C := pr2 (pr2 (pr2 C)).
+
+(** ** Pullback-data : object + morphism starting in this object *)
+
+Definition Csystem_pb_data (C : Csystem_predata) := total2 (
+  fun fstar : forall X : C, Clength X > 0 ->
+                forall Y : C, forall f : catqalghom Y (Cft X), C =>
+    forall (X : C) (H : Clength X > 0) (Y : C)
+           (f : catqalghom Y (Cft X)), 
+       catqalghom (fstar X H Y f) X).
+
+(** ** [Csystem_data] as described above *)
+
+Definition Csystem_data := total2 (fun C : Csystem_predata =>
+   dirprod (forall X : C, catqalghom X (Cft X)) 
+           (Csystem_pb_data C)).
+
+Definition Csystem_data_from_Csystem_predata (C : Csystem_data):
+  Csystem_predata := pr1 C.
+Coercion Csystem_data_from_Csystem_predata : 
+   Csystem_data >-> Csystem_predata.
+
+Definition Ccanprojection {C : Csystem_data}(X : C) : 
+    catqalghom X (Cft X) := pr1 (pr2 C) X.
+
+Definition Cprojpbobject {C : Csystem_data} X (H : Clength X > 0)
+         {Y} (f : catqalghom Y (Cft X)) : C :=
+   pr1 (pr2 (pr2 C)) X H Y f.
+
+Definition Cq {C : Csystem_data} (X : C) (H : Clength X > 0)
+      {Y} (f : catqalghom Y (Cft X)) : catqalghom (Cprojpbobject X H f) X :=
+   pr2 (pr2 (pr2 C)) X H Y f.
+
+
+(** ** Axioms of a C-System *)
+
+(* for now we are missing the pullbacks and final object *)
+
+Definition Csystem_axioms (C : Csystem_data) :=
+  dirprod (forall X : C, Clength X == 0 <-> X == Cpt C)
+          (forall X : C, forall n : nat, Clength X == S n ->
+                                         Clength (Cft X) == n).
+
 
 Record cstructure := {
-
+ 
   ob : nat -> hSet 
      where "'Ob'" := (tpair isaset (total2 ob) 
            (sigset ob isasetnat 
