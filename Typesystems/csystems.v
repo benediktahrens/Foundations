@@ -67,16 +67,23 @@ Definition Cq {C : Csystem_data} (X : C) (H : Clength X > 0)
       {Y} (f : catqalghom Y (Cft X)) : catqalghom (Cprojpbobject X H f) X :=
    pr2 (pr2 (pr2 C)) X H Y f.
 
-
 (** ** Axioms of a C-System *)
 
-(* for now we are missing the pullbacks and final object *)
+(* for now we are missing the pullbacks  *)
 
 Definition Csystem_axioms (C : Csystem_data) :=
+ dirprod (
   dirprod (forall X : C, Clength X == 0 <-> X == Cpt C)
-          (forall X : C, forall n : nat, Clength X == S n ->
-                                         Clength (Cft X) == n).
+          (forall X : C, Clength X > 0 ->
+              Clength (Cft X) == (Clength X - 1)%nat)
+         )
+         (
+  dirprod (Cft (Cpt C) == Cpt C)
+          (isfinal_in_catqalg C (Cpt C))
+         ).
 
+
+(** ** below are only notes *)
 
 Record cstructure := {
  
