@@ -49,7 +49,8 @@ Print isaset.
 
 *)
 
-(** ** We define [objects], [morphisms], [source], [target], [id_morphism] of a [cell_data]
+(** ** We define [objects], [morphisms], [source], [target], [id_morphism] 
+        of a [cell_data]
 
     this allows us to state composition in a readable way
 
@@ -62,20 +63,24 @@ Print isaset.
 
 Definition catqalgobjects (X : cell_data) : hSet := pr1 (pr1 X).
 Definition catqalgmorphisms (X : cell_data) : hSet := pr2 (pr1 X).
-Definition catqalgsource {X : cell_data} : catqalgmorphisms X -> catqalgobjects X := 
-                 pr1 (pr1 (pr2 X)).
-Definition catqalgtarget {X : cell_data} : catqalgmorphisms X -> catqalgobjects X := pr2 (pr1 (pr2 X)).
-Definition catqalgid_morphism {X : cell_data} : catqalgobjects X -> catqalgmorphisms X := pr2 (pr2 X).
+Definition catqalgsource {X : cell_data} : catqalgmorphisms X -> 
+               catqalgobjects X := pr1 (pr1 (pr2 X)).
+Definition catqalgtarget {X : cell_data} : catqalgmorphisms X -> 
+               catqalgobjects X := pr2 (pr1 (pr2 X)).
+Definition catqalgid_morphism {X : cell_data} : catqalgobjects X -> 
+               catqalgmorphisms X := pr2 (pr2 X).
 
 
 Definition catqalg_data := total2 (fun X : cell_data => 
-   forall f g : catqalgmorphisms X, catqalgtarget f == catqalgsource g -> catqalgmorphisms X).
+   forall f g : catqalgmorphisms X, catqalgtarget f == catqalgsource g -> 
+            catqalgmorphisms X).
 
 Definition cell_data_from_catqalg_data (X : catqalg_data) : cell_data := pr1 X.
 Coercion cell_data_from_catqalg_data : catqalg_data >-> cell_data.
 
 Definition catqalgcompose { X : catqalg_data } : 
-    forall f g : catqalgmorphisms X, catqalgtarget f == catqalgsource g -> catqalgmorphisms X := pr2 X.
+    forall f g : catqalgmorphisms X, catqalgtarget f == catqalgsource g -> 
+           catqalgmorphisms X := pr2 X.
 
 (** ** Properties for categories *)
 (** *** Properties of identity maps *)
@@ -87,12 +92,16 @@ Definition catqalgcompose { X : catqalg_data } :
 
 
 Definition catqalgidentity_is_unit ( X : catqalg_data ) := total2 (
-   ( fun H : dirprod ( forall x : catqalgobjects X, catqalgsource ( catqalgid_morphism x ) == x )
-                     ( forall x : catqalgobjects X, catqalgtarget ( catqalgid_morphism x ) == x ) =>
-   dirprod ( forall f : catqalgmorphisms X, 
-             catqalgcompose (catqalgid_morphism (catqalgsource f)) f (pr2 H (catqalgsource f)) == f ) 
-           ( forall f : catqalgmorphisms X, 
-             catqalgcompose f (catqalgid_morphism (catqalgtarget f)) (!pr1 H (catqalgtarget f)) == f ))).
+ (fun H : dirprod 
+   (forall x : catqalgobjects X, catqalgsource (catqalgid_morphism x ) == x)
+   (forall x : catqalgobjects X, catqalgtarget (catqalgid_morphism x ) == x) =>
+ dirprod 
+   (forall f : catqalgmorphisms X, 
+     catqalgcompose (catqalgid_morphism (catqalgsource f)) f 
+                   (pr2 H (catqalgsource f)) == f ) 
+   (forall f : catqalgmorphisms X, 
+     catqalgcompose f (catqalgid_morphism (catqalgtarget f)) 
+                    (!pr1 H (catqalgtarget f)) == f ))).
 
 
 (** *** Associativity of composition *)
@@ -102,17 +111,21 @@ Definition catqalgidentity_is_unit ( X : catqalg_data ) := total2 (
 
 Definition catqalgcompose_is_assoc ( X : catqalg_data ) := total2 (
    ( fun H : dirprod 
-           (forall f g (H : catqalgtarget f == catqalgsource g), catqalgsource (catqalgcompose f g H) == catqalgsource f)
-           (forall f g (H : catqalgtarget f == catqalgsource g), catqalgtarget (catqalgcompose f g H) == catqalgtarget g) =>
+       (forall f g (H : catqalgtarget f == catqalgsource g), 
+           catqalgsource (catqalgcompose f g H) == catqalgsource f)
+       (forall f g (H : catqalgtarget f == catqalgsource g), 
+           catqalgtarget (catqalgcompose f g H) == catqalgtarget g) =>
    forall (f g h: catqalgmorphisms X) (Hfg : catqalgtarget f == catqalgsource g)
          (Hgh : catqalgtarget g == catqalgsource h),
       catqalgcompose f (catqalgcompose g h Hgh) (Hfg @ !pr1 H g h Hgh) == 
         catqalgcompose (catqalgcompose f g Hfg ) h (pr2 H f g Hfg @ Hgh) )).
 
-(** *** We now package these two properties into a nice package to obtain [catqalg]s *)
+(** *** We now package these two properties into 
+          a nice package to obtain [catqalg]s *)
 
 Definition catqalg := total2 (
-   fun X : catqalg_data => dirprod (catqalgidentity_is_unit X) (catqalgcompose_is_assoc X)).
+   fun X : catqalg_data => dirprod (catqalgidentity_is_unit X) 
+                                   (catqalgcompose_is_assoc X)).
 
 Definition catqalg_data_from_catqalg (X : catqalg) : catqalg_data := pr1 X.
 Coercion catqalg_data_from_catqalg : catqalg >-> catqalg_data.
@@ -151,8 +164,10 @@ Definition catqalg_id_right (C : catqalg) :
 Definition catqalg_assoc (C : catqalg) : 
  forall (f g h: catqalgmorphisms C) (Hfg : catqalgtarget f == catqalgsource g)
          (Hgh : catqalgtarget g == catqalgsource h),
-   catqalgcompose f (catqalgcompose g h Hgh) (Hfg @ !catqalg_comp_source C g h Hgh) == 
-     catqalgcompose (catqalgcompose f g Hfg ) h ( catqalg_comp_target C f g Hfg @ Hgh) 
+   catqalgcompose f (catqalgcompose g h Hgh) 
+           (Hfg @ !catqalg_comp_source C g h Hgh) == 
+     catqalgcompose (catqalgcompose f g Hfg ) h 
+                (catqalg_comp_target C f g Hfg @ Hgh) 
   := pr2 (pr2 (pr2 C)).
 
 
@@ -185,7 +200,8 @@ Proof.
   apply catqalgobpi.
 Qed.
 
-Lemma catqalgmorpi (C : catqalg)(f g : catqalgmorphisms C)(p q : f == g) : p == q.
+Lemma catqalgmorpi (C : catqalg)(f g : catqalgmorphisms C)
+             (p q : f == g) : p == q.
 Proof.
   apply (uip (pr2 (catqalgmorphisms C))).
 Qed.
@@ -230,12 +246,15 @@ Qed.
 
 
 (** *** Hom notation for quasi-algebraic categories *)
+(** We can actually more generally define this for [cell_data]
+    Since we have a coercion down to [cell_data] from [catqalg],
+    this is not more inconvenient in practice *) 
 
-Definition catqalghom { C : catqalg } (a b : C) := total2 (
+Definition catqalghom { C : cell_data } (a b : C) := total2 (
     fun f : catqalgmorphisms C =>
        dirprod (catqalgsource f == a) (catqalgtarget f == b)).
 
-Lemma isaset_catqalghom (C : catqalg) (a b : C) : isaset (catqalghom a b).
+Lemma isaset_catqalghom (C : cell_data) (a b : C) : isaset (catqalghom a b).
 Proof.
   change (isaset) with (isofhlevel 2).
   apply isofhleveltotal2.
@@ -251,11 +270,11 @@ Proof.
   apply (pr2 (catqalgobjects C)).
 Defined.
 
-Definition catqalghomset { C : catqalg } (a b : C) : hSet := 
+Definition catqalghomset { C : cell_data } (a b : C) : hSet := 
    tpair _ (catqalghom a b) (isaset_catqalghom C a b).
 
-Definition catqalgmorphism_from_catqalghom (C : catqalg) (a b : C) (f : catqalghom a b) :
-         catqalgmorphisms C := pr1 f.
+Definition catqalgmorphism_from_catqalghom (C : cell_data) (a b : C) 
+    (f : catqalghom a b) : catqalgmorphisms C := pr1 f.
 Coercion catqalgmorphism_from_catqalghom : catqalghom >-> pr1hSet.
 
 (** **  Identity and Composition in terms of homsets *)
@@ -312,13 +331,15 @@ Proof.
   assert (HOHO : pr1 (catqalghomcomp f (catqalghomcomp g h)) == 
               pr1 (catqalghomcomp (catqalghomcomp f g) h)).
   simpl.
-  apply (pathscomp0 (b:=catqalgcompose f (catqalgcompose g h (pr2 (pr2 g) @ !pr1 (pr2 h)))
+  apply (pathscomp0 (b:=catqalgcompose f 
+             (catqalgcompose g h (pr2 (pr2 g) @ !pr1 (pr2 h)))
       ((pr2 (pr2 f) @ !pr1 (pr2 g)) @
        !catqalg_comp_source C g h (pr2 (pr2 g) @ !pr1 (pr2 h))))).
   apply maponpaths.
   apply catqalgobpi.
   
-  apply (pathscomp0 (b:=catqalgcompose (catqalgcompose f g (pr2 (pr2 f) @ !pr1 (pr2 g))) h
+  apply (pathscomp0 (b:=catqalgcompose 
+            (catqalgcompose f g (pr2 (pr2 f) @ !pr1 (pr2 g))) h
       (catqalg_comp_target C f g (pr2 (pr2 f) @ !pr1 (pr2 g)) @
        pr2 (pr2 g) @ !pr1 (pr2 h)))).
   apply H.
@@ -330,14 +351,16 @@ Qed.
 
 (** ** Isomorphism between two equal objects *)
 
-Definition catqalgmoralongeq (C : catqalg) (a b : C)(H : a == b) : catqalghom a b.
+Definition catqalgmoralongeq (C : catqalg) (a b : C)
+                  (H : a == b) : catqalghom a b.
 Proof.
   exists (catqalgid_morphism a).
   exists (catqalg_id_source C a).
   exact (catqalg_id_target C a @ H).
 Defined.
 
-Definition catqalgmoralongeqinv (C : catqalg) (a b : C)(H : a == b) : catqalghom b a.
+Definition catqalgmoralongeqinv (C : catqalg) (a b : C)
+                  (H : a == b) : catqalghom b a.
 Proof.
   exists (catqalgid_morphism a).
   exists (catqalg_id_source C a @ H).
@@ -348,7 +371,8 @@ Defined.
 
 Lemma is_inv_catqalgmoralongeqinv (C : catqalg) (a b : C)(H : a == b) :
   catqalgcompose (catqalgmoralongeq C a b H) (catqalgmoralongeqinv C a b H) 
-        (pr2 (pr2 (catqalgmoralongeq C a b H)) @ ! pr1 (pr2 (catqalgmoralongeqinv C a b H)))
+        (pr2 (pr2 (catqalgmoralongeq C a b H)) @ 
+             ! pr1 (pr2 (catqalgmoralongeqinv C a b H)))
           ==
           catqalgid_morphism a.
 Proof.
@@ -391,6 +415,101 @@ Qed.
 (** remains to be done *)  
 
 
+
+(** ** Maps between quasi-algebraic categories *)
+
+(** *** First, maps between two terms of type [cell_data] *)
+
+Definition cell_data_map (C C' : cell_data) := total2 (
+  fun F : dirprod (C -> C')
+	          (catqalgmorphisms C -> catqalgmorphisms C') =>
+   dirprod (
+     dirprod (forall f, catqalgsource (pr2 F f) == pr1 F (catqalgsource f))
+	     (forall f, catqalgtarget (pr2 F f) == pr1 F (catqalgtarget f))
+           )
+           (forall x, pr2 F (catqalgid_morphism x) == 
+                   catqalgid_morphism (pr1 F x))).
+
+Definition functorqalgobj {C C'} (F : cell_data_map C C') :
+     C -> C' := pr1 (pr1 F).
+Coercion functorqalgobj : cell_data_map >-> Funclass.
+
+Definition functorqalgmor {C C'} (F : cell_data_map C C') :
+     catqalgmorphisms C -> catqalgmorphisms C' := pr2 (pr1 F).
+
+Local Notation "# F" := (functorqalgmor F)(at level 3).
+
+Definition functorqalgsource {C C'} (F : cell_data_map C C') : forall f, 
+    catqalgsource (#F f) == (*functorqalgobj*) F (catqalgsource f) := 
+        pr1 (pr1 (pr2 F)).
+
+Definition functorqalgtarget {C C'} (F : cell_data_map C C') : forall f, 
+    catqalgtarget (#F f) == F (catqalgtarget f) := 
+        pr2 (pr1 (pr2 F)).
+
+Definition functorqalgid {C C'} (F : cell_data_map C C') :
+   forall x, #F (catqalgid_morphism x) == 
+                  catqalgid_morphism (F x) := pr2 (pr2 F).
+
+(** **** A check to see whether this works as it should *)
+
+Definition functorqalghom {C C'} (F : cell_data_map C C') {a b} :
+         catqalghom a b -> catqalghom (F a) (F b).
+Proof.
+  intro f.
+  exists (#F f).
+  exists (functorqalgsource F f @ maponpaths F (pr1 (pr2 f))).
+  exact (functorqalgtarget F f @ maponpaths F (pr2 (pr2 f))).
+Defined.
+  
+(** *** Now maps between categories as quasi-alg. structures *)
+(** remains compatibility with composition, which relies on the 
+    axiom that functors preserve source and target and thus
+    composability *)
+(**  We can make [functoralg] dependent on just the data, since its 
+     definition does not rely on associativity or id morphisms *)
+
+Definition functorqalg (C C' : catqalg_data) := total2 (
+  fun F : cell_data_map C C' =>
+     (forall f g (H : catqalgtarget f == catqalgsource g),
+        #F (catqalgcompose f g H) == 
+           catqalgcompose (#F f) (#F g)  
+                 (functorqalgtarget F f @ maponpaths F H @ ! functorqalgsource F g))).
+
+Definition cell_data_map_from_functorqalg C C' (F : functorqalg C C') :
+       cell_data_map C C' := pr1 F.
+Coercion cell_data_map_from_functorqalg : functorqalg >-> cell_data_map.
+
+Definition functorqalg_compose C C' (F : functorqalg C C') :
+  forall f g (H : catqalgtarget f == catqalgsource g),
+        #F (catqalgcompose f g H) == 
+           catqalgcompose (#F f) (#F g)  
+                 (functorqalgtarget F f @ maponpaths F H @ ! functorqalgsource F g) :=
+    pr2 F.
+
+(** Again a check in terms of homsets *)
+(** Introducing (local) notation might turn this statement into something
+    beautiful... *)
+
+Lemma functorqalghom_compose (C C' : catqalg) (F : functorqalg C C') :
+  forall a b c (f : catqalghom a b) (g : catqalghom b c),
+   catqalghomcomp (functorqalghom F f) (functorqalghom F g) == 
+          functorqalghom F (catqalghomcomp f g).
+Proof.
+  intros a b c f g.
+  assert (H : pr1 (catqalghomcomp (functorqalghom F f) (functorqalghom F g)) ==
+                     pr1 (functorqalghom F (catqalghomcomp f g))).
+    simpl.
+    rewrite functorqalg_compose.
+    apply catqalg_comp_pi.
+  
+  apply (total2_paths H).
+  apply catqalgpairofobpi.
+Qed.
+  
+
+ (* (functorqalgtarget F f @ maponpaths F H @ ! functorqalgsource F g) *)
+
 (** *** Below only notes *)
 
 
@@ -400,7 +519,8 @@ Definition cell_structure := total2 (fun X : cell_data =>
    dirprod (forall x : objects X, source (id_morphism x) == x)
            (forall x : objects X, target (id_morphism x) == x) ).
 
-Definition cell_data_from_cell_structure (X : cell_structure) : cell_data := pr1 X.
+Definition cell_data_from_cell_structure (X : cell_structure) : 
+           cell_data := pr1 X.
 Coercion cell_data_from_cell_structure : cell_structure >-> cell_data.
 
 
@@ -436,7 +556,8 @@ Coercion cell_from_cell_with_comp : catqalg_data >-> cell_data.
 Definition morphisms (X : catqalg_data) := cell_morphisms X.
 Definition composable {X : catqalg_data} (f g : morphisms X) :=
          cell_target X f == cell_source X g.
-Definition compose {X : catqalg_data} (f g : morphisms X) (H : composable f g) :=
+Definition compose {X : catqalg_data} (f g : morphisms X) 
+          (H : composable f g) :=
       comp X (hfp_pair (cell_source X) (cell_target X) g f H).
 
 
@@ -496,7 +617,8 @@ Defined.
   
 
 Definition assoc_comp (X : catqalg_data) := 
-   total2 (fun H : dirprod (source_of_comp X)(target_of_comp X) => is_assoc_compose X H).
+   total2 (fun H : dirprod (source_of_comp X)(target_of_comp X) => 
+          is_assoc_compose X H).
 
 Lemma isaprop_assoc_comp X : isaprop (assoc_comp X).
 Proof.
@@ -512,7 +634,8 @@ Defined.
 
 Definition compose_id_right (X : catqalg_data) (H : is_cell_structure X) :=
    forall f : morphisms X, 
-        compose f (id_cell X (cell_target X f)) (!pr1 H (cell_target X f) ) == f.
+        compose f (id_cell X (cell_target X f)) 
+              (!pr1 H (cell_target X f) ) == f.
 
 Lemma isaprop_compose_id_right X H : isaprop (compose_id_right X H).
 Proof.
@@ -522,8 +645,8 @@ Proof.
 Defined.
 
 Definition compose_id_left (X : catqalg_data) (H : is_cell_structure X) :=
-   forall f : morphisms X, 
-        compose (id_cell X (cell_source X f)) f (pr2 H (cell_source X f) ) == f.
+ forall f : morphisms X, 
+  compose (id_cell X (cell_source X f)) f (pr2 H (cell_source X f) ) == f.
 
 Lemma isaprop_compose_id_left X H : isaprop (compose_id_left X H).
 Proof.
@@ -651,8 +774,10 @@ Proof.
   apply (total2_paths H).
   simpl.
   assert (H': pr1 
-           (transportf (fun f0 : mor => dirprod (s f0 == Y) (t f0 == pt)) H (pr2 f)) ==
-        pr1 (dirprodpair (final_map_s pt pt_final Y) (final_map_t pt pt_final Y))).
+     (transportf (fun f0 : mor => dirprod (s f0 == Y) 
+                (t f0 == pt)) H (pr2 f)) ==
+    pr1 (dirprodpair (final_map_s pt pt_final Y) 
+              (final_map_t pt pt_final Y))).
   simpl.
   apply uip.
   apply ob.
