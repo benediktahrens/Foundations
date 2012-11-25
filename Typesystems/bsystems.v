@@ -112,7 +112,7 @@ Definition Bsystem := total2 (fun B : Bsystem_data =>
                            forall (H : Bft Y == iter (@Bft B) (S i) n (Bpartial s)),
                       Bpartial (BTtilde Y s H) == BT Y (Bpartial s) H) (* Baxiom2 *)
                     (dirprod (forall n : nat, forall r : Btilde B (S n), forall X : BB B (S (S n)),
-                                   forall (H : Bpartial r == Bft X), Bft (BS (i:=0) r X H) == Bft (Bpartial r)) 
+                              forall (H : Bpartial r == Bft X), Bft (BS (i:=0) r X H) == Bft (Bpartial r)) 
                                          (* Baxiom3ieq0 *)
                              (forall i n : nat, forall r : Btilde B (S n), 
                                   forall X : BB B (S (S ( (i + S n)))),
@@ -178,7 +178,189 @@ Definition Baxiom5 (B : Bsystem) : forall n : nat,
          Bpartial (Bdiag X) == BT (i:=0) X X (idpath _) := pr2 (pr2 (pr2 B)).
 
 
-(** *** 
+(** * Morphisms of B-Systems *)
+(** consist of two families of maps 
+ $B_n \to B'_n$ and $Btilde_n \to B'tilde_n$ 
+  compatible with stuff *)
+
+
+Definition preBsystem_morphism_data (B B' : preBsystem_data) := 
+  dirprod (forall n : nat, BB B n -> BB B' n)
+          (forall n : nat, Btilde B n -> Btilde B' n).
+
+Definition BBmap {B B' : preBsystem_data} (F : preBsystem_morphism_data B B') {n}:
+      BB B n -> BB B' n := pr1 F n.
+
+Definition Btildemap {B B' : preBsystem_data} (F : preBsystem_morphism_data B B') {n}:
+      Btilde B n -> Btilde B' n := pr2 F n.
+
+
+Definition preBsystem_morphism (B B' : preBsystem_data) := total2 (
+  fun F : preBsystem_morphism_data B B' => 
+ dirprod (forall n (X : BB B (S n)), BBmap F (Bft X) == Bft (BBmap F X))
+         (forall n (s : Btilde B (S n)), BBmap F (Bpartial s) == Bpartial (Btildemap F s))).
+
+Definition preBsystem_morphism_data_from_preBsystem_morphism B B'
+     (F : preBsystem_morphism B B') : preBsystem_morphism_data B B' := pr1 F.
+Coercion preBsystem_morphism_data_from_preBsystem_morphism :
+           preBsystem_morphism >-> preBsystem_morphism_data.
+
+Definition preBsystem_morphism_ft B B' (F : preBsystem_morphism B B') :
+   forall n (X : BB B (S n)), BBmap F (Bft X) == Bft (BBmap F X) := pr1 (pr2 F).
+
+Definition preBsystem_morphism_partial B B' (F : preBsystem_morphism B B') :
+   forall n (s : Btilde B (S n)), BBmap F (Bpartial s) == Bpartial (Btildemap F s) := pr2 (pr2 F).
+
+
+(** *** Iteration lemmas *)
+
+Lemma bla B B' (F : preBsystem_morphism B B') : forall i n,
+forall (Y : BB B (S n)) (X : BB B (S i + n))
+   (H : Bft Y == iter (@Bft B) (S i) n X) ,
+Bft (BBmap F Y) == iter (@Bft B') (S i) n (BBmap F X).
+Proof.
+  intro i.
+  induction i; intros; simpl in *.
+  rewrite <- preBsystem_morphism_ft.
+  rewrite <- preBsystem_morphism_ft.
+  destruct H.
+  reflexivity.
+  
+  rewrite <- preBsystem_morphism_ft.
+  rewrite <- preBsystem_morphism_ft.
+  set (H':= IHi _ _ _ H).
+  rewrite <- H'.
+  rewrite preBsystem_morphism_ft.
+  reflexivity.
+Qed.
+
+Lemma blablabla B B' (F : preBsystem_morphism B B') : forall {i n : nat}, 
+  forall (Y : BB B (S n)) (s : Btilde B (S i + n))
+    (H : Bft Y == iter (@Bft B) (S i) n (Bpartial s)),
+  Bft (BBmap F Y) == iter (@Bft _) (S i) n (Bpartial (Btildemap F s)) .
+Proof.
+  intros.
+  set (H':= bla B B' F i _ Y (Bpartial s) H).
+  rewrite H'.
+  rewrite <- preBsystem_morphism_partial.
+  reflexivity.
+Qed.
+
+(*
+Lemma blablabla B B' (F : preBsystem_morphism B B') : forall {i n : nat}, 
+  forall (Y : BB B (S n)) (s : Btilde B (S i + n))
+    (H : Bft Y == iter (@Bft B) (S i) n (Bpartial s)),
+  Bft (BBmap F Y) == iter (@Bft _) (S i) n (Bpartial (Btildemap F s)) .
+Proof.
+  intro i; 
+  induction i;
+  intros.
+  simpl in *.
+  rewrite <- preBsystem_morphism_ft.
+  rewrite H.
+  rewrite <- preBsystem_morphism_partial.
+  rewrite preBsystem_morphism_ft.
+  reflexivity.
+  
+  set (H1 := bla B B' F (S i) _ Y (Bpartial s) H).
+  rewrite H1.
+  apply maponpaths.
+  rewrite <- preBsystem_morphism_partial.
+  reflexivity.
+Qed.
+*)
+
+Lemma more_bla B B' (F : preBsystem_morphism B B') : forall i n : nat ,
+  forall (r : Btilde B (S n)) (X : BB B (S i + S n))
+   (H : Bpartial r == iter (@Bft B) (S i) (S n) X ),
+Bpartial (Btildemap F r) == iter (@Bft _) (S i) (S n) (BBmap F X).
+Proof.
+  intro i.
+  induction i.
+  simpl; intros.
+  rewrite <- preBsystem_morphism_partial.
+  rewrite <- preBsystem_morphism_ft.
+  rewrite H.
+  reflexivity.
+  
+  intros.
+  set (H':= IHi _ _ _ H).
+  rewrite H'.
+  simpl.
+  rewrite preBsystem_morphism_ft.
+  reflexivity.
+Qed.
+
+Lemma even_more_bla B B' (F : preBsystem_morphism B B'): forall (i n : nat),
+  forall (r : Btilde B (S n)) (s : Btilde B (S i + S n))
+   (H : Bpartial r == iter (@Bft B) (S i) (S n) (Bpartial s)),
+Bpartial (Btildemap F r) == iter (@Bft _ ) (S i) (S n) (Bpartial (Btildemap F s)).
+Proof.
+  intros.
+  set (H':= more_bla B B' F _ _ _ _ H).
+  rewrite H'.
+  rewrite <- preBsystem_morphism_partial.
+  reflexivity.
+Qed.
+
+
+(** section is for writing things down, will be removed later *)
+Section defs.
+
+Variables B B' : Bsystem.
+Variable F : preBsystem_morphism B B'.
+
+Definition comp_father := forall n (X : BB B (S n)), 
+        BBmap F (Bft X) == Bft (BBmap F X).
+
+Definition comp_partial := forall n (s : Btilde B (S n)),
+        BBmap F (Bpartial s) == Bpartial (Btildemap F s).
+
+Definition comp_BT := forall i n : nat,
+  forall (Y : BB B (S n)) (X : BB B (S i + n))
+   (H : Bft Y == iter (@Bft B) (S i) n X) ,
+   BBmap F (BT Y X H) == BT (BBmap F Y) (BBmap F X) (bla _ _ _ _ _ _ _ H) .
+
+Definition comp_BTtilde := forall (i n : nat), 
+  forall (Y : BB B (S n)) (s : Btilde B (S i + n))
+    (H : Bft Y == iter (@Bft B) (S i) n (Bpartial s)),
+  Btildemap F (BTtilde Y s H) == BTtilde  (BBmap F Y) (Btildemap F s) (blablabla _ _ _ _ _ H ).
+
+Definition comp_BS := forall i n : nat ,
+  forall (r : Btilde B (S n)) (X : BB B (S i + S n))
+   (H : Bpartial r == iter (@Bft B) (S i) (S n) X ),
+   BBmap F (BS r X H) == BS (Btildemap F r) (BBmap F X) 
+     (more_bla _ _ _ _ _ _ _ H  ).
+
+
+Definition comp_BStilde := forall (i n : nat),
+  forall (r : Btilde B (S n)) (s : Btilde B (S i + S n))
+   (H : Bpartial r == iter (@Bft B) (S i) (S n) (Bpartial s)),
+   Btildemap F (BStilde r s H) ==  BStilde (Btildemap F r)(Btildemap F s) 
+     (even_more_bla _ _ _ _ _ _ _ H  ).
+
+Definition comp_BStilde := forall (i n : nat),
+  forall (r : Btilde B (S n)) (s : Btilde B (S i + S n))
+   (H : Bpartial r == iter (@Bft B) (S i) (S n) (Bpartial s)),
+Bpartial (Btildemap F r) == iter Bft (S i) (S n) (Bpartial (Btildemap F s))
+
+
+Definition comp_BS := forall i n : nat ,
+  forall (r : Btilde B (S n)) (X : BB B (S i + S n))
+   (H : Bpartial r == iter (@Bft B) (S i) (S n) X ),
+Bpartial (Btildemap F r) == iter Bft (S i) (S n) (BBmap F X)
+
+Definition Bsystem_morphism (B B': Bsystem) := total2 (
+   fun F : preBsystem_morphism B B' =>
+   
+  forall n (X : BB B (S n)), 
+            
+
+
+
+
+
+
 
 (** *** Below only notes *)
 
