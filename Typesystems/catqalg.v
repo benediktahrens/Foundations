@@ -507,8 +507,11 @@ Proof.
   apply catqalgpairofobpi.
 Qed.
   
+(** categorical structure of categories and functors *)
 
- (* (functorqalgtarget F f @ maponpaths F H @ ! functorqalgsource F g) *)
+(** lemma that two functors are equal if they are pointwise equal on objects 
+    and morphisms *)
+
 
 (** *** Below only notes *)
 

@@ -388,6 +388,14 @@ Definition Bsystem_morphism_diag B B' (F : Bsystem_morphism B B') :
       Btildemap F (Bdiag X) == Bdiag (BBmap F X) :=
         pr2 (pr2 (pr2 (pr2 (pr2 (pr2 (pr2 F)))))).
 
+
+(**  categorical structures on Bsystems and morphisms *)
+
+(** proof that two morphisms of Bsystems are equal if they agree
+    pointwise on B and Btilde  *)
+
+
+
 (** section is for writing things down, will be removed later *)
 
 
