@@ -206,7 +206,7 @@ Proof.
   apply (uip (pr2 (catqalgmorphisms C))).
 Qed.
 
-Lemma catqalg_comp_pi (C : catqalg) (f g : catqalgmorphisms C)
+Lemma catqalgcompose_pi (C : catqalg) (f g : catqalgmorphisms C)
   (H H' : catqalgtarget f == catqalgsource g) : 
      catqalgcompose f g H == catqalgcompose f g H'.
 Proof.
@@ -474,7 +474,7 @@ Definition functorqalg (C C' : catqalg_data) := total2 (
      (forall f g (H : catqalgtarget f == catqalgsource g),
         #F (catqalgcompose f g H) == 
            catqalgcompose (#F f) (#F g)  
-                 (functorqalgtarget F f @ maponpaths F H @ ! functorqalgsource F g))).
+             (functorqalgtarget F f @ maponpaths F H @ ! functorqalgsource F g))).
 
 Definition cell_data_map_from_functorqalg C C' (F : functorqalg C C') :
        cell_data_map C C' := pr1 F.
@@ -484,7 +484,7 @@ Definition functorqalg_compose C C' (F : functorqalg C C') :
   forall f g (H : catqalgtarget f == catqalgsource g),
         #F (catqalgcompose f g H) == 
            catqalgcompose (#F f) (#F g)  
-                 (functorqalgtarget F f @ maponpaths F H @ ! functorqalgsource F g) :=
+            (functorqalgtarget F f @ maponpaths F H @ ! functorqalgsource F g) :=
     pr2 F.
 
 (** Again a check in terms of homsets *)
@@ -501,13 +501,122 @@ Proof.
                      pr1 (functorqalghom F (catqalghomcomp f g))).
     simpl.
     rewrite functorqalg_compose.
-    apply catqalg_comp_pi.
+    apply catqalgcompose_pi.
   
   apply (total2_paths H).
   apply catqalgpairofobpi.
 Qed.
   
-(** categorical structure of categories and functors *)
+(** ** categorical structure of categories and functors *)
+(** *** composition *)
+
+
+
+
+(** we opacify the equality proofs for better performance
+    and less unfolding by simpl *)
+
+Lemma cell_data_map_comp_axioms  
+     (C C' C'' : catqalg)(F : functorqalg C C') (F' : functorqalg C' C''): 
+dirprod
+  (dirprod
+     (forall f : catqalgmorphisms C,
+      catqalgsource (#F' (#F f)) == F' (F (catqalgsource f)))
+     (forall f : catqalgmorphisms C,
+      catqalgtarget (#F' (#F f)) == F' (F (catqalgtarget f))))
+  (forall x : C,
+   #F' (#F (catqalgid_morphism x)) == catqalgid_morphism (F' (F x))).
+Proof.
+  repeat split; simpl;
+   intros;
+   repeat rewrite functorqalgsource;
+   repeat rewrite functorqalgtarget;
+   repeat rewrite functorqalgid;
+   reflexivity.
+Qed.
+   
+  
+
+
+
+Definition cell_data_map_comp  {C C' C'' : catqalg}(F : functorqalg C C') 
+      (F' : functorqalg C' C''): cell_data_map C C''.
+Proof.
+  exists (dirprodpair (fun x => F' (F x)) (fun f => #F' (#F f))).
+  exact (cell_data_map_comp_axioms C C' C'' F F').
+Defined.
+
+Lemma functorqalgcomposite_compose (C C' C'' : catqalg)(F : functorqalg C C')
+      (F' : functorqalg C' C''): 
+ forall (f g : catqalgmorphisms C) (H : catqalgtarget f == catqalgsource g),
+#(cell_data_map_comp F F') (catqalgcompose f g H) ==
+catqalgcompose (#(cell_data_map_comp F F') f) (#(cell_data_map_comp F F') g)
+  (functorqalgtarget (cell_data_map_comp F F') f @
+   maponpaths (cell_data_map_comp F F') H @
+   !functorqalgsource (cell_data_map_comp F F') g) .
+Proof.
+  intros f g H.
+  set (HFcomp:= functorqalg_compose _ _ F).
+  set (HF'comp:=functorqalg_compose _ _ F').
+  About pathscomp0.
+  change (#(cell_data_map_comp F F') (catqalgcompose f g H)) with
+              (#F'(#F (catqalgcompose f g H))).
+  rewrite  HFcomp.
+  rewrite HF'comp.
+  apply catqalgcompose_pi.
+Qed.
+  
+
+Definition functorqalg_composite (C C' C'' : catqalg)(F : functorqalg C C')
+      (F' : functorqalg C' C''): functorqalg C C''.
+Proof.
+  exists (cell_data_map_comp  F F').
+  apply functorqalgcomposite_compose.
+Defined.
+
+
+
+(** *** Identity functor *)
+
+Lemma cell_data_map_id_axioms (C : catqalg):
+dirprod
+  (dirprod
+     (forall f : catqalgmorphisms C, catqalgsource f == catqalgsource f)
+     (forall f : catqalgmorphisms C, catqalgtarget f == catqalgtarget f))
+  (forall x : C, catqalgid_morphism x == catqalgid_morphism x).
+Proof.
+  repeat split; reflexivity.
+Qed.
+
+
+Definition cell_data_map_id  {C : catqalg}: cell_data_map C C.
+Proof.
+  exists (dirprodpair (fun x => x) (fun f => f)).
+  apply cell_data_map_id_axioms.
+Defined.
+
+Lemma functorqalgidentity_compose (C : catqalg) : 
+ forall (f g : catqalgmorphisms C) (H : catqalgtarget f == catqalgsource g),
+#cell_data_map_id (catqalgcompose f g H) ==
+catqalgcompose (#cell_data_map_id f) (#cell_data_map_id g)
+  (functorqalgtarget cell_data_map_id f @
+   maponpaths cell_data_map_id H @ !functorqalgsource cell_data_map_id g).
+Proof.
+  intros f g H.
+  change (#cell_data_map_id (catqalgcompose f g H)) with
+      (catqalgcompose f g H).
+  change (#cell_data_map_id f) with f.
+  change (#cell_data_map_id g) with g.
+  apply catqalgcompose_pi.
+Qed.
+
+Definition functorqalg_identity (C : catqalg) : functorqalg C C.
+Proof. 
+  exists cell_data_map_id.
+  apply functorqalgidentity_compose.
+Defined.
+
+
 
 (** lemma that two functors are equal if they are pointwise equal on objects 
     and morphisms *)
