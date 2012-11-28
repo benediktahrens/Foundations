@@ -12,6 +12,13 @@ Notation "! p " := (pathsinv0 p) (at level 50).
 Notation "p @ q" := (pathscomp0 p q) (at level 60, right associativity).
 
 
+(** * Precategory from a quasi-alg. category *)
+
+(** we construct a precategory from a given quasi-alg. category.
+    all the work is actually done in the file on quasi-alg. 
+    categories *)
+
+
 Section precat_from_catqalg.
 
 Variable C : catqalg.

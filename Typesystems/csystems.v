@@ -84,7 +84,7 @@ Definition Csystem_axioms (C : Csystem_data) :=
 
 
 (** ** below are only notes *)
-
+(*
 Record cstructure := {
  
   ob : nat -> hSet 
@@ -202,3 +202,4 @@ Record cstructure := {
 
 
 Check (fun X : cstructure => ob X).
+*)

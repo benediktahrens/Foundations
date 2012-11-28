@@ -37,6 +37,8 @@ Notation "p @ q" := (pathscomp0 p q) (at level 60, right associativity).
    avoid confusion with projections (coercions, actually) from [hSet] to [UU]
 *)
 
+
+
 Definition cell_data := total2
     (fun obmor : dirprod hSet hSet => 
         dirprod
@@ -416,7 +418,7 @@ Qed.
 
 
 
-(** ** Maps between quasi-algebraic categories *)
+(** * Functors: Maps between quasi-algebraic categories *)
 
 (** *** First, maps between two terms of type [cell_data] *)
 
