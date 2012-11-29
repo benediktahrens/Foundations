@@ -84,8 +84,8 @@ Definition catqalgcompose { X : catqalg_data } :
     forall f g : catqalgmorphisms X, catqalgtarget f == catqalgsource g -> 
            catqalgmorphisms X := pr2 X.
 
-(** ** Properties for categories *)
-(** *** Properties of identity maps *)
+(** ** Axioms for categories *)
+(** *** Axioms of identity maps *)
 (**  To state the unit laws for identity, we need to have [cell_data] where
       identities have suitable source and target 
       
@@ -122,7 +122,7 @@ Definition catqalgcompose_is_assoc ( X : catqalg_data ) := total2 (
       catqalgcompose f (catqalgcompose g h Hgh) (Hfg @ !pr1 H g h Hgh) == 
         catqalgcompose (catqalgcompose f g Hfg ) h (pr2 H f g Hfg @ Hgh) )).
 
-(** *** We now package these two properties into 
+(** *** We now package these two axioms into 
           a nice package to obtain [catqalg]s *)
 
 Definition catqalg := total2 (
