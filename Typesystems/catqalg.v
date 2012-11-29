@@ -185,24 +185,28 @@ Coercion catqalgobjects : cell_data >-> hSet.
 Check (fun (X : catqalg)(x : X) => catqalgid_morphism x).
 
 
-(** ** Proof irrelevance for composition, associativity, source and target of 
-       composition *)
+(** ** Proof irrelevance *)
+(**   for 
+        - composition, 
+        - associativity, 
+        - source and target of composition 
+*)
 
-Lemma catqalgobpi (C : catqalg)(a b : C)(p q : a == b) : p == q.
+Lemma catqalgobuip (C : catqalg)(a b : C)(p q : a == b) : p == q.
 Proof.
   apply (uip (pr2 (catqalgobjects C))).
 Qed.
 
-Lemma catqalgpairofobpi (C : catqalg) (a b c d : C) 
+Lemma catqalgpairofobuip (C : catqalg) (a b c d : C) 
         (p q : dirprod (a == b) (c == d)) : p == q.
 Proof.
   assert (H : pr1 p == pr1 q).
-  apply catqalgobpi.
+  apply catqalgobuip.
   apply (total2_paths H).
-  apply catqalgobpi.
+  apply catqalgobuip.
 Qed.
 
-Lemma catqalgmorpi (C : catqalg)(f g : catqalgmorphisms C)
+Lemma catqalgmoruip (C : catqalg)(f g : catqalgmorphisms C)
              (p q : f == g) : p == q.
 Proof.
   apply (uip (pr2 (catqalgmorphisms C))).
@@ -213,7 +217,7 @@ Lemma catqalgcompose_pi (C : catqalg) (f g : catqalgmorphisms C)
      catqalgcompose f g H == catqalgcompose f g H'.
 Proof.
   apply maponpaths.
-  apply catqalgobpi.
+  apply catqalgobuip.
 Qed.
 
 Lemma catqalg_id_left_pi (C : catqalg) (a : C )(f : catqalgmorphisms C) 
@@ -226,7 +230,7 @@ Proof.
   destruct H'.
   rewrite <- catqalg_id_left.
   apply maponpaths.
-  apply catqalgobpi.
+  apply catqalgobuip.
 Qed.
 
 
@@ -241,7 +245,7 @@ Proof.
   assert (H2:=catqalg_id_right C f).
   rewrite <- H2.
   apply maponpaths.
-  apply catqalgobpi.
+  apply catqalgobuip.
 Qed.
 
 
@@ -279,6 +283,17 @@ Definition catqalgmorphism_from_catqalghom (C : cell_data) (a b : C)
     (f : catqalghom a b) : catqalgmorphisms C := pr1 f.
 Coercion catqalgmorphism_from_catqalghom : catqalghom >-> pr1hSet.
 
+(** Lemma for comparing two morphisms in [catqalghom a b] *)
+
+Lemma catqalghom_eq (C : catqalg) (a b : C) (f g : catqalghom a b) :
+   pr1 f == pr1 g -> f == g.
+Proof.
+  intro H;
+  apply (total2_paths H).
+  apply catqalgpairofobuip.
+Qed.
+
+
 (** **  Identity and Composition in terms of homsets *)
 
 Definition catqalghomid {C : catqalg} (c : C) : catqalghom c c.
@@ -307,7 +322,7 @@ Proof.
   simpl.
   apply catqalg_id_left_pi.
   apply (total2_paths H).
-  apply (catqalgpairofobpi).
+  apply catqalgpairofobuip.
 Defined.
 
 Lemma catqalghom_id_right (C : catqalg) (a b : C) (f : catqalghom a b) :
@@ -318,7 +333,7 @@ Proof.
   simpl.
   apply catqalg_id_right_pi.
   apply (total2_paths H).
-  apply (catqalgpairofobpi).
+  apply catqalgpairofobuip.
 Qed.
 
 Lemma catqalghom_assoc (C : catqalg) :
@@ -338,7 +353,7 @@ Proof.
       ((pr2 (pr2 f) @ !pr1 (pr2 g)) @
        !catqalg_comp_source C g h (pr2 (pr2 g) @ !pr1 (pr2 h))))).
   apply maponpaths.
-  apply catqalgobpi.
+  apply catqalgobuip.
   
   apply (pathscomp0 (b:=catqalgcompose 
             (catqalgcompose f g (pr2 (pr2 f) @ !pr1 (pr2 g))) h
@@ -346,46 +361,65 @@ Proof.
        pr2 (pr2 g) @ !pr1 (pr2 h)))).
   apply H.
   apply maponpaths.
-  apply catqalgobpi.
+  apply catqalgobuip.
   apply (total2_paths HOHO).
-  apply catqalgpairofobpi.
+  apply catqalgpairofobuip.
 Qed.
 
 (** ** Isomorphism between two equal objects *)
 
-Definition catqalgmoralongeq (C : catqalg) (a b : C)
+(*
+Definition catqalgmoralongeq {C : catqalg} (a b : C)
                   (H : a == b) : catqalghom a b.
 Proof.
   exists (catqalgid_morphism a).
   exists (catqalg_id_source C a).
   exact (catqalg_id_target C a @ H).
 Defined.
+*)
 
-Definition catqalgmoralongeqinv (C : catqalg) (a b : C)
+Definition catqalgmoralongeq {C : catqalg} (a b : C)
+                  (H : a == b) : catqalghom a b.
+Proof.
+  destruct H.
+  exact (catqalghomid a).
+Defined.
+
+(*
+Definition catqalgmoralongeqinv {C : catqalg} (a b : C)
                   (H : a == b) : catqalghom b a.
 Proof.
   exists (catqalgid_morphism a).
   exists (catqalg_id_source C a @ H).
   exact (catqalg_id_target C a).
 Defined.
+*)
 
-
-
-Lemma is_inv_catqalgmoralongeqinv (C : catqalg) (a b : C)(H : a == b) :
-  catqalgcompose (catqalgmoralongeq C a b H) (catqalgmoralongeqinv C a b H) 
-        (pr2 (pr2 (catqalgmoralongeq C a b H)) @ 
-             ! pr1 (pr2 (catqalgmoralongeqinv C a b H)))
-          ==
-          catqalgid_morphism a.
+Definition catqalgmoralongeqinv {C : catqalg} (a b : C)
+                  (H : a == b) : catqalghom b a.
 Proof.
-  unfold catqalgmoralongeq.
-  simpl.
-  rewrite catqalg_id_left_pi.
-  reflexivity.
+  destruct H.
+  exact (catqalghomid a).
+Defined.
+
+Lemma is_left_inv_catqalgmoralongeq (C : catqalg) (a b : C) (H : a == b) :
+   catqalghomcomp (catqalgmoralongeqinv a b H) (catqalgmoralongeq a b H) ==
+           catqalghomid b.
+Proof.
+  destruct H.
+  apply catqalghom_id_right.
+Qed.
+
+Lemma is_right_inv_catqalgmoralongeq (C : catqalg) (a b : C) (H : a == b) :
+   catqalghomcomp (catqalgmoralongeq a b H) (catqalgmoralongeqinv a b H) ==
+           catqalghomid a.
+Proof.
+  destruct H.
+  apply catqalghom_id_right.
 Qed.
 
 
-(** ** Final object for [catqalg]s *)
+(** ** Final objects in quasi-algebraic categories *)
 
 Definition isfinal_in_catqalg (C : catqalg)(pt : C) :=
      forall X : C, iscontr (catqalghom X pt).
@@ -506,7 +540,7 @@ Proof.
     apply catqalgcompose_pi.
   
   apply (total2_paths H).
-  apply catqalgpairofobpi.
+  apply catqalgpairofobuip.
 Qed.
   
 (** ** categorical structure of categories and functors *)
