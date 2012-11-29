@@ -481,36 +481,36 @@ Definition cell_data_fun (C C' : cell_data) := total2 (
            (forall x, pr2 F (catqalgid_morphism x) == 
                    catqalgid_morphism (pr1 F x))).
 *)
-Definition functorqalgobj {C C'} (F : cell_data_fun C C') :
+Definition catqalg_fun_obj {C C'} (F : cell_data_fun C C') :
      C -> C' := pr1 (pr1 F).
-Coercion functorqalgobj : cell_data_fun >-> Funclass.
+Coercion catqalg_fun_obj : cell_data_fun >-> Funclass.
 
-Definition functorqalgmor {C C'} (F : cell_data_fun C C') :
+Definition catqalg_fun_mor {C C'} (F : cell_data_fun C C') :
      catqalgmorphisms C -> catqalgmorphisms C' := pr2 (pr1 F).
 
-Local Notation "# F" := (functorqalgmor F)(at level 3).
+Local Notation "# F" := (catqalg_fun_mor F)(at level 3).
 
-Definition functorqalgsource {C C'} (F : cell_data_fun C C') : forall f, 
+Definition catqalg_fun_source {C C'} (F : cell_data_fun C C') : forall f, 
     catqalgsource (#F f) == (*functorqalgobj*) F (catqalgsource f) := 
         pr1 (pr1 (pr2 F)).
 
-Definition functorqalgtarget {C C'} (F : cell_data_fun C C') : forall f, 
+Definition catqalg_fun_target {C C'} (F : cell_data_fun C C') : forall f, 
     catqalgtarget (#F f) == F (catqalgtarget f) := 
         pr2 (pr1 (pr2 F)).
 
-Definition functorqalgid {C C'} (F : cell_data_fun C C') :
+Definition catqalg_fun_id {C C'} (F : cell_data_fun C C') :
    forall x, #F (catqalgid_morphism x) == 
                   catqalgid_morphism (F x) := pr2 (pr2 F).
 
 (** **** A check to see whether this works as it should *)
 
-Definition functorqalghom {C C'} (F : cell_data_fun C C') {a b} :
+Definition catqalg_fun_hom {C C'} (F : cell_data_fun C C') {a b} :
          catqalghom a b -> catqalghom (F a) (F b).
 Proof.
   intro f.
   exists (#F f).
-  exists (functorqalgsource F f @ maponpaths F (pr1 (pr2 f))).
-  exact (functorqalgtarget F f @ maponpaths F (pr2 (pr2 f))).
+  exists (catqalg_fun_source F f @ maponpaths F (pr1 (pr2 f))).
+  exact (catqalg_fun_target F f @ maponpaths F (pr2 (pr2 f))).
 Defined.
   
 (** *** Now maps between categories as quasi-alg. structures *)
@@ -520,38 +520,38 @@ Defined.
 (**  We can make [functoralg] dependent on just the data, since its 
      definition does not rely on associativity or id morphisms *)
 
-Definition functorqalg (C C' : catqalg_data) := total2 (
+Definition catqalg_fun (C C' : catqalg_data) := total2 (
   fun F : cell_data_fun C C' =>
      (forall f g (H : catqalgtarget f == catqalgsource g),
         #F (catqalgcompose f g H) == 
            catqalgcompose (#F f) (#F g)  
-             (functorqalgtarget F f @ maponpaths F H @ ! functorqalgsource F g))).
+             (catqalg_fun_target F f @ maponpaths F H @ ! catqalg_fun_source F g))).
 
-Definition cell_data_map_from_functorqalg C C' (F : functorqalg C C') :
+Definition cell_data_fun_from_catqalg_fun C C' (F : catqalg_fun C C') :
        cell_data_fun C C' := pr1 F.
-Coercion cell_data_map_from_functorqalg : functorqalg >-> cell_data_fun.
+Coercion cell_data_fun_from_catqalg_fun : catqalg_fun >-> cell_data_fun.
 
-Definition functorqalg_compose C C' (F : functorqalg C C') :
+Definition catqalg_fun_compose C C' (F : catqalg_fun C C') :
   forall f g (H : catqalgtarget f == catqalgsource g),
         #F (catqalgcompose f g H) == 
            catqalgcompose (#F f) (#F g)  
-            (functorqalgtarget F f @ maponpaths F H @ ! functorqalgsource F g) :=
+            (catqalg_fun_target F f @ maponpaths F H @ ! catqalg_fun_source F g) :=
     pr2 F.
 
 (** Again a check in terms of homsets *)
 (** Introducing (local) notation might turn this statement into something
     beautiful... *)
 
-Lemma functorqalghom_compose (C C' : catqalg) (F : functorqalg C C') :
+Lemma catqalg_fun_hom_compose (C C' : catqalg) (F : catqalg_fun C C') :
   forall a b c (f : catqalghom a b) (g : catqalghom b c),
-   catqalghomcomp (functorqalghom F f) (functorqalghom F g) == 
-          functorqalghom F (catqalghomcomp f g).
+   catqalghomcomp (catqalg_fun_hom F f) (catqalg_fun_hom F g) == 
+          catqalg_fun_hom F (catqalghomcomp f g).
 Proof.
   intros a b c f g.
-  assert (H : pr1 (catqalghomcomp (functorqalghom F f) (functorqalghom F g)) ==
-                     pr1 (functorqalghom F (catqalghomcomp f g))).
+  assert (H : pr1 (catqalghomcomp (catqalg_fun_hom F f) (catqalg_fun_hom F g)) ==
+                     pr1 (catqalg_fun_hom F (catqalghomcomp f g))).
     simpl.
-    rewrite functorqalg_compose.
+    rewrite catqalg_fun_compose.
     apply catqalgcompose_pi.
   
   apply (total2_paths H).
@@ -568,7 +568,7 @@ Qed.
     and less unfolding by simpl *)
 
 Lemma cell_data_map_comp_axioms  
-     (C C' C'' : catqalg)(F : functorqalg C C') (F' : functorqalg C' C''): 
+     (C C' C'' : catqalg)(F : catqalg_fun C C') (F' : catqalg_fun C' C''): 
 dirprod
   (dirprod
      (forall f : catqalgmorphisms C,
@@ -580,9 +580,9 @@ dirprod
 Proof.
   repeat split; simpl;
    intros;
-   repeat rewrite functorqalgsource;
-   repeat rewrite functorqalgtarget;
-   repeat rewrite functorqalgid;
+   repeat rewrite catqalg_fun_source;
+   repeat rewrite catqalg_fun_target;
+   repeat rewrite catqalg_fun_id;
    reflexivity.
 Qed.
    
@@ -590,27 +590,26 @@ Qed.
 
 
 
-Definition cell_data_map_comp  {C C' C'' : catqalg}(F : functorqalg C C') 
-      (F' : functorqalg C' C''): cell_data_fun C C''.
+Definition cell_data_fun_comp  {C C' C'' : catqalg}(F : catqalg_fun C C') 
+      (F' : catqalg_fun C' C''): cell_data_fun C C''.
 Proof.
   exists (dirprodpair (fun x => F' (F x)) (fun f => #F' (#F f))).
   exact (cell_data_map_comp_axioms C C' C'' F F').
 Defined.
 
-Lemma functorqalgcomposite_compose (C C' C'' : catqalg)(F : functorqalg C C')
-      (F' : functorqalg C' C''): 
+Lemma catqalg_fun_composite_compose (C C' C'' : catqalg)(F : catqalg_fun C C')
+      (F' : catqalg_fun C' C''): 
  forall (f g : catqalgmorphisms C) (H : catqalgtarget f == catqalgsource g),
-#(cell_data_map_comp F F') (catqalgcompose f g H) ==
-catqalgcompose (#(cell_data_map_comp F F') f) (#(cell_data_map_comp F F') g)
-  (functorqalgtarget (cell_data_map_comp F F') f @
-   maponpaths (cell_data_map_comp F F') H @
-   !functorqalgsource (cell_data_map_comp F F') g) .
+#(cell_data_fun_comp F F') (catqalgcompose f g H) ==
+catqalgcompose (#(cell_data_fun_comp F F') f) (#(cell_data_fun_comp F F') g)
+  (catqalg_fun_target (cell_data_fun_comp F F') f @
+   maponpaths (cell_data_fun_comp F F') H @
+   !catqalg_fun_source (cell_data_fun_comp F F') g) .
 Proof.
   intros f g H.
-  set (HFcomp:= functorqalg_compose _ _ F).
-  set (HF'comp:=functorqalg_compose _ _ F').
-  About pathscomp0.
-  change (#(cell_data_map_comp F F') (catqalgcompose f g H)) with
+  set (HFcomp:= catqalg_fun_compose _ _ F).
+  set (HF'comp:=catqalg_fun_compose _ _ F').
+  change (#(cell_data_fun_comp F F') (catqalgcompose f g H)) with
               (#F'(#F (catqalgcompose f g H))).
   rewrite  HFcomp.
   rewrite HF'comp.
@@ -618,11 +617,11 @@ Proof.
 Qed.
   
 
-Definition functorqalg_composite (C C' C'' : catqalg)(F : functorqalg C C')
-      (F' : functorqalg C' C''): functorqalg C C''.
+Definition functorqalg_composite (C C' C'' : catqalg)(F : catqalg_fun C C')
+      (F' : catqalg_fun C' C''): catqalg_fun C C''.
 Proof.
-  exists (cell_data_map_comp  F F').
-  apply functorqalgcomposite_compose.
+  exists (cell_data_fun_comp  F F').
+  apply catqalg_fun_composite_compose.
 Defined.
 
 
@@ -640,31 +639,31 @@ Proof.
 Qed.
 
 
-Definition cell_data_map_id  {C : catqalg}: cell_data_fun C C.
+Definition cell_data_fun_id  {C : catqalg}: cell_data_fun C C.
 Proof.
   exists (dirprodpair (fun x => x) (fun f => f)).
   apply cell_data_map_id_axioms.
 Defined.
 
-Lemma functorqalgidentity_compose (C : catqalg) : 
+Lemma catqalg_fun_identity_compose (C : catqalg) : 
  forall (f g : catqalgmorphisms C) (H : catqalgtarget f == catqalgsource g),
-#cell_data_map_id (catqalgcompose f g H) ==
-catqalgcompose (#cell_data_map_id f) (#cell_data_map_id g)
-  (functorqalgtarget cell_data_map_id f @
-   maponpaths cell_data_map_id H @ !functorqalgsource cell_data_map_id g).
+#cell_data_fun_id (catqalgcompose f g H) ==
+catqalgcompose (#cell_data_fun_id f) (#cell_data_fun_id g)
+  (catqalg_fun_target cell_data_fun_id f @
+   maponpaths cell_data_fun_id H @ !catqalg_fun_source cell_data_fun_id g).
 Proof.
   intros f g H.
-  change (#cell_data_map_id (catqalgcompose f g H)) with
+  change (#cell_data_fun_id (catqalgcompose f g H)) with
       (catqalgcompose f g H).
-  change (#cell_data_map_id f) with f.
-  change (#cell_data_map_id g) with g.
+  change (#cell_data_fun_id f) with f.
+  change (#cell_data_fun_id g) with g.
   apply catqalgcompose_pi.
 Qed.
 
-Definition functorqalg_identity (C : catqalg) : functorqalg C C.
+Definition functorqalg_identity (C : catqalg) : catqalg_fun C C.
 Proof. 
-  exists cell_data_map_id.
-  apply functorqalgidentity_compose.
+  exists cell_data_fun_id.
+  apply catqalg_fun_identity_compose.
 Defined.
 
 
