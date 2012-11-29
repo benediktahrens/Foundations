@@ -456,40 +456,55 @@ Qed.
 
 (** *** First, maps between two terms of type [cell_data] *)
 
-Definition cell_data_map (C C' : cell_data) := total2 (
+(* is_cell_data_fun *)
+
+Definition is_cell_data_fun (C C' : cell_data)(F1 : C -> C')
+         (F2 : catqalgmorphisms C -> catqalgmorphisms C') :=
+   dirprod (
+     dirprod (forall f, catqalgsource (F2 f) == F1 (catqalgsource f))
+	     (forall f, catqalgtarget (F2 f) == F1 (catqalgtarget f))
+           )
+           (forall x, F2 (catqalgid_morphism x) == 
+                   catqalgid_morphism (F1 x)).
+
+(* Lemma isaprop_is_cell_data_fun *)
+
+Definition cell_data_fun (C C' : cell_data) := total2 (
   fun F : dirprod (C -> C')
 	          (catqalgmorphisms C -> catqalgmorphisms C') =>
+          is_cell_data_fun C C' (pr1 F) (pr2 F)).
+(*
    dirprod (
      dirprod (forall f, catqalgsource (pr2 F f) == pr1 F (catqalgsource f))
 	     (forall f, catqalgtarget (pr2 F f) == pr1 F (catqalgtarget f))
            )
            (forall x, pr2 F (catqalgid_morphism x) == 
                    catqalgid_morphism (pr1 F x))).
-
-Definition functorqalgobj {C C'} (F : cell_data_map C C') :
+*)
+Definition functorqalgobj {C C'} (F : cell_data_fun C C') :
      C -> C' := pr1 (pr1 F).
-Coercion functorqalgobj : cell_data_map >-> Funclass.
+Coercion functorqalgobj : cell_data_fun >-> Funclass.
 
-Definition functorqalgmor {C C'} (F : cell_data_map C C') :
+Definition functorqalgmor {C C'} (F : cell_data_fun C C') :
      catqalgmorphisms C -> catqalgmorphisms C' := pr2 (pr1 F).
 
 Local Notation "# F" := (functorqalgmor F)(at level 3).
 
-Definition functorqalgsource {C C'} (F : cell_data_map C C') : forall f, 
+Definition functorqalgsource {C C'} (F : cell_data_fun C C') : forall f, 
     catqalgsource (#F f) == (*functorqalgobj*) F (catqalgsource f) := 
         pr1 (pr1 (pr2 F)).
 
-Definition functorqalgtarget {C C'} (F : cell_data_map C C') : forall f, 
+Definition functorqalgtarget {C C'} (F : cell_data_fun C C') : forall f, 
     catqalgtarget (#F f) == F (catqalgtarget f) := 
         pr2 (pr1 (pr2 F)).
 
-Definition functorqalgid {C C'} (F : cell_data_map C C') :
+Definition functorqalgid {C C'} (F : cell_data_fun C C') :
    forall x, #F (catqalgid_morphism x) == 
                   catqalgid_morphism (F x) := pr2 (pr2 F).
 
 (** **** A check to see whether this works as it should *)
 
-Definition functorqalghom {C C'} (F : cell_data_map C C') {a b} :
+Definition functorqalghom {C C'} (F : cell_data_fun C C') {a b} :
          catqalghom a b -> catqalghom (F a) (F b).
 Proof.
   intro f.
@@ -506,15 +521,15 @@ Defined.
      definition does not rely on associativity or id morphisms *)
 
 Definition functorqalg (C C' : catqalg_data) := total2 (
-  fun F : cell_data_map C C' =>
+  fun F : cell_data_fun C C' =>
      (forall f g (H : catqalgtarget f == catqalgsource g),
         #F (catqalgcompose f g H) == 
            catqalgcompose (#F f) (#F g)  
              (functorqalgtarget F f @ maponpaths F H @ ! functorqalgsource F g))).
 
 Definition cell_data_map_from_functorqalg C C' (F : functorqalg C C') :
-       cell_data_map C C' := pr1 F.
-Coercion cell_data_map_from_functorqalg : functorqalg >-> cell_data_map.
+       cell_data_fun C C' := pr1 F.
+Coercion cell_data_map_from_functorqalg : functorqalg >-> cell_data_fun.
 
 Definition functorqalg_compose C C' (F : functorqalg C C') :
   forall f g (H : catqalgtarget f == catqalgsource g),
@@ -576,7 +591,7 @@ Qed.
 
 
 Definition cell_data_map_comp  {C C' C'' : catqalg}(F : functorqalg C C') 
-      (F' : functorqalg C' C''): cell_data_map C C''.
+      (F' : functorqalg C' C''): cell_data_fun C C''.
 Proof.
   exists (dirprodpair (fun x => F' (F x)) (fun f => #F' (#F f))).
   exact (cell_data_map_comp_axioms C C' C'' F F').
@@ -625,7 +640,7 @@ Proof.
 Qed.
 
 
-Definition cell_data_map_id  {C : catqalg}: cell_data_map C C.
+Definition cell_data_map_id  {C : catqalg}: cell_data_fun C C.
 Proof.
   exists (dirprodpair (fun x => x) (fun f => f)).
   apply cell_data_map_id_axioms.
