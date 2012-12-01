@@ -1645,7 +1645,8 @@ end.
 
 Theorem hlevelretract (n:nat) { X Y : UU } ( p : X -> Y ) ( s : Y -> X ) ( eps : forall y : Y , paths ( p ( s y ) ) y ) : isofhlevel n X -> isofhlevel n Y .
 Proof. intro. induction n as [ | n IHn ].  intros X Y p s eps X0. unfold isofhlevel.  apply ( iscontrretract p s eps X0). 
- unfold isofhlevel. intros X Y p s eps X0 x x'. unfold isofhlevel in X0. assert (is: isofhlevel n (paths (s x) (s x'))).  apply X0. set (s':= @maponpaths _ _ s x x'). set (p':= pathssec2  s p eps x x').  set (eps':= @pathssec3 _ _  s p eps x x' ). simpl. apply (IHn  _ _ p' s' eps' is). Defined. 
+ unfold isofhlevel. intros X Y p s eps X0 x x'. unfold isofhlevel in X0. assert (is: isofhlevel n (paths (s x) (s x'))).  apply X0. set (s':= @maponpaths _ _ s x x'). set (p':= pathssec2  s p eps x x').  set (eps':= @pathssec3 _ _  s p eps x x' ). simpl. 
+apply (IHn  _ _ p' s' eps' is).  Defined. 
 
 Corollary  isofhlevelweqf (n:nat) { X Y : UU } ( f : weq X Y ) : isofhlevel n X  ->  isofhlevel n Y .
 Proof. intros n X Y f X0.  apply (hlevelretract n  f (invmap f ) (homotweqinvweq  f )). assumption. Defined. 

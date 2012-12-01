@@ -18,6 +18,7 @@ Definition precategory_ob_mor := total2 (
 
 Definition precategory_objects (C : precategory_ob_mor) : UU :=
     pr1 C.
+Coercion precategory_objects : precategory_ob_mor >-> UU.
 
 Definition precategory_morphisms { C : precategory_ob_mor } : 
       precategory_objects C -> precategory_objects C -> hSet :=
@@ -98,9 +99,43 @@ forall (a b c d : precategory_objects C)
                     (f : a --> b)(g : b --> c) (h : c --> d),
                      f ;; (g ;; h) == (f ;; g) ;; h := pr2 (pr2 C).
 
+(** * Functors : Morphisms of precategories *)
 
 
+Definition precategory_ob_mor_fun (C C' : precategory_ob_mor) := total2 (
+    fun F : precategory_objects C -> precategory_objects C' => 
+             forall a b : precategory_objects C, a --> b -> F a --> F b).
 
+Definition precategory_ob_mor_fun_objects {C C' : precategory_ob_mor}
+     (F : precategory_ob_mor_fun C C') : 
+   precategory_objects C -> precategory_objects C' := pr1 F.
+Coercion precategory_ob_mor_fun_objects : precategory_ob_mor_fun >-> Funclass.
+
+
+Definition precategory_ob_mor_fun_morphisms {C C' : precategory_ob_mor}
+     (F : precategory_ob_mor_fun C C') { a b : precategory_objects C} : 
+       a --> b -> F a --> F b := pr2 F a b.
+
+Local Notation "# F" := (precategory_ob_mor_fun_morphisms F)(at level 3).
+
+Definition precategory_fun (C C' : precategory_data) := total2 (
+   fun F : precategory_ob_mor_fun C C' => 
+     dirprod (forall a : precategory_objects C, 
+                 #F (precategory_identity a) == precategory_identity (F a))
+             (forall a b c : precategory_objects C, forall f : a --> b,
+                 forall g : b --> c, 
+                #F (f ;; g) == #F f ;; #F g)).
+
+Definition precategory_ob_mor_fun_from_precategory_fun (C C': precategory_data)
+     (F : precategory_fun C C') : precategory_ob_mor_fun C C' := pr1 F.
+Coercion precategory_ob_mor_fun_from_precategory_fun : precategory_fun >->
+      precategory_ob_mor_fun.
+
+
+Definition precategory_fun_id (C C' : precategory_data)(F : precategory_fun C C') :
+       forall a : precategory_objects C, 
+                 #F (precategory_identity a) == precategory_identity (F a) :=
+     pr1 (pr2 F).
 
 
 
