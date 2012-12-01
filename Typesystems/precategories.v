@@ -2,6 +2,7 @@ Add Rec LoadPath "../Generalities".
 Add Rec LoadPath "../hlevel1".
 Add Rec LoadPath "../hlevel2".
 
+Require Import basic_lemmas_which_should_be_in_uu0.
 Require Import uu0.
 Require Import hSet.
 
@@ -72,8 +73,17 @@ Local Notation "f ;; g" := (precategory_compose f g)(at level 50).
         - composition is associative
 *)
 
-Definition precategory := total2 (
-  fun C : precategory_data => 
+Definition is_precategory (C : precategory_data) := 
+   dirprod (dirprod (forall (a b : precategory_objects C) (f : a --> b),
+                         precategory_identity a ;; f == f)
+                     (forall (a b : precategory_objects C) (f : a --> b),
+                         f ;; precategory_identity b == f))
+            (forall (a b c d : precategory_objects C) 
+                    (f : a --> b)(g : b --> c) (h : c --> d),
+                     f ;; (g ;; h) == (f ;; g) ;; h).
+
+Definition precategory := total2 is_precategory.
+(*  fun C : precategory_data => 
     dirprod (dirprod (forall (a b : precategory_objects C) (f : a --> b),
                          precategory_identity a ;; f == f)
                      (forall (a b : precategory_objects C) (f : a --> b),
@@ -81,6 +91,7 @@ Definition precategory := total2 (
             (forall (a b c d : precategory_objects C) 
                     (f : a --> b)(g : b --> c) (h : c --> d),
                      f ;; (g ;; h) == (f ;; g) ;; h)).
+*)
 
 Definition precategory_data_from_precategory (C : precategory) : 
        precategory_data := pr1 C.
@@ -177,6 +188,20 @@ Definition sub_precategory_morphisms {C : precategory}(C':sub_precategories C)
       (a b : precategory_objects C) : UU := 
          (*carrier*) (sub_precategory_predicate_morphisms C' a b).
 
+
+Definition sub_precategory_id (C : precategory)(C':sub_precategories C) :
+   forall a : precategory_objects C,
+       sub_precategory_predicate_objects C' a -> 
+       sub_precategory_predicate_morphisms  C' _ _ (precategory_identity a) :=
+         pr1 (pr2 C').
+
+Definition sub_precategory_comp (C : precategory)(C':sub_precategories C) :
+   forall (a b c: precategory_objects C) (f: a --> b) (g : b --> c),
+          sub_precategory_predicate_morphisms C' _ _ f -> 
+          sub_precategory_predicate_morphisms C' _ _ g -> 
+          sub_precategory_predicate_morphisms C' _ _  (f ;; g) :=
+        pr2 (pr2 C').
+
 (** the following lemma should be an instance of a general theorem saying that
      subtypes of a type of hlevel n are of hlevel n, but
      i haven't found that theorem
@@ -216,39 +241,63 @@ Definition sub_precategory_ob_mor (C : precategory)(C':sub_precategories C) :
   exact (fun a b => @sub_precategory_morphisms_set _ C' a b).
 Defined.
 
+(*
 Coercion sub_precategory_ob_mor : sub_precategories >-> precategory_ob_mor.
+*)
 
 
 Definition sub_precategory_data (C : precategory)(C':sub_precategories C) :
       precategory_data.
+Proof.
 exists (sub_precategory_ob_mor C C').
 split.
   intro c.
-  simpl. unfold sub_precategory_morphisms. simpl.
-  unfold sub_precategory_predicate_morphisms. simpl.
-  exists (precategory_identity (C:=C)).
- intros.
+  exists (precategory_identity (C:=C) (pr1 c)).
+  apply sub_precategory_id.
+  apply (pr2 c).
+  
+  intros a b c f g.
+  exists (precategory_compose (pr1 f) (pr1 g)).
+  apply (sub_precategory_comp).
+  apply f. apply g.
+Defined.
 
 
-Definition sub_precategory_id_closed (C : precategory)(C':sub_precategories C) :
-    forall a : precategory_objects C,
-       sub_precategory_predicate_objects C' a -> 
-    sub_precategory_morphisms C' (precategory_identity a ).
+Lemma eq_in_sub_precategory (C : precategory)(C':sub_precategories C)
+      (a b : sub_precategory_objects C') (f g : sub_precategory_morphisms C' a b) :
+          pr1 f == pr1 g -> f == g.
+Proof.
+  intro H.
+  destruct f as [f p].
+  destruct g as [g p']. Search total2.
+  apply (total2_paths H).
+  simpl. apply proofirrelevance. 
+  apply (sub_precategory_predicate_morphisms C' a b g).
+Qed.
 
-Definition sub_precategory_comp_closed (C : precategory)(C':sub_precategories C) :
-   forall (a b c: precategory_objects C) (f: a --> b) (g : b --> c),
-              sub_precategory_morphisms C' f -> 
-              sub_precategory_morphisms C' g -> 
-              sub_precategory_morphisms C' (f ;; g).
 
-Definition sub_precategory_ob_mor (C : precategory)(C':sub_precategories C) :
-     precategory_ob_mor.
-  exists (sub_precategory_objects C').
-  exact (fun a b => @sub_precategory_morphisms _ C' a b).
-  exact (
+Definition is_precategory_sub_category (C : precategory)(C':sub_precategories C) :
+    is_precategory (sub_precategory_data C C').
+Proof.
+  repeat split;
+  simpl; intros.
+  unfold sub_precategory_comp.
+  apply eq_in_sub_precategory. simpl.
+  apply (precategory_id_left _ (pr1 a)).
+  apply eq_in_sub_precategory. simpl.
+  apply (precategory_id_right _ (pr1 a)).
+  apply eq_in_sub_precategory.
+  simpl.
+  apply precategory_assoc.
+Qed.
 
-Definition is_precategory_sub_precategory (C : precategory)(C':sub_precategories C) :
-   precategory.
+Definition carrier_of_sub_precategory (C : precategory)(C':sub_precategories C) :
+   precategory := tpair _ _ (is_precategory_sub_category C C').
+
+Coercion carrier_of_sub_precategory : sub_precategories >-> precategory.
+
+
+    
 
 
 (** * Natural transformations *)
