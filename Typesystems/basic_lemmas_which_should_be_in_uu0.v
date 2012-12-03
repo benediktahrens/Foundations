@@ -126,27 +126,16 @@ Proof.
   intros [p q].
   simpl.
   
-  set (H:=total2_paths_UU p q).
-  apply 
-  apply H.
+  set (H':= base_total_path q).
+  Check 
+ tpair (fun p : pr1 x == pr1 y => transportf (fun x : UU => B x) p (pr2 x) 
+      == pr2 y) p q.
 
-  exists (fun r : x == y => tpair _ (base_paths_UU _ _ r) (fiber_path  r)).
- About gradth.
-  apply (gradth 
-     (fun r => tpair
-   
-  apply (equiv_from_hequiv
-     (fun r => existT (fun p => transport p (pr2 x) = pr2 y) (base_path r) (fiber_path r))
-     (fun (pq : { p : pr1 x = pr1 y & transport p (pr2 x) = pr2 y }) =>
-          @total_path A P x y (projT1 pq) (projT2 pq))).
-  intros [p q].
-  simpl.
-  apply @total_path with (p := base_total_path q).
+  apply ( total2_paths2 
+    (B := fun p : pr1 x == pr1 y => transportf (fun x : UU => B x) p (pr2 x) 
+      == pr2 y) H').
   simpl.
   apply fiber_total_path.
-  intro r.
-  simpl.
-  apply total_path_reconstruction.
 Defined.
 
 
