@@ -180,6 +180,30 @@ Defined.
 
 
 
+Lemma UA_for_Predicates (P : UU -> hProp) (X X' : UU)
+     (pX : P X) (pX' : P X') :
+  weq ((tpair _ X pX) == (tpair (fun x => P x) X' pX')) (weq X X').
+Proof.
+  set (f := Id_p_weq_Id P X X' pX pX').
+  set (g := univalenceweq X X').
+  exact (weqcomp f g).
+Defined.
+
+Corollary UA_for_HLevels : forall (n : nat)
+      (X X' : HLevel n), 
+     weq (X == X') (weq (pr1 X) (pr1 X')).
+Proof.
+  intros n [X pX] [X' pX'].
+  simpl.
+  apply (UA_for_Predicates (fun X => tpair (fun X => isaprop X) (isofhlevel n X) 
+                                      (isapropisofhlevel _ _))
+           ).
+Defined.
+  
+
+
+
+
 Section blah.
 
 Variable P : UU -> hProp.
