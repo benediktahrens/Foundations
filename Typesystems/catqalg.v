@@ -45,7 +45,7 @@ Definition cell_data := total2
            (dirprod  (@pr2 hSet _ obmor -> @pr1 hSet _ obmor)
                      (@pr2 hSet _ obmor -> @pr1 hSet _ obmor))
            (@pr1 hSet _ obmor -> @pr2 hSet _ obmor)).
-Print isaset.
+
 
 (**  compute hlevel of [cell_data]: to be done
 
@@ -873,7 +873,7 @@ Definition composables (C : category_data) :=
 
 Record category (*C : category_data*) 
      (ob : hSet) (mor : hSet) (s t : mor -> ob)
-     (comp : hfp s t -> mor) (id : ob -> mor) : UU := {
+     (comp : hfp s t -> mor) (id : ob -> mor)  := {
   id_s : forall x : ob, s (id x) == x ;
   id_t : forall x : ob, t (id x) == x ;
   comp_s : forall f g (Hfg : t f == s g),

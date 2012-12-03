@@ -279,9 +279,13 @@ set (is2:= gradth _ _ egf efg).
 apply ( isweqtotaltofib P1 P2  (fun XY: dirprod hProp hProp => (match XY with  tpair X Y => @eqweqmaphProp X Y end)) is2 ( dirprodpair P P')). Defined. 
 
 Definition weqeqweqhProp ( P P' : hProp ) := weqpair _ ( univfromtwoaxiomshProp P P' ) .
-
+Check weqeqweqhProp.
 Corollary isasethProp : isaset hProp.
-Proof. unfold isaset.  simpl. intros x x'. apply (isofhlevelweqb (S O) ( weqeqweqhProp x x' ) (isapropweqtoprop x x' (pr2 x'))). Defined.
+Proof. unfold isaset.  simpl. intros x x'. 
+apply (isofhlevelweqb (S O) ( weqeqweqhProp x x' )).
+Check isapropweqtoprop.
+
+apply (isofhlevelweqb (S O) ( weqeqweqhProp x x' ) (isapropweqtoprop x x' (pr2 x'))). Defined.
 
 
 Lemma iscontrtildehProp : iscontr tildehProp .
