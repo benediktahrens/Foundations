@@ -176,8 +176,8 @@ Definition isaset_if_isofhlevel2 (X : UU) :
 
 
 
-Lemma isweqpr1 ( B : UU -> hProp ) 
-   ( is1 : forall z : UU, iscontr ( B z ) ) : isweq ( @pr1 UU B ) .
+Lemma isweqpr1_UU (X X' : UU) ( B : (X == X') -> hProp ) 
+   ( is1 : forall z , iscontr ( B z ) ) : isweq ( @pr1 _ B ) .
 Proof. intros. unfold isweq. intro y. set (isy:= is1 y). 
   apply (iscontrweqf ( ezweqpr1 B y)) . assumption. 
 Defined.
