@@ -9,15 +9,22 @@ Require Import hProp.
 Require Import pathnotations.
 Import pathnotations.PathNotations.
 
+
+(** * Paths in total spaces are equivalent to pairs of paths *)
+
+(** some of the lemmas are proved for similar fibrations twice:
+    once we consider fibrations over a type in universe [UU], 
+    once we consider fibrations over the universe [UU] itself *)
+
 Lemma total2_paths {A : UU} {B : A -> UU} {s s' : total2 (fun x => B x)} 
     (p : pr1 s == pr1 s') 
     (q : transportf (fun x => B x) p (pr2 s) == pr2 s') : 
                s == s'.
 Proof.
-destruct s as [a b]; destruct s' as [a' b'].
-simpl in p; destruct p.
-simpl in q; destruct q.
-apply idpath.
+  destruct s as [a b]; destruct s' as [a' b'].
+  simpl in p; destruct p.
+  simpl in q; destruct q.
+  apply idpath.
 Defined.
 
 Lemma total2_paths_UU  {B : UU -> hProp} {s s' : total2 (fun x => B x)} 
@@ -25,18 +32,20 @@ Lemma total2_paths_UU  {B : UU -> hProp} {s s' : total2 (fun x => B x)}
     (q : transportf (fun x => B x) p (pr2 s) == pr2 s') : 
                s == s'.
 Proof.
-destruct s as [a b]; destruct s' as [a' b'].
-simpl in p; destruct p.
-simpl in q; destruct q.
-apply idpath.
+  destruct s as [a b]; destruct s' as [a' b'].
+  simpl in p; destruct p.
+  simpl in q; destruct q.
+  apply idpath.
 Defined.
 
 
 Lemma total2_paths2 {A : UU} {B : A -> UU} {a1 : A} {b1 : B a1} 
-    {a2 : A} {b2 : B a2} (p : a1 == a2) (q : transportf (fun x => B x) p b1 == b2) : 
+    {a2 : A} {b2 : B a2} (p : a1 == a2) 
+    (q : transportf (fun x => B x) p b1 == b2) : 
     tpair (fun x => B x) a1 b1 == tpair (fun x => B x) a2 b2.
 Proof.
-  set (H := @total2_paths _ _  (tpair (fun x => B x) a1 b1)(tpair (fun x => B x) a2 b2)).
+  set (H := @total2_paths _ _  
+    (tpair (fun x => B x) a1 b1)(tpair (fun x => B x) a2 b2)).
   simpl in H.
   apply (H p q).
 Defined.
@@ -45,7 +54,8 @@ Lemma total2_paths2_UU {B : UU -> hProp} {A A': UU} {b : B A}
      {b' : B A'} (p : A == A') (q : transportf (fun x => B x) p b == b') : 
     tpair (fun x => B x) A b == tpair (fun x => B x) A' b'.
 Proof.
-  set (H := @total2_paths _ _  (tpair (fun x => B x) A b)(tpair (fun x => B x) A' b')).
+  set (H := @total2_paths _ _  
+     (tpair (fun x => B x) A b)(tpair (fun x => B x) A' b')).
   simpl in H.
   apply (H p q).
 Defined.
@@ -75,7 +85,7 @@ Proof.
 Defined.
 
 Lemma total_path_reconstruction {B : UU -> hProp} {x y : total2 (fun x => B x)} (p : x == y) :
-  total2_paths_UU  _ (*pr1 _ p*) (fiber_path p) == p.
+  total2_paths_UU  _ (fiber_path p) == p.
 Proof.
   induction p.
   destruct x.
@@ -115,26 +125,19 @@ Theorem total_paths_equiv (B : UU -> hProp) (x y : total2 (fun x => B x)) :
 Proof.
   exists (  fun r : x == y =>  
                tpair (fun p : pr1 x == pr1 y => 
-                            transportf _ p (pr2 x) == pr2 y)  (base_paths_UU _ _ r) (fiber_path  r)).
+             transportf _ p (pr2 x) == pr2 y) (base_paths_UU _ _ r) (fiber_path r)).
   apply (gradth _
   (fun pq : total2 (fun p : pr1 x == pr1 y => transportf _ p (pr2 x) == pr2 y)
           => total2_paths_UU (pr1 pq) (pr2 pq))).
-
   intro p.
   simpl.
   apply total_path_reconstruction.
   intros [p q].
   simpl.
-  
   set (H':= base_total_path q).
-  Check 
- tpair (fun p : pr1 x == pr1 y => transportf (fun x : UU => B x) p (pr2 x) 
-      == pr2 y) p q.
-
   apply ( total2_paths2 
     (B := fun p : pr1 x == pr1 y => transportf (fun x : UU => B x) p (pr2 x) 
       == pr2 y) H').
-  simpl.
   apply fiber_total_path.
 Defined.
 
