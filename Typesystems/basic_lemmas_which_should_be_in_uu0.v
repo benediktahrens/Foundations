@@ -176,7 +176,11 @@ Definition isaset_if_isofhlevel2 (X : UU) :
 
 
 
-
+Lemma isweqpr1 ( B : UU -> hProp ) 
+   ( is1 : forall z : UU, iscontr ( B z ) ) : isweq ( @pr1 UU B ) .
+Proof. intros. unfold isweq. intro y. set (isy:= is1 y). 
+  apply (iscontrweqf ( ezweqpr1 B y)) . assumption. 
+Defined.
 
 
 
