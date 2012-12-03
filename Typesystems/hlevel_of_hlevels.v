@@ -5,7 +5,8 @@ Add Rec LoadPath "../Proof_of_Extensionality".
 
 Require Import basic_lemmas_which_should_be_in_uu0.
 
-Require Import hSet.
+(*Require Import hSet.*)
+Require Import hProp.
 Require Import funextfun.
 
 
@@ -28,25 +29,6 @@ Definition univalenceweq (X X' : UU) : weq (X == X') (weq X X') :=
 (** The proof works differently for [n == 0] and [n == S n'],
     so we treat these two cases in separate lemmas and package
     everything nicely in the end. *)
-
-(** *** The case [n == S n'] *)
-
-Lemma isofhlevelSnpathspace : forall n : nat, forall X Y : UU,
-      isofhlevel (S n) X -> isofhlevel (S n) Y ->
-          isofhlevel (S n) (X == Y).
-Proof.
-  intros n X Y pX pY.
-  set (H:=isofhlevelweqb (S n) (univalenceweq X Y)).
-  apply H.
-  assert (H' : isofhlevel (S n) (X -> Y)).
-    apply impred.
-    intro x. assumption.
-  assert (H2 : isincl (@pr1 (X -> Y) (fun f => isweq f))).
-    apply isofhlevelfpr1.
-    intro f. apply isapropisweq.
-  apply (isofhlevelsninclb _ _ H2).
-  assumption.
-Qed.
 
 (** *** The case [n == 0] *)
 
@@ -76,6 +58,28 @@ Proof.
   apply proofirrelevance.
   apply isapropisweq.
 Defined.
+
+
+
+(** *** The case [n == S n'] *)
+
+Lemma isofhlevelSnpathspace : forall n : nat, forall X Y : UU,
+      isofhlevel (S n) X -> isofhlevel (S n) Y ->
+          isofhlevel (S n) (X == Y).
+Proof.
+  intros n X Y pX pY.
+  set (H:=isofhlevelweqb (S n) (univalenceweq X Y)).
+  apply H.
+  assert (H' : isofhlevel (S n) (X -> Y)).
+    apply impred.
+    intro x. assumption.
+  assert (H2 : isincl (@pr1 (X -> Y) (fun f => isweq f))).
+    apply isofhlevelfpr1.
+    intro f. apply isapropisweq.
+  apply (isofhlevelsninclb _ _ H2).
+  assumption.
+Qed.
+
 
 (** ** The lemma itself *)
 
@@ -203,7 +207,7 @@ Proof.
 Defined.
   
 
-
+(*
 
 
 Section blah.
@@ -296,3 +300,4 @@ Proof.
   Focus 2.
   
   apply isofhleveltotal2.
+*)
