@@ -95,17 +95,6 @@ Proof.
 Qed.
 
 
-(*
-Lemma bal (P : UU -> hProp) (X X' : UU) 
-      (pX : P X) (pX' : P X') : forall w : X == X', 
-        iscontr (transportf (fun x => P x) w pX == pX').
-Proof.
-  intro w.
-  apply (pr2 (P X')).
-Defined.
-*)
-
-
 (** ** Weak equivalence between identity types in [HLevel] and [U] *)
 
 (** Identity of Sigmas <~> Sigma of Identities <~> Identities in [U] ,
