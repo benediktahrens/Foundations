@@ -110,6 +110,18 @@ forall (a b c d : precategory_objects C)
                     (f : a --> b)(g : b --> c) (h : c --> d),
                      f ;; (g ;; h) == (f ;; g) ;; h := pr2 (pr2 C).
 
+
+(** ** Setcategories: Precategories whose objects form a set *)
+
+Definition setcategory := total2 (
+   fun C : precategory => isaset (precategory_objects C)).
+
+Definition precategory_from_setcategory (C : setcategory) : precategory := pr1 C.
+Coercion precategory_from_setcategory : setcategory >-> precategory.
+
+(** TODO : this is injective *)
+
+
 (** * Functors : Morphisms of precategories *)
 
 
@@ -298,9 +310,31 @@ Coercion carrier_of_sub_precategory : sub_precategories >-> precategory.
 
 
     
+(** ** Precategories in style of essentially algebraic cats *)
+(** Of course we later want SETS of objects, rather than types,
+    but the construction can already be specified.
+*)
+       
+Definition precategory_total_morphisms (C : precategory_ob_mor) := total2 (
+   fun ab : dirprod (precategory_objects C)(precategory_objects C) =>
+        precategory_morphisms (pr1 ab) (pr2 ab)).
+
+Lemma isaset_setcategory_total_morphisms (C : setcategory) : 
+   isaset (precategory_total_morphisms C).
+
+Definition precategory_source (C : precategory_ob_mor) : 
+     precategory_total_morphisms C -> precategory_objects C := 
+     fun abf => pr1 (pr1 abf).
+
+Definition precategory_target (C : precategory_ob_mor) : 
+     precategory_total_morphisms C -> precategory_objects C := 
+     fun abf => pr2 (pr1 abf).
+
+Definition precategory_total_id (C : precategory_data) : 
+      precategory_objects C -> precategory_total_morphisms C :=
+      fun c => tpair _ (dirprodpair c c) (precategory_identity c).
 
 
-(** * Natural transformations *)
 
 
 
