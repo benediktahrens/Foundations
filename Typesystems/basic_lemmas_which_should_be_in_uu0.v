@@ -185,8 +185,15 @@ Proof. intros. unfold isweq. intro y. set (isy:= is1 y).
   apply (iscontrweqf ( ezweqpr1 B y)) . assumption. 
 Defined.
 
+About transportf.
 
-
+Lemma transportf_idpath (X : UU) (P : X -> UU) (x : X)(z : P x) :
+   transportf _ (idpath x) z == z.
+Proof.
+  unfold transportf.
+  simpl.
+  apply idpath.
+Defined.
 
 
 

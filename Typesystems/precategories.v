@@ -133,6 +133,10 @@ Definition setcategory := total2 (
 Definition precategory_from_setcategory (C : setcategory) : precategory := pr1 C.
 Coercion precategory_from_setcategory : setcategory >-> precategory.
 
+Definition setcategory_objects_set (C : setcategory) : hSet :=
+    hSetpair (precategory_objects C) (pr2 C).
+
+
 (** TODO : this is injective *)
 
 
@@ -295,7 +299,7 @@ Lemma eq_in_sub_precategory (C : precategory)(C':sub_precategories C)
 Proof.
   intro H.
   destruct f as [f p].
-  destruct g as [g p']. Search total2.
+  destruct g as [g p'].
   apply (total2_paths H).
   simpl. apply proofirrelevance. 
   apply (sub_precategory_predicate_morphisms C' a b g).
@@ -335,6 +339,16 @@ Definition precategory_total_morphisms (C : precategory_ob_mor) := total2 (
 
 Lemma isaset_setcategory_total_morphisms (C : setcategory) : 
    isaset (precategory_total_morphisms C).
+Proof.
+  change isaset with (isofhlevel 2).
+  apply isofhleveltotal2.
+  apply isofhleveldirprod;
+  apply C.
+  exact (fun x => (pr2 (pr1 x --> pr2 x))).
+Qed.
+
+Definition setcategory_total_morphisms_set (C : setcategory) : hSet :=
+    hSetpair _ (isaset_setcategory_total_morphisms C).
 
 Definition precategory_source (C : precategory_ob_mor) : 
      precategory_total_morphisms C -> precategory_objects C := 
