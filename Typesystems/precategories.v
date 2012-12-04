@@ -17,8 +17,7 @@ Notation "p @ q" := (pathscomp0 p q) (at level 60, right associativity).
 Definition precategory_ob_mor := total2 (
   fun ob : UU => ob -> ob -> hSet).
 
-Definition precategory_objects (C : precategory_ob_mor) : UU :=
-    pr1 C.
+Definition precategory_objects (C : precategory_ob_mor) : UU := @pr1 _ _ C.
 Coercion precategory_objects : precategory_ob_mor >-> UU.
 
 Definition precategory_morphisms { C : precategory_ob_mor } : 
@@ -110,6 +109,21 @@ forall (a b c d : precategory_objects C)
                     (f : a --> b)(g : b --> c) (h : c --> d),
                      f ;; (g ;; h) == (f ;; g) ;; h := pr2 (pr2 C).
 
+(** Any equality on objects a and b induces a morphism from a to b *)
+
+Definition precategory_eq_morphism (C : precategory_data) (a b : precategory_objects C)
+      (H : a == b) : a --> b.
+Proof.
+  destruct H.
+  exact (precategory_identity a).
+Defined.
+
+Definition precategory_eq_morphism_inv (C : precategory_data) (a b : precategory_objects C)
+      (H : a == b) : b --> a.
+Proof.
+  destruct H.
+  exact (precategory_identity a).
+Defined.
 
 (** ** Setcategories: Precategories whose objects form a set *)
 
@@ -333,6 +347,21 @@ Definition precategory_target (C : precategory_ob_mor) :
 Definition precategory_total_id (C : precategory_data) : 
       precategory_objects C -> precategory_total_morphisms C :=
       fun c => tpair _ (dirprodpair c c) (precategory_identity c).
+
+Definition precategory_total_comp (C : precategory_data) : 
+      forall f g : precategory_total_morphisms C,
+        precategory_target C f == precategory_source C g ->
+         precategory_total_morphisms C.
+Proof.
+  intros f g H.
+  destruct f as [[a b] f]. simpl in *.
+  destruct g as [[b' c] g]. simpl in *.
+  unfold precategory_target in H; simpl in H.
+  unfold precategory_source in H; simpl in H. 
+  simpl.
+  exists (dirprodpair a c). simpl.
+  exact ((f ;; precategory_eq_morphism C b b' H) ;; g).
+Defined.
 
 
 
