@@ -12,6 +12,10 @@ Notation "a == b" := (paths a b) (at level 70, no associativity).
 Notation "! p " := (pathsinv0 p) (at level 50).
 Notation "p @ q" := (pathscomp0 p q) (at level 60, right associativity).
 
+(** * Quasi-algebraic category from a setcategory *)
+
+(** ** Objects, morphisms, identity *)
+
 Definition cell_data_from_setcategory (C : setcategory) : cell_data.
 Proof. 
   exists (dirprodpair (setcategory_objects_set C) 
@@ -20,6 +24,8 @@ Proof.
   exact (dirprodpair (precategory_source C)(precategory_target C)).
   exact (precategory_total_id C).
 Defined.
+
+(** ** Composition *)
 
 Definition catqalg_data_from_setcategory (C : setcategory) : catqalg_data :=
    tpair _ (cell_data_from_setcategory C) (precategory_total_comp C).
@@ -42,33 +48,26 @@ Proof.
   apply idpath.
 Qed.
 
-Lemma bla (C : setcategory) : forall 
+Lemma comp_id_r_pr1 (C : setcategory) : forall 
   f : catqalgmorphisms (catqalg_data_from_setcategory C),
-pr1 (catqalgcompose (catqalgid_morphism (catqalgsource f)) f
-  (pr2
-     (dirprodpair (catqalg_data_from_setcat_id_source C)
+  pr1 (catqalgcompose (catqalgid_morphism (catqalgsource f)) f
+  (pr2  (dirprodpair (catqalg_data_from_setcat_id_source C)
         (catqalg_data_from_setcat_id_target C)) (catqalgsource f))) == 
     pr1 f.
 Proof.
   intro f.
-   destruct f as [[a b] f];
-         simpl in *.
-     apply pathsdirprod; apply idpath.
+  destruct f as [[a b] f].
+  simpl in *. 
+  apply pathsdirprod; apply idpath.
 Defined.
 
-Lemma bla2 (C : setcategory) : forall 
+Lemma comp_id_l_pr1 (C : setcategory) : forall 
   f : catqalgmorphisms (catqalg_data_from_setcategory C),
-pr1 (catqalgcompose f (catqalgid_morphism (catqalgtarget f))
-  (!pr1
-      (dirprodpair (catqalg_data_from_setcat_id_source C)
+  pr1 (catqalgcompose f (catqalgid_morphism (catqalgtarget f))
+  (!pr1  (dirprodpair (catqalg_data_from_setcat_id_source C)
          (catqalg_data_from_setcat_id_target C)) (catqalgtarget f))) == pr1 f.
 Proof.
-  simpl; intro f.
-  Check (pr1 f).
-  simpl.
-  unfold catqalgtarget.
-  simpl.
-  unfold precategory_target; simpl.
+  intro f.
   destruct f as [[a b] f];
   simpl in *.
   apply idpath.
@@ -77,15 +76,13 @@ Defined.
 
 
 Lemma catqalg_from_setcat_left_unit (C : setcategory):
-forall f : catqalgmorphisms (catqalg_data_from_setcategory C),
-catqalgcompose (catqalgid_morphism (catqalgsource f)) f
-  (pr2
-     (dirprodpair (catqalg_data_from_setcat_id_source C)
-        (catqalg_data_from_setcat_id_target C)) (catqalgsource f)) == f
-.
+  forall f : catqalgmorphisms (catqalg_data_from_setcategory C),
+  catqalgcompose (catqalgid_morphism (catqalgsource f)) f
+  (pr2  (dirprodpair (catqalg_data_from_setcat_id_source C)
+        (catqalg_data_from_setcat_id_target C)) (catqalgsource f)) == f.
 Proof.
   intro f.
-   apply (total2_paths (bla C f)).
+   apply (total2_paths (comp_id_r_pr1 C f)).
    destruct f as [[a b] f];
    simpl in *.
    rewrite transportf_idpath.
@@ -103,7 +100,7 @@ Proof.
                       (catqalg_data_from_setcat_id_target C)).
   split.
   intro f.
-   apply (total2_paths (bla C f)).
+   apply (total2_paths (comp_id_r_pr1 C f)).
    destruct f as [[a b] f];
    simpl in *.
    rewrite transportf_idpath.
@@ -115,9 +112,8 @@ Proof.
    
    intro f.
    
-   apply (total2_paths (bla2 C f)).
+   apply (total2_paths (comp_id_l_pr1 C f)).
    simpl.
-   Check (bla2 C f).
    destruct f as [[a b] f].
    simpl in *.
    rewrite transportf_idpath.
@@ -200,31 +196,11 @@ Proof.
 Qed.
 
 
+Definition catqalg_from_setcat (C : setcategory) : catqalg.
+Proof.
+  exists (catqalg_data_from_setcategory C).
+  exists (catqalg_from_setcat_id_is_unit C).
+  exact (catqalg_data_from_setcat_comp_assoc C).
+Defined.
 
-
-  rewrite pathscomp0rid. 
-  simpl.
-  repeat rewrite precategory_id_right.
-  unfold catqalg_data_from_setcat_comp_target.
-  repeat rewrite <- precategory_assoc.
-  repeat rewrite (precategory_eq_morphism_pi _ _ _ _ (idpath _ )).
-  simpl.
   
-  apply 
-  unfold catqalgtarget, catqalgsource in *;
-  simpl in *.
-  unfold precategory_target, precategory_source in *;
-  simpl in *.
-  unfold precategory_total_comp. simpl.
-  
-   
-  
-dirprod 
-       (forall f g (H : catqalgtarget f == catqalgsource g), 
-           catqalgsource (catqalgcompose f g H) == catqalgsource f)
-       (forall f g (H : catqalgtarget f == catqalgsource g), 
-           catqalgtarget (catqalgcompose f g H) == catqalgtarget g)
-               
-
-
-

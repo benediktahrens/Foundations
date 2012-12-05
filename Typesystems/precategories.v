@@ -58,10 +58,7 @@ Definition precategory_identity { C : precategory_data } :
 
 Definition precategory_compose { C : precategory_data } 
   { a b c : precategory_objects C } : 
-                 a --> b ->
-                 b --> c ->
-                 a --> c :=
-   pr2 (pr2 C) a b c.
+    a --> b -> b --> c -> a --> c := pr2 (pr2 C) a b c.
 
 Local Notation "f ;; g" := (precategory_compose f g)(at level 50).
 
@@ -82,31 +79,22 @@ Definition is_precategory (C : precategory_data) :=
                      f ;; (g ;; h) == (f ;; g) ;; h).
 
 Definition precategory := total2 is_precategory.
-(*  fun C : precategory_data => 
-    dirprod (dirprod (forall (a b : precategory_objects C) (f : a --> b),
-                         precategory_identity a ;; f == f)
-                     (forall (a b : precategory_objects C) (f : a --> b),
-                         f ;; precategory_identity b == f))
-            (forall (a b c d : precategory_objects C) 
-                    (f : a --> b)(g : b --> c) (h : c --> d),
-                     f ;; (g ;; h) == (f ;; g) ;; h)).
-*)
 
 Definition precategory_data_from_precategory (C : precategory) : 
        precategory_data := pr1 C.
 Coercion precategory_data_from_precategory : precategory >-> precategory_data.
 
 Definition precategory_id_left (C : precategory) : 
-forall (a b : precategory_objects C) (f : a --> b),
-                         precategory_identity a ;; f == f := pr1 (pr1 (pr2 C)).
+   forall (a b : precategory_objects C) (f : a --> b),
+           precategory_identity a ;; f == f := pr1 (pr1 (pr2 C)).
 
 Definition precategory_id_right (C : precategory) :
-forall (a b : precategory_objects C) (f : a --> b),
-                         f ;; precategory_identity b == f := pr2 (pr1 (pr2 C)).
+   forall (a b : precategory_objects C) (f : a --> b),
+           f ;; precategory_identity b == f := pr2 (pr1 (pr2 C)).
 
 Definition precategory_assoc (C : precategory) : 
-forall (a b c d : precategory_objects C) 
-                    (f : a --> b)(g : b --> c) (h : c --> d),
+   forall (a b c d : precategory_objects C) 
+          (f : a --> b)(g : b --> c) (h : c --> d),
                      f ;; (g ;; h) == (f ;; g) ;; h := pr2 (pr2 C).
 
 (** Any equality on objects a and b induces a morphism from a to b *)
