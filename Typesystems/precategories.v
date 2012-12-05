@@ -118,8 +118,8 @@ Proof.
   exact (precategory_identity a).
 Defined.
 
-Definition precategory_eq_morphism_inv (C : precategory_data) (a b : precategory_objects C)
-      (H : a == b) : b --> a.
+Definition precategory_eq_morphism_inv (C : precategory_data) 
+    (a b : precategory_objects C) (H : a == b) : b --> a.
 Proof.
   destruct H.
   exact (precategory_identity a).
@@ -209,13 +209,58 @@ Proof.
   apply (pr2 (a --> b)).
   intro f.
   apply isasetaprop.
-  apply is
-  intros f g.
+  apply isaprop_is_precat_isomorphism.
+Qed.
+
+Lemma identity_is_iso_precat (C : precategory) (a : precategory_objects C) :
+    is_precat_isomorphism (precategory_identity a).
+Proof.
+  exists (precategory_identity a).
+  simpl; split;
+  apply precategory_id_left.
+Defined.
+
+Definition identity_iso_precat {C : precategory} (a : precategory_objects C) :
+   iso_precat a a := tpair _ _ (identity_is_iso_precat C a).
 
 
 (** ** Saturated precategories *)
 
-Definition is_saturated (C : precategory)
+Definition precat_paths_to_iso {C : precategory} (a b : precategory_objects C):
+      a == b -> iso_precat a b.
+Proof.
+  intro H.
+  destruct H.
+  exact (identity_iso_precat a).
+Defined.
+      
+
+Definition is_saturated (C : precategory) := forall (a b : precategory_objects C),
+    isweq (precat_paths_to_iso a b).
+
+Lemma isaprop_is_saturated (C : precategory) : isaprop (is_saturated C).
+Proof.
+  apply impred.
+  intro a.
+  apply impred.
+  intro b.
+  apply isapropisweq.
+Qed.
+
+Definition sat_precat := total2 (fun C : precategory => is_saturated C).
+
+Definition precat_from_sat_precat (C : sat_precat) : precategory := pr1 C.
+Coercion precat_from_sat_precat : sat_precat >-> precategory.
+
+Lemma satcat_has_groupoid_ob (C : sat_precat) : 
+  isofhlevel 3 (precategory_objects C).
+Proof.
+  apply isofhlevelonestep.
+  intros a b.
+  apply (isofhlevelweqb _ (tpair _ _ (pr2 C a b))).
+  apply isaset_iso_precat.
+Qed.
+  
 
 (** TODO : this is injective *)
 
