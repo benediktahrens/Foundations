@@ -56,8 +56,47 @@ Proof.
      apply pathsdirprod; apply idpath.
 Defined.
 
+Lemma bla2 (C : setcategory) : forall 
+  f : catqalgmorphisms (catqalg_data_from_setcategory C),
+pr1 (catqalgcompose f (catqalgid_morphism (catqalgtarget f))
+  (!pr1
+      (dirprodpair (catqalg_data_from_setcat_id_source C)
+         (catqalg_data_from_setcat_id_target C)) (catqalgtarget f))) == pr1 f.
+Proof.
+  simpl; intro f.
+  Check (pr1 f).
+  simpl.
+  unfold catqalgtarget.
+  simpl.
+  unfold precategory_target; simpl.
+  destruct f as [[a b] f];
+  simpl in *.
+  apply idpath.
+Defined.
 
-Definition catqalg_from_setcat_id_is_unit (C : setcategory) :
+
+
+Lemma catqalg_from_setcat_left_unit (C : setcategory):
+forall f : catqalgmorphisms (catqalg_data_from_setcategory C),
+catqalgcompose (catqalgid_morphism (catqalgsource f)) f
+  (pr2
+     (dirprodpair (catqalg_data_from_setcat_id_source C)
+        (catqalg_data_from_setcat_id_target C)) (catqalgsource f)) == f
+.
+Proof.
+  intro f.
+   apply (total2_paths (bla C f)).
+   destruct f as [[a b] f];
+   simpl in *.
+   rewrite transportf_idpath.
+   rewrite precategory_id_left.
+   rewrite (precategory_eq_morphism_pi _ _ _ _ (idpath _ )).
+   simpl.
+   rewrite precategory_id_left.
+   apply idpath.
+Qed.  
+
+Lemma catqalg_from_setcat_id_is_unit (C : setcategory) :
    catqalgidentity_is_unit (catqalg_data_from_setcategory C).
 Proof.
   exists (dirprodpair (catqalg_data_from_setcat_id_source C)
@@ -68,36 +107,123 @@ Proof.
    destruct f as [[a b] f];
    simpl in *.
    rewrite transportf_idpath.
+   rewrite precategory_id_left.
+   rewrite (precategory_eq_morphism_pi _ _ _ _ (idpath _ )).
+   simpl.
+   rewrite precategory_id_left.
+   apply idpath.
    
-   About transportf.
-   rewrite  functtransportf. simpl.
-   Search (transportf _ _ == _ ).
-   rewrite idpathtransportf.
-  unfold precategory_compose. simpl.
-  unfold H.
+   intro f.
+   
+   apply (total2_paths (bla2 C f)).
+   simpl.
+   Check (bla2 C f).
+   destruct f as [[a b] f].
+   simpl in *.
+   rewrite transportf_idpath.
+   rewrite precategory_id_right.
+   rewrite (precategory_eq_morphism_pi _ _ _ _ (idpath _ )).
+   simpl.
+   rewrite precategory_id_right.
+   apply idpath.
+Qed.
+   
   
-  rewrite precategory_id_left.
-  unfold precategory_eq_morphism. simpl.
-  simpl in H.
-  destruct H.
-
-
-
-     unfold catqalgsource. simpl.
-     unfold precategory_source; simpl.
-     destruct f as [[a b] f]. simpl in *.
-  assert (H : 
-  apply total2_paths.
-  
-  Focus 2. intro f.
-  unfold precategory_total_comp.
-  simpl.
+Lemma catqalg_data_from_setcat_comp_source (C : setcategory) :
+forall (f g : catqalgmorphisms (catqalg_data_from_setcategory C)) 
+     (H : catqalgtarget f == catqalgsource g), 
+           catqalgsource (catqalgcompose f g H) == catqalgsource f.
+Proof.
+  simpl in *.
+  intros f g H.
   destruct f as [[a b] f].
   simpl in *.
-  
-  apply pathsdirprod.
-  apply pathsindirprod.
+  destruct g as [[c d] g].
+  apply idpath.
+Qed.
 
+Lemma catqalg_data_from_setcat_comp_target (C : setcategory) :
+  forall (f g : catqalgmorphisms (catqalg_data_from_setcategory C)) 
+     (H : catqalgtarget f == catqalgsource g), 
+           catqalgtarget (catqalgcompose f g H) == catqalgtarget g.
+Proof.
+  simpl in *.
+  intros f g H.
+  destruct f as [[a b] f].
+  simpl in *.
+  destruct g as [[c d] g].
+  apply idpath.
+Defined.
+
+
+Lemma catqalg_data_from_setcat_comp_assoc_pr1 (C : setcategory)
+ (f g h : catqalgmorphisms (catqalg_data_from_setcategory C))
+ (Hfg : catqalgtarget f == catqalgsource g)
+ (Hgh : catqalgtarget g == catqalgsource h) :
+
+pr1 (precategory_total_comp C f (precategory_total_comp C g h Hgh)
+  (Hfg @ !catqalg_data_from_setcat_comp_source C g h Hgh)) ==
+pr1 (precategory_total_comp C (precategory_total_comp C f g Hfg) h
+  (catqalg_data_from_setcat_comp_target C f g Hfg @ Hgh)).
+Proof.
+  simpl.
+  apply idpath.
+Defined.
+
+
+Definition catqalg_data_from_setcat_comp_assoc (C : setcategory) :
+   catqalgcompose_is_assoc (catqalg_data_from_setcategory C).
+Proof.
+  exists (dirprodpair (catqalg_data_from_setcat_comp_source C)
+                      (catqalg_data_from_setcat_comp_target C)).
+  simpl; intros f g h Hfg Hgh.
+  apply (total2_paths 
+      (catqalg_data_from_setcat_comp_assoc_pr1 C f g h Hfg Hgh)).
+  rewrite transportf_idpath.
+  simpl.
+  repeat rewrite precategory_assoc.
+  simpl.
+  destruct f as [[a b] f].
+  destruct g as [[c d] g].
+  destruct h as [[e e'] h].
+  simpl in *.
+  unfold catqalgtarget, catqalgsource in *.
+  simpl in *.
+  unfold precategory_source, precategory_target in *;
+  simpl in *.
+  destruct Hfg.
+  destruct Hgh.
+  simpl in *.
+  repeat rewrite (precategory_eq_morphism_pi _ _ _ _ (idpath _ )).
+  simpl.
+  apply idpath.
+Qed.
+
+
+
+
+  rewrite pathscomp0rid. 
+  simpl.
+  repeat rewrite precategory_id_right.
+  unfold catqalg_data_from_setcat_comp_target.
+  repeat rewrite <- precategory_assoc.
+  repeat rewrite (precategory_eq_morphism_pi _ _ _ _ (idpath _ )).
+  simpl.
+  
+  apply 
+  unfold catqalgtarget, catqalgsource in *;
+  simpl in *.
+  unfold precategory_target, precategory_source in *;
+  simpl in *.
+  unfold precategory_total_comp. simpl.
+  
+   
+  
+dirprod 
+       (forall f g (H : catqalgtarget f == catqalgsource g), 
+           catqalgsource (catqalgcompose f g H) == catqalgsource f)
+       (forall f g (H : catqalgtarget f == catqalgsource g), 
+           catqalgtarget (catqalgcompose f g H) == catqalgtarget g)
                
 
 

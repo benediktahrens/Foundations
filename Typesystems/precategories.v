@@ -125,6 +125,8 @@ Proof.
   exact (precategory_identity a).
 Defined.
 
+
+
 (** ** Setcategories: Precategories whose objects form a set *)
 
 Definition setcategory := total2 (
@@ -135,6 +137,16 @@ Coercion precategory_from_setcategory : setcategory >-> precategory.
 
 Definition setcategory_objects_set (C : setcategory) : hSet :=
     hSetpair (precategory_objects C) (pr2 C).
+
+Lemma precategory_eq_morphism_pi (C : setcategory) (a b : precategory_objects C)
+      (H H': a == b) : precategory_eq_morphism C a b H == 
+                       precategory_eq_morphism C a b H'.
+Proof.
+  assert (h : H == H').
+  apply uip. apply (pr2 C).
+  apply (maponpaths (precategory_eq_morphism C a b) h).
+Qed.
+
 
 
 (** TODO : this is injective *)
@@ -362,7 +374,7 @@ Definition precategory_total_id (C : precategory_data) :
       precategory_objects C -> precategory_total_morphisms C :=
       fun c => tpair _ (dirprodpair c c) (precategory_identity c).
 
-Definition precategory_total_comp (C : precategory_data) : 
+Definition precategory_total_comp'' (C : precategory_data) : 
       forall f g : precategory_total_morphisms C,
         precategory_target C f == precategory_source C g ->
          precategory_total_morphisms C.
@@ -377,6 +389,13 @@ Proof.
   exact ((f ;; precategory_eq_morphism C b b' H) ;; g).
 Defined.
 
+Definition precategory_total_comp (C : precategory_data) : 
+      forall f g : precategory_total_morphisms C,
+        precategory_target C f == precategory_source C g ->
+         precategory_total_morphisms C := 
+  fun f g H => 
+     tpair _ (dirprodpair (pr1 (pr1 f))(pr2 (pr1 g)))
+        ((pr2 f ;; precategory_eq_morphism _ _ _ H) ;; pr2 g).
 
 
 
