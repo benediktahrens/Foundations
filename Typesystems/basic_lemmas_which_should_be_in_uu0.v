@@ -5,6 +5,7 @@ Add Rec LoadPath "../hlevel2".
 
 Require Import uu0.
 Require Import hProp.
+Require Import hSet.
 
 Require Import pathnotations.
 Import pathnotations.PathNotations.
@@ -197,7 +198,14 @@ Defined.
 
 
 
-
+Lemma pairofobuip (C C': hSet) (a b : C) (c d : C') 
+        (p q : dirprod (a == b) (c == d)) : p == q.
+Proof.
+  assert (H : pr1 p == pr1 q).
+  apply uip. apply C.
+  apply (total2_paths H).
+  apply uip. apply C'.
+Qed.
 
 
 

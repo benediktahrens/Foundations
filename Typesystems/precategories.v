@@ -147,7 +147,75 @@ Proof.
   apply (maponpaths (precategory_eq_morphism C a b) h).
 Qed.
 
+(** ** Isomorphisms in a precategory *)
 
+Definition is_inverse_in_precat {C : precategory} {a b : precategory_objects C}
+  (f : a --> b) (g : b --> a) := 
+  dirprod (f ;; g == precategory_identity a)
+          (g ;; f == precategory_identity b).
+
+Lemma isaprop_is_inverse_in_precat (C : precategory) (a b : precategory_objects C)
+   (f : a --> b) (g : b --> a) : isaprop (is_inverse_in_precat f g).
+Proof.
+  apply isapropdirprod.
+  apply (pr2 (a --> a)).
+  apply (pr2 (b --> b)).
+Qed.
+
+Lemma inverse_unique_precat (C : precategory) (a b : precategory_objects C)
+   (f : a --> b) (g g': b --> a) (H : is_inverse_in_precat f g)
+    (H' : is_inverse_in_precat f g') : g == g'.
+Proof.
+  destruct H as [eta eps].
+  destruct H' as [eta' eps'].
+  assert (H : g == precategory_identity b ;; g).
+    rewrite precategory_id_left; apply idpath.
+  apply (pathscomp0 H).
+  rewrite <- eps'.
+  rewrite <- precategory_assoc.
+  rewrite eta.
+  apply precategory_id_right.
+Qed.
+
+Definition is_inverse_in_precat_hProp {C : precategory} {a b : precategory_objects C}
+  (f : a --> b) (g : b --> a) : hProp := 
+   hProppair _ (isaprop_is_inverse_in_precat C a b f g).
+
+Definition is_precat_isomorphism {C : precategory} {a b : precategory_objects C}
+  (f : a --> b) := total2 (fun g => is_inverse_in_precat_hProp f g).
+
+Lemma isaprop_is_precat_isomorphism {C : precategory} {a b : precategory_objects C}
+     (f : a --> b) : isaprop (is_precat_isomorphism f).
+Proof.
+  apply invproofirrelevance.
+  intros g g'.
+  set (Hpr1 := inverse_unique_precat _ _ _ _ _ _ (pr2 g) (pr2 g')).
+  apply (total2_paths Hpr1).
+  destruct g as [g [eta eps]].
+  destruct g' as [g' [eta' eps']].
+  simpl in *.
+  apply pairofobuip.
+Qed.
+
+
+Definition iso_precat {C : precategory} (a b :precategory_objects C) := total2
+    (fun f : a --> b => is_precat_isomorphism f).
+
+Lemma isaset_iso_precat {C : precategory} (a b :precategory_objects C) :
+  isaset (iso_precat a b).
+Proof.
+  change isaset with (isofhlevel 2).
+  apply isofhleveltotal2.
+  apply (pr2 (a --> b)).
+  intro f.
+  apply isasetaprop.
+  apply is
+  intros f g.
+
+
+(** ** Saturated precategories *)
+
+Definition is_saturated (C : precategory)
 
 (** TODO : this is injective *)
 
