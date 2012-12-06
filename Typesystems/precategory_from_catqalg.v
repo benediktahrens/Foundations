@@ -57,7 +57,7 @@ unfold precategory_compose. simpl.
 apply catqalghom_assoc.
 Defined.
 
-Definition set_category_from_catqalg (C : catqalg) : setcategory.
+Definition setcategory_from_catqalg (C : catqalg) : setcategory.
 Proof.
   exists (precategory_from_catqalg C).
   exact (pr2 (catqalgobjects C)).

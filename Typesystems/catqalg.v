@@ -73,6 +73,7 @@ Definition catqalgid_morphism {X : cell_data} : catqalgobjects X ->
                catqalgmorphisms X := pr2 (pr2 X).
 
 
+
 Definition catqalg_data := total2 (fun X : cell_data => 
    forall f g : catqalgmorphisms X, catqalgtarget f == catqalgsource g -> 
             catqalgmorphisms X).
@@ -83,6 +84,20 @@ Coercion cell_data_from_catqalg_data : catqalg_data >-> cell_data.
 Definition catqalgcompose { X : catqalg_data } : 
     forall f g : catqalgmorphisms X, catqalgtarget f == catqalgsource g -> 
            catqalgmorphisms X := pr2 X.
+
+(** Equality for data of quasi-algebraic categories *)
+
+Lemma catqalg_data_eq_from_cell_data (C C' : catqalg_data) 
+   (H : pr1 C == pr1 C') : 
+  transportf
+  (fun x : cell_data =>
+   forall f g : catqalgmorphisms x,
+   catqalgtarget f == catqalgsource g -> catqalgmorphisms x) H (pr2 C) ==
+      pr2 C' -> C == C'.
+Proof.
+  apply (total2_paths H).
+Defined.
+  
 
 (** ** Axioms for categories *)
 (** *** Axioms of identity maps *)
@@ -105,6 +120,28 @@ Definition catqalgidentity_is_unit ( X : catqalg_data ) := total2 (
      catqalgcompose f (catqalgid_morphism (catqalgtarget f)) 
                     (!pr1 H (catqalgtarget f)) == f ))).
 
+Lemma isaprop_catqalgidentity_is_unit (X : catqalg_data) :
+  isaprop (catqalgidentity_is_unit X).
+Proof.
+  apply isofhleveltotal2.
+  apply isofhleveldirprod.
+  apply impred.
+  intro t.
+  apply (catqalgobjects X).
+  apply impred.
+  intro t.
+  apply (catqalgobjects X).
+  
+  intro t.
+  apply isofhleveldirprod.
+  apply impred.
+  intro f.
+  apply (catqalgmorphisms X).
+  apply impred.
+  intro f.
+  apply (catqalgmorphisms X).
+Qed.
+
 
 (** *** Associativity of composition *)
 (**   To state associativity, we need to have [catqalg_data] where
@@ -121,6 +158,31 @@ Definition catqalgcompose_is_assoc ( X : catqalg_data ) := total2 (
          (Hgh : catqalgtarget g == catqalgsource h),
       catqalgcompose f (catqalgcompose g h Hgh) (Hfg @ !pr1 H g h Hgh) == 
         catqalgcompose (catqalgcompose f g Hfg ) h (pr2 H f g Hfg @ Hgh) )).
+
+Lemma isaprop_catqalgcompose_is_assoc ( X : catqalg_data ) :
+   isaprop (catqalgcompose_is_assoc X).
+Proof.
+  apply isofhleveltotal2.
+  apply isofhleveldirprod.
+  apply impred; intro t.
+  apply impred; intro t'.
+  apply impred; intro H.
+  apply (catqalgobjects X).
+  apply impred; intro t.
+  apply impred; intro t'.
+  apply impred; intro H.
+  apply (catqalgobjects X).
+  
+  intro t.
+  apply impred; intro f.
+  apply impred; intro g.
+  apply impred; intro h.
+  apply impred; intro Hfg.
+  apply impred; intro Hgh.
+  apply (catqalgmorphisms X).
+Qed.
+
+
 
 (** *** We now package these two axioms into 
           a nice package to obtain [catqalg]s *)
@@ -184,6 +246,37 @@ Coercion catqalgobjects : cell_data >-> hSet.
 
 Check (fun (X : catqalg)(x : X) => catqalgid_morphism x).
 
+(** ** Criterion for two quasialgebraic categories to be equal *)
+
+Lemma catqalg_eq_if_catqalg_data (C C' : catqalg) : 
+   pr1 C == pr1 C' -> C == C'. 
+Proof.
+  intro H.
+  apply (total2_paths H).
+  apply proofirrelevance.
+  apply isofhleveldirprod.
+  apply isaprop_catqalgidentity_is_unit.
+  apply isaprop_catqalgcompose_is_assoc.
+Defined.
+
+
+(*
+Lemma catqalg_eq (C C' : catqalg) : C == C'.
+Proof.
+  assert (H : pr1 C == pr1 C').
+  destruct C as [C Cax]; destruct C' as [C' Cax'];
+  simpl.
+  assert (H': pr1 C == pr1 C').
+  destruct C as [Cpre Ccomp] ; destruct C' as [Cpre' Ccomp'];
+  simpl. 
+  apply (total2_paths Cpre).
+
+Lemma catqalg_eq (C C' : catqalg) :
+  forall (Hob : catqalgobjects C == catqalgobjects C'),
+  forall (Hmor: catqalgmorphisms C == catqalgmorphisms C'),
+  forall (
+  C == C'.
+*)
 
 (** ** Proof irrelevance *)
 (**   for 
