@@ -280,12 +280,9 @@ apply ( isweqtotaltofib P1 P2  (fun XY: dirprod hProp hProp => (match XY with  t
 
 Definition weqeqweqhProp ( P P' : hProp ) := weqpair _ ( univfromtwoaxiomshProp P P' ) .
 Check weqeqweqhProp.
-Corollary isasethProp : isaset hProp.
-Proof. unfold isaset.  simpl. intros x x'. 
-apply (isofhlevelweqb (S O) ( weqeqweqhProp x x' )).
-Check isapropweqtoprop.
 
-apply (isofhlevelweqb (S O) ( weqeqweqhProp x x' ) (isapropweqtoprop x x' (pr2 x'))). Defined.
+Corollary isasethProp : isaset hProp.
+Proof. unfold isaset. simpl. intros x x'. apply (isofhlevelweqb (S O) ( weqeqweqhProp x x' ) (isapropweqtoprop x x' (pr2 x'))). Defined.
 
 
 Lemma iscontrtildehProp : iscontr tildehProp .
