@@ -560,7 +560,17 @@ Definition is_cell_data_fun (C C' : cell_data)(F1 : C -> C')
            (forall x, F2 (catqalgid_morphism x) == 
                    catqalgid_morphism (F1 x)).
 
-(* Lemma isaprop_is_cell_data_fun *)
+
+Lemma isaprop_is_cell_data_fun (C C' : cell_data) (F1 : C -> C')
+      (F2 : catqalgmorphisms C -> catqalgmorphisms C') : 
+   isaprop (is_cell_data_fun C C' F1 F2).
+Proof.
+  repeat apply isofhleveldirprod;
+    repeat apply impred.
+  intro t; apply (pr2 (catqalgobjects C')).
+  intro t; apply (pr2 (catqalgobjects C')).
+  intro t; apply (pr2 (catqalgmorphisms C')).
+Qed.
 
 Definition cell_data_fun (C C' : cell_data) := total2 (
   fun F : dirprod (C -> C')
@@ -574,17 +584,36 @@ Definition cell_data_fun (C C' : cell_data) := total2 (
            (forall x, pr2 F (catqalgid_morphism x) == 
                    catqalgid_morphism (pr1 F x))).
 *)
+
+
 Definition catqalg_fun_obj {C C'} (F : cell_data_fun C C') :
      C -> C' := pr1 (pr1 F).
-Coercion catqalg_fun_obj : cell_data_fun >-> Funclass.
 
 Definition catqalg_fun_mor {C C'} (F : cell_data_fun C C') :
      catqalgmorphisms C -> catqalgmorphisms C' := pr2 (pr1 F).
 
 Local Notation "# F" := (catqalg_fun_mor F)(at level 3).
 
+Lemma cell_data_fun_eq (C C' : cell_data)(F F': cell_data_fun C C') :
+     catqalg_fun_obj F == catqalg_fun_obj F' ->
+     #F == #F' -> F == F'.
+Proof.
+  intros H H'.
+  assert (Hpr1 : pr1 F == pr1 F').
+  destruct F as [F Fax]; destruct F' as [F' Fax']; simpl in *.
+  destruct F as [Fob Fmor]; destruct F' as [Fob' Fmor']; simpl in *.
+  unfold catqalg_fun_obj, catqalg_fun_mor in H, H'. simpl in *.
+  apply pathsdirprod; assumption.
+  apply (total2_paths Hpr1).
+  
+  apply (total2_paths (pathsdirprod H H')).
+
+Coercion catqalg_fun_obj : cell_data_fun >-> Funclass.
+
+
+
 Definition catqalg_fun_source {C C'} (F : cell_data_fun C C') : forall f, 
-    catqalgsource (#F f) == (*functorqalgobj*) F (catqalgsource f) := 
+    catqalgsource (#F f) ==  F (catqalgsource f) := 
         pr1 (pr1 (pr2 F)).
 
 Definition catqalg_fun_target {C C'} (F : cell_data_fun C C') : forall f, 
@@ -594,6 +623,12 @@ Definition catqalg_fun_target {C C'} (F : cell_data_fun C C') : forall f,
 Definition catqalg_fun_id {C C'} (F : cell_data_fun C C') :
    forall x, #F (catqalgid_morphism x) == 
                   catqalgid_morphism (F x) := pr2 (pr2 F).
+
+
+
+
+
+
 
 (** **** A check to see whether this works as it should *)
 
