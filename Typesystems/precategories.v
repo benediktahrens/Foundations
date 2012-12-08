@@ -450,6 +450,19 @@ Proof.
   apply (sub_precategory_predicate_morphisms C' a b g).
 Qed.
 
+(*
+Lemma eq_in_sub_precategory2 (C : precategory)(C':sub_precategories C)
+     (a b : sub_precategory_objects C') (f g : a --> b) 
+ (pf : sub_precategory_predicate_morphisms C' _ _ f) 
+ (pg : sub_precategory_predicate_morphisms C' _ _ g): 
+  f == g -> (tpair (fun f => sub_precategory_predicate_morphisms _ _ _ f) f pf) == 
+      (tpair (fun f => sub_precategory_predicate_morphisms _ _ _ f) g pg).
+Proof.
+  intro H.
+  apply (total2_paths2 H).
+  destruct H.
+  apply (total2_paths2 (idpath _ )).
+*)
 
 Definition is_precategory_sub_category (C : precategory)(C':sub_precategories C) :
     is_precategory (sub_precategory_data C C').
@@ -501,6 +514,71 @@ Definition sub_precategory_inclusion (C : precategory)(C': sub_precategories C) 
 Definition full_img_sub_precategory {C D : precategory}(F : precategory_fun C D) :
     sub_precategories D := 
        full_sub_precategory D (sub_img_precategory_fun F).
+
+Definition full_img_functor_obj {C D : precategory}(F : precategory_fun C D) :
+   precategory_objects C -> precategory_objects (full_img_sub_precategory F).
+Proof.
+  intro c.
+  simpl.
+  exists (F c).
+  simpl.
+  intros a b.
+  apply b.
+  exists c.
+  apply idpath.
+Defined.
+
+Definition full_img_functor_data {C D : precategory}(F : precategory_fun C D) :
+  precategory_ob_mor_fun C (full_img_sub_precategory F).
+Proof.
+  exists (full_img_functor_obj F).
+  simpl.
+  intros a b f.
+  exists (#F f).
+  exact tt.
+Defined.
+
+Lemma is_precategory_fun_full_img (C D: precategory) (F : precategory_fun C D) :
+  is_precategory_fun _ _  (full_img_functor_data F).
+Proof.
+  split; simpl. 
+  intro a. 
+   assert (H : pr1 (tpair (fun f => htrue) (#F (precategory_identity a)) tt ) ==
+               pr1 (precategory_identity (full_img_functor_obj F a))).
+   simpl. apply precategory_fun_id.
+  apply (total2_paths H).
+  apply proofirrelevance.
+  apply htrue.
+  
+  intros a b c f g.
+  set ( H := eq_in_sub_precategory D (full_img_sub_precategory F)).
+  set (H':= H (full_img_functor_obj F a)(full_img_functor_obj F c)).
+  apply H'.
+  simpl.
+  apply precategory_fun_comp.
+Qed.
+  unfold precategory_compose; simpl.
+  
+  set ( H := eq_in_sub_precategory D (full_img_sub_precategory F)
+            c).
+ Check  {| pr1 := #F (f;; g); pr2 := tt |}.
+ apply H.
+  assert (H' : pr1 ({| pr1 := #F (f;; g); pr2 := tt |}) ==
+               pr1 (precategory_compose (C:=full_img_sub_precategory F)
+                     (tpair (fun _ => htrue) (#F f) tt)  
+                     (tpair (fun _ => htrue) (#F g) tt ))).
+  
+  unfold full_img_functor_obj; simpl. simpl.
+  
+  assert (
+  Check (precategory_identity (full_img_functor_obj F a)).
+  set ( H := eq_in_sub_precategory D (full_img_sub_precategory F)
+         _ _ ({| pr1 := #F (precategory_identity a); pr2 := tt |})
+        (precategory_identity (full_img_functor_obj F a))  
+          
+          ).
+  Check precategory_identity (full_img_functor_obj F a).
+  simpl in H. apply H.
 
 
 
