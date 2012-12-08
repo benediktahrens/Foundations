@@ -50,7 +50,7 @@ Definition hset_precategory : precategory :=
   tpair _ _ is_precategory_hset_precategory_data.
 
 
-  
+
 
 
 
