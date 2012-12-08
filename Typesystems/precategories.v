@@ -48,6 +48,13 @@ Definition precategory_data := total2 (
                 (*precategory_morphisms*) b --> c ->
                 (*precategory_morphisms*) a --> c)).
 
+Definition precategory_data_pair (C : precategory_ob_mor)
+    (id : forall c : precategory_objects C, 
+                precategory_morphisms c c)
+    (comp: forall a b c : precategory_objects C,
+         a --> b -> b --> c -> a --> c) : precategory_data :=
+   tpair _ C (dirprodpair id comp).
+
 Definition precategory_ob_mor_from_precategory_data (C : precategory_data) :
      precategory_ob_mor := pr1 C.
 Coercion precategory_ob_mor_from_precategory_data : 
@@ -619,6 +626,8 @@ Proof.
   apply etacorrection.
 Defined.
 
+(**  works up to eta conversion
+
 Lemma precategory_fun_full_img_factorization (C D: precategory) (F : precategory_fun C D) :
     F == precategory_fun_composite _ _ _ (precategory_fun_full_img F) 
             (sub_precategory_inclusion D _).
@@ -632,24 +641,13 @@ Proof.
   apply (total2_paths2 (H)).
   unfold precategory_fun_full_img_factorization_ob in H.
   simpl in *.
-  rewrite transportf_idpath.
-  assert (H : (fun a => Fob a) == Fob ).
-  apply funextfunax.
-  apply (fun x => idpath _ ).
-  apply (total2_paths2 (!H)).
   generalize Fmor.
-  clear Fmor.
-  destruct H.
+  clear Fax.
   generalize H.
-  generalize Fmor.
   clear Fmor.
-  induction H.
-  intros.
-  simpl.
-  assert (H : pr1 F ==
-              pr1 ({| pr1 := fun a : precategory_objects C => F a; 
-                      pr2 := fun (a b : precategory_objects C) (f : a --> b) => #F f |})).
-
+  clear H.
+  
+*)
 
     
 (** ** Precategories in style of essentially algebraic cats *)
@@ -710,9 +708,6 @@ Definition precategory_total_comp (C : precategory_data) :
         ((pr2 f ;; precategory_eq_morphism _ _ _ H) ;; pr2 g).
 
 (** * Functors *)
-
-Definition is_precategory_fun
-
 
 
 
