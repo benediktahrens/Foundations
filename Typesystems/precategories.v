@@ -871,10 +871,10 @@ Proof.
   apply (precategory_assoc).
 Qed.
 
-Definition precatgory_fun_precategory (C C' : precategory): precategory := 
+Definition precategory_fun_precategory (C C' : precategory): precategory := 
   tpair _ _ (is_precategory_precategory_fun_precategory_data C C').
 
-  
+
   
 
 
