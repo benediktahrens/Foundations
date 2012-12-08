@@ -610,11 +610,45 @@ Definition precategory_fun_full_img {C D: precategory} (F : precategory_fun C D)
    tpair _ _ (is_precategory_fun_full_img C D F).
 
 
+Lemma precategory_fun_full_img_factorization_ob (C D: precategory) (F : precategory_fun C D):
+  precategory_ob_mor_fun_objects F == 
+  precategory_ob_mor_fun_objects (precategory_fun_composite _ _ _ (precategory_fun_full_img F) 
+            (sub_precategory_inclusion D _)).
+Proof.
+  simpl.
+  apply etacorrection.
+Defined.
+
 Lemma precategory_fun_full_img_factorization (C D: precategory) (F : precategory_fun C D) :
     F == precategory_fun_composite _ _ _ (precategory_fun_full_img F) 
             (sub_precategory_inclusion D _).
 Proof.
-  
+  apply precategory_fun_eq.
+  set (H := precategory_fun_full_img_factorization_ob C D F).
+  simpl in *.
+  destruct F as [F Fax].
+  simpl. 
+  destruct F as [Fob Fmor]; simpl in *.
+  apply (total2_paths2 (H)).
+  unfold precategory_fun_full_img_factorization_ob in H.
+  simpl in *.
+  rewrite transportf_idpath.
+  assert (H : (fun a => Fob a) == Fob ).
+  apply funextfunax.
+  apply (fun x => idpath _ ).
+  apply (total2_paths2 (!H)).
+  generalize Fmor.
+  clear Fmor.
+  destruct H.
+  generalize H.
+  generalize Fmor.
+  clear Fmor.
+  induction H.
+  intros.
+  simpl.
+  assert (H : pr1 F ==
+              pr1 ({| pr1 := fun a : precategory_objects C => F a; 
+                      pr2 := fun (a b : precategory_objects C) (f : a --> b) => #F f |})).
 
 
     
