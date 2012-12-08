@@ -605,11 +605,13 @@ Proof.
   unfold catqalg_fun_obj, catqalg_fun_mor in H, H'. simpl in *.
   apply pathsdirprod; assumption.
   apply (total2_paths Hpr1).
-  
-  apply (total2_paths (pathsdirprod H H')).
+  Check (pr2 F').
+  apply proofirrelevance.
+  apply isaprop_is_cell_data_fun.
+Defined.
+
 
 Coercion catqalg_fun_obj : cell_data_fun >-> Funclass.
-
 
 
 Definition catqalg_fun_source {C C'} (F : cell_data_fun C C') : forall f, 
@@ -623,9 +625,6 @@ Definition catqalg_fun_target {C C'} (F : cell_data_fun C C') : forall f,
 Definition catqalg_fun_id {C C'} (F : cell_data_fun C C') :
    forall x, #F (catqalgid_morphism x) == 
                   catqalgid_morphism (F x) := pr2 (pr2 F).
-
-
-
 
 
 
@@ -648,23 +647,42 @@ Defined.
 (**  We can make [functoralg] dependent on just the data, since its 
      definition does not rely on associativity or id morphisms *)
 
-Definition catqalg_fun (C C' : catqalg_data) := total2 (
-  fun F : cell_data_fun C C' =>
-     (forall f g (H : catqalgtarget f == catqalgsource g),
+
+
+Definition is_catqalg_fun (C C' : catqalg_data) (F : cell_data_fun C C') :=
+   forall f g (H : catqalgtarget f == catqalgsource g),
         #F (catqalgcompose f g H) == 
            catqalgcompose (#F f) (#F g)  
-             (catqalg_fun_target F f @ maponpaths F H @ ! catqalg_fun_source F g))).
+             (catqalg_fun_target F f @ maponpaths F H @ ! catqalg_fun_source F g).
+
+Lemma isaprop_is_catqalg_fun (C C' : catqalg_data) (F : cell_data_fun C C') :
+   isaprop (is_catqalg_fun C C' F).
+Proof.
+  apply impred.
+  intro f.
+  apply impred;
+  intro g.
+  apply impred;
+  intro H.
+  apply (pr2 (catqalgmorphisms C')).
+Qed.
+
+Definition catqalg_fun (C C' : catqalg_data) := total2 (
+  fun F : cell_data_fun C C' => is_catqalg_fun C C' F).
+
 
 Definition cell_data_fun_from_catqalg_fun C C' (F : catqalg_fun C C') :
        cell_data_fun C C' := pr1 F.
 Coercion cell_data_fun_from_catqalg_fun : catqalg_fun >-> cell_data_fun.
 
-Definition catqalg_fun_compose C C' (F : catqalg_fun C C') :
+Definition catqalg_fun_compose {C C'} (F : catqalg_fun C C') :
   forall f g (H : catqalgtarget f == catqalgsource g),
         #F (catqalgcompose f g H) == 
            catqalgcompose (#F f) (#F g)  
             (catqalg_fun_target F f @ maponpaths F H @ ! catqalg_fun_source F g) :=
     pr2 F.
+
+
 
 (** Again a check in terms of homsets *)
 (** Introducing (local) notation might turn this statement into something
@@ -735,8 +753,8 @@ catqalgcompose (#(cell_data_fun_comp F F') f) (#(cell_data_fun_comp F F') g)
    !catqalg_fun_source (cell_data_fun_comp F F') g) .
 Proof.
   intros f g H.
-  set (HFcomp:= catqalg_fun_compose _ _ F).
-  set (HF'comp:=catqalg_fun_compose _ _ F').
+  set (HFcomp:= catqalg_fun_compose  F).
+  set (HF'comp:=catqalg_fun_compose  F').
   change (#(cell_data_fun_comp F F') (catqalgcompose f g H)) with
               (#F'(#F (catqalgcompose f g H))).
   rewrite  HFcomp.
@@ -745,10 +763,11 @@ Proof.
 Qed.
   
 
-Definition functorqalg_composite (C C' C'' : catqalg)(F : catqalg_fun C C')
+Definition catqalg_fun_composite {C C' C'' : catqalg}(F : catqalg_fun C C')
       (F' : catqalg_fun C' C''): catqalg_fun C C''.
 Proof.
   exists (cell_data_fun_comp  F F').
+  unfold is_catqalg_fun.
   apply catqalg_fun_composite_compose.
 Defined.
 
@@ -788,12 +807,68 @@ Proof.
   apply catqalgcompose_pi.
 Qed.
 
-Definition functorqalg_identity (C : catqalg) : catqalg_fun C C.
+Definition catqalg_fun_identity (C : catqalg) : catqalg_fun C C.
 Proof. 
   exists cell_data_fun_id.
+  unfold is_catqalg_fun.
   apply catqalg_fun_identity_compose.
 Defined.
 
+(** ** Equality between two functors *)
+
+Lemma catqalg_fun_eq_pr1 (C C' : catqalg) (F G : catqalg_fun C C'):
+  (forall x, F x == G x) ->
+   (forall f, #F f == #G f) -> pr1 F == pr1 G.
+Proof.
+  intros Hob Hmor.
+  destruct F as [F Fax]; destruct G as [G Gax]; simpl in *.
+  assert (H : pr1 F == pr1 G).
+  destruct F as [F FF] ; destruct G as [G GG]; simpl in *.
+  destruct F as [F1 F2]; destruct G as [G1 G2]; simpl in *.
+  apply pathsdirprod.
+  apply funextfunax; assumption.
+  apply funextfunax; assumption.
+  apply (total2_paths H).
+  apply proofirrelevance.
+  apply isaprop_is_cell_data_fun.
+Defined.
+
+Lemma catqalg_fun_eq (C C' : catqalg) (F G : catqalg_fun C C'):
+  (forall x, F x == G x) ->
+   (forall f, #F f == #G f) -> F == G.
+Proof.
+  intros Hob Hmor.
+  apply (total2_paths (catqalg_fun_eq_pr1 _ _ _ _ Hob Hmor)).
+  apply proofirrelevance.
+  apply isaprop_is_catqalg_fun.
+Defined.
+  
+
+
+(** ** Isomorphisms *)
+
+Definition are_catqalg_fun_inverses {C C' : catqalg}
+  (F : catqalg_fun C C') (G : catqalg_fun C' C) :=
+ dirprod (catqalg_fun_composite F G == catqalg_fun_identity C)
+         (catqalg_fun_composite G F == catqalg_fun_identity C').
+
+Definition catqalg_fun_is_iso {C C' : catqalg} (F : catqalg_fun C C') := total2 (
+   fun G => are_catqalg_fun_inverses F G).
+
+Definition are_iso_catqalgs (C C' : catqalg) := total2 (
+   fun F : catqalg_fun C C' => catqalg_fun_is_iso F).
+   
+
+Lemma catqalg_fun_eq_if_iso (C C' : catqalg) :
+   are_iso_catqalgs C C' -> C == C'.
+Proof.
+  
+
+Lemma isaprop_are_catqalg_fun_inverses (C C' : catqalg) (F : catqalg_fun C C')
+     (G : catqalg_fun C' C) : isaprop (are_catqalg_fun_inverses F G).
+Proof.
+  apply isofhleveldirprod.
+  
 
 
 (** lemma that two functors are equal if they are pointwise equal on objects 
