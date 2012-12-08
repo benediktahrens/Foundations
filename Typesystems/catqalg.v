@@ -843,6 +843,22 @@ Proof.
   apply isaprop_is_catqalg_fun.
 Defined.
   
+Lemma catqalg_fun_eq_ob (C C' : catqalg) (F G : catqalg_fun C C'):
+  F == G -> forall x, F x == G x.
+Proof.
+  intro H.
+  destruct H.
+  exact (fun _ => idpath _ ).
+Defined.
+  
+Lemma catqalg_fun_eq_mor (C C' : catqalg) (F G : catqalg_fun C C'):
+  F == G -> forall x, #F x == #G x.
+Proof.
+  intro H.
+  destruct H.
+  exact (fun _ => idpath _ ).
+Defined.
+
 
 
 (** ** Isomorphisms *)
@@ -851,6 +867,29 @@ Definition are_catqalg_fun_inverses {C C' : catqalg}
   (F : catqalg_fun C C') (G : catqalg_fun C' C) :=
  dirprod (catqalg_fun_composite F G == catqalg_fun_identity C)
          (catqalg_fun_composite G F == catqalg_fun_identity C').
+(*
+Definition catqalg_fun_inverses_obj {C C' : catqalg}
+  (F : catqalg_fun C C') (G : catqalg_fun C' C) 
+  (H : are_catqalg_fun_inverses F G):
+    forall x : catqalgobjects C, G (F x) == x.
+Proof.
+  destruct H as [H1 H2].
+  set (H := catqalg_fun_eq_ob _ _ _ _ H1).
+  apply H.
+  
+  destruct F as [F Fax]; simpl in *.
+  destruct F as [F Fid]; simpl in *.
+  destruct G as [G Gax]; simpl in *.
+  destruct G as [G Gid]; simpl in *.
+  unfold catqalg_fun_composite in *.
+  unfold catqalg_fun_identity in *.
+  simpl in *.
+  simpl.
+  simpl in *.
+  
+ dirprod (catqalg_fun_composite F G == catqalg_fun_identity C)
+         (catqalg_fun_composite G F == catqalg_fun_identity C').
+*)
 
 Definition catqalg_fun_is_iso {C C' : catqalg} (F : catqalg_fun C C') := total2 (
    fun G => are_catqalg_fun_inverses F G).
@@ -858,11 +897,69 @@ Definition catqalg_fun_is_iso {C C' : catqalg} (F : catqalg_fun C C') := total2 
 Definition are_iso_catqalgs (C C' : catqalg) := total2 (
    fun F : catqalg_fun C C' => catqalg_fun_is_iso F).
    
+Lemma catqalg_obj_weq_if_iso (C C' : catqalg) :
+   are_iso_catqalgs C C' -> weq (catqalgobjects C) (catqalgobjects C').
+Proof.
+  intro H.
+  destruct H as [F [G H]].
+  destruct H as [H1 H2].
+  exists (fun x : catqalgobjects C => F x).
+  apply (gradth _ (fun y : catqalgobjects C' => G y)).
+  apply (catqalg_fun_eq_ob _ _ _ _ H1).
+  apply (catqalg_fun_eq_ob _ _ _ _ H2).
+Defined.
+
+
+Lemma catqalg_mor_weq_if_iso (C C' : catqalg) :
+   are_iso_catqalgs C C' -> weq (catqalgmorphisms C) (catqalgmorphisms C').
+Proof.
+  intro H.
+  destruct H as [F [G H]].
+  destruct H as [H1 H2].
+  exists (fun x : catqalgmorphisms C => #F x).
+  apply (gradth _ (fun y : catqalgmorphisms C' => #G y)).
+  apply (catqalg_fun_eq_mor _ _ _ _ H1).
+  apply (catqalg_fun_eq_mor _ _ _ _ H2).
+Defined.
+
+
+
+  
 
 Lemma catqalg_fun_eq_if_iso (C C' : catqalg) :
    are_iso_catqalgs C C' -> C == C'.
 Proof.
+  intro H.
+  destruct H as [F [G H]].
+  destruct F as [F Fax].
+  destruct F as [[Fob Fmor] FHH].
+  destruct G as [G Gax].
+  destruct G as [[Gob Gmor] GHH].
+  simpl in *.
+  apply catqalg_eq_if_catqalg_data.
+  destruct C as [C Cax];
+  destruct C' as [C' Cax'];
+  simpl in *.
+  unfold are_catqalg_fun_inverses in H.
+  destruct H as [H1 H2].
+  simpl in *.
+  unfold catqalg_fun_composite in *;
+  simpl in *.
   
+  assert (H : pr1 C == pr1 C').
+   destruct C as [C Ccomp];
+   destruct C' as [C' Ccomp'];
+   simpl in *.
+   
+  apply catqalg_data_eq_from_cell_data.
+  
+  simpl in H.
+  clear dependent Cax.
+  clear dependent Cax'.
+  clear Gax.
+
+
+
 
 Lemma isaprop_are_catqalg_fun_inverses (C C' : catqalg) (F : catqalg_fun C C')
      (G : catqalg_fun C' C) : isaprop (are_catqalg_fun_inverses F G).
