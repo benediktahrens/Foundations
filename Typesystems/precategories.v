@@ -7,6 +7,8 @@ Require Import uu0.
 Require Import hProp.
 Require Import hSet.
 
+Require Import AXIOM_dep_funext.
+
 Notation "a == b" := (paths a b) (at level 70, no associativity).
 Notation "! p " := (pathsinv0 p) (at level 50).
 Notation "p @ q" := (pathscomp0 p q) (at level 60, right associativity).
@@ -17,6 +19,9 @@ Notation "p @ q" := (pathscomp0 p q) (at level 60, right associativity).
 
 Definition precategory_ob_mor := total2 (
   fun ob : UU => ob -> ob -> hSet).
+
+Definition precategory_ob_mor_pair (ob : UU)(mor : ob -> ob -> hSet) :
+    precategory_ob_mor := tpair _ ob mor.
 
 Definition precategory_objects (C : precategory_ob_mor) : UU := @pr1 _ _ C.
 Coercion precategory_objects : precategory_ob_mor >-> UU.
@@ -736,6 +741,7 @@ Definition is_precategory_fun_fun {C C' : precategory_data}
   forall (x x' : precategory_objects C)(f : x --> x'),
     #F f ;; t x' == t x ;; #F' f.
 
+
 Lemma isaprop_is_precategory_fun_fun {C C' : precategory_data}
   (F F' : precategory_ob_mor_fun C C') (t : precategory_fun_fun_data F F') :
   isaprop (is_precategory_fun_fun F F' t).
@@ -747,11 +753,129 @@ Proof.
 Qed.
 
 
+Definition precategory_fun_fun {C C' : precategory_data}
+  (F F' : precategory_ob_mor_fun C C') := total2 (
+   fun t : precategory_fun_fun_data F F' => 
+         is_precategory_fun_fun F F' t).
+
+Lemma isaset_precategory_fun_fun {C C' : precategory_data}
+  (F F' : precategory_ob_mor_fun C C') : isaset
+    (precategory_fun_fun F F').
+Proof.
+  change isaset with (isofhlevel 2).
+  apply isofhleveltotal2.
+  apply impred.
+  intro t. apply (F t --> F' t).
+  intro x. 
+  Search ( isaset).
+  apply isasetaprop.
+  apply isaprop_is_precategory_fun_fun.
+Qed.
+
+Definition precategory_fun_fun_carrier (C C' : precategory_data)
+ (F F' : precategory_ob_mor_fun C C')(a : precategory_fun_fun F F') :
+   forall x : precategory_objects C, F x --> F' x := pr1 a.
+Coercion precategory_fun_fun_carrier : precategory_fun_fun >-> Funclass.
+
+Definition precategory_fun_fun_ax {C C' : precategory_data}
+  (F F' : precategory_ob_mor_fun C C') (a : precategory_fun_fun F F') :
+  forall (x x' : precategory_objects C)(f : x --> x'),
+    #F f ;; a x' == a x ;; #F' f := pr2 a.
 
 
 
+Lemma precategory_fun_fun_eq {C C' : precategory_data}
+  (F F' : precategory_ob_mor_fun C C')(a a' : precategory_fun_fun F F'):
+  (forall x, a x == a' x) -> a == a'.
+Proof.
+  intro H.
+  assert (H' : pr1 a == pr1 a').
+  apply dep_funextfunax.
+  assumption.
+  apply (total2_paths H').
+  apply proofirrelevance.
+  apply isaprop_is_precategory_fun_fun.
+Qed.
+
+Definition precategory_fun_fun_precategory_ob_mor (C C' : precategory_data): 
+  precategory_ob_mor := precategory_ob_mor_pair 
+   (precategory_fun C C') (fun F F' : precategory_fun C C' =>
+                              hSetpair (precategory_fun_fun F F') 
+                                       (isaset_precategory_fun_fun F F')).
 
 
+Lemma is_precategory_fun_fun_id {C C' : precategory}
+  (F : precategory_ob_mor_fun C C') : is_precategory_fun_fun F F
+     (fun c : precategory_objects C => precategory_identity (F c)).
+Proof.
+  intros c c' f.
+  rewrite precategory_id_left.
+  rewrite precategory_id_right.
+  apply idpath.
+Qed.
+
+Definition precategory_fun_fun_id {C C' : precategory}
+  (F : precategory_ob_mor_fun C C') : precategory_fun_fun F F :=
+    tpair _ _ (is_precategory_fun_fun_id F).
+
+
+Lemma is_precategory_fun_fun_comp {C C' : precategory}
+  {F G H : precategory_ob_mor_fun C C'}
+  (a : precategory_fun_fun F G)
+  (b : precategory_fun_fun G H): is_precategory_fun_fun F H
+     (fun x : precategory_objects C => a x ;; b x).
+Proof.
+  intros c c' f.
+  rewrite precategory_assoc.
+  rewrite precategory_fun_fun_ax.
+  rewrite <- precategory_assoc.
+  rewrite precategory_fun_fun_ax.
+  apply precategory_assoc.
+Qed.
+
+
+Definition precategory_fun_fun_comp {C C' : precategory}
+  (F G H: precategory_ob_mor_fun C C') 
+  (a : precategory_fun_fun F G)
+  (b : precategory_fun_fun G H): precategory_fun_fun F H :=
+    tpair _ _ (is_precategory_fun_fun_comp a b).
+
+
+Definition precategory_fun_precategory_data (C C' : precategory): 
+ precategory_data.
+Proof.
+  apply ( precategory_data_pair 
+        (precategory_fun_fun_precategory_ob_mor C C')).
+  intro a. simpl.
+  apply (precategory_fun_fun_id (pr1 a)).
+  intros a b c f g.
+  apply (precategory_fun_fun_comp _ _ _ f g).
+Defined.
+
+Lemma is_precategory_precategory_fun_precategory_data (C C' : precategory) :
+   is_precategory (precategory_fun_precategory_data C C').
+Proof.
+  repeat split; simpl; intros.
+  unfold precategory_identity.
+  simpl.
+  apply precategory_fun_fun_eq.
+  intro x; simpl.
+  apply (precategory_id_left).
+  
+  apply precategory_fun_fun_eq.
+  intro x; simpl.
+  apply (precategory_id_right).
+  
+  apply precategory_fun_fun_eq.
+  intro x; simpl.
+  apply (precategory_assoc).
+Qed.
+
+Definition precatgory_fun_precategory (C C' : precategory): precategory := 
+  tpair _ _ (is_precategory_precategory_fun_precategory_data C C').
+
+  
+  
 
 
 
