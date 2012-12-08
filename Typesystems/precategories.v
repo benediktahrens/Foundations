@@ -4,6 +4,7 @@ Add Rec LoadPath "../hlevel2".
 
 Require Import basic_lemmas_which_should_be_in_uu0.
 Require Import uu0.
+Require Import hProp.
 Require Import hSet.
 
 Notation "a == b" := (paths a b) (at level 70, no associativity).
@@ -272,13 +273,17 @@ Definition precategory_ob_mor_fun_morphisms {C C' : precategory_ob_mor}
 
 Local Notation "# F" := (precategory_ob_mor_fun_morphisms F)(at level 3).
 
-Definition precategory_fun (C C' : precategory_data) := total2 (
-   fun F : precategory_ob_mor_fun C C' => 
+Definition is_precategory_fun (C C' : precategory_data) (F : precategory_ob_mor_fun C C') :=
      dirprod (forall a : precategory_objects C, 
                  #F (precategory_identity a) == precategory_identity (F a))
              (forall a b c : precategory_objects C, forall f : a --> b,
                  forall g : b --> c, 
-                #F (f ;; g) == #F f ;; #F g)).
+                #F (f ;; g) == #F f ;; #F g).
+
+
+Definition precategory_fun (C C' : precategory_data) := total2 (
+   fun F : precategory_ob_mor_fun C C' => 
+      is_precategory_fun C C' F).
 
 Definition precategory_ob_mor_fun_from_precategory_fun (C C': precategory_data)
      (F : precategory_fun C C') : precategory_ob_mor_fun C C' := pr1 F.
@@ -296,6 +301,18 @@ Definition precategory_fun_comp (C C' : precategory_data)(F : precategory_fun C 
                  forall g : b --> c, 
                 #F (f ;; g) == #F f ;; #F g := pr2 (pr2 F).
 
+(** ** Image of a functor is a subcategory *)
+
+Definition is_in_img_precategory_fun {C D : precategory} (F : precategory_fun C D) 
+      (d : precategory_objects D) :=
+  ishinh (
+  total2 (fun c : precategory_objects C => F c == d)).
+
+Definition sub_img_precategory_fun {C D : precategory}(F : precategory_fun C D) :
+    hsubtypes (precategory_objects D) := 
+       fun d : precategory_objects D => is_in_img_precategory_fun F d.
+
+
 
 (** ** Composition of Functors, Identity Functors *)
 
@@ -303,14 +320,29 @@ Definition precategory_fun_comp (C C' : precategory_data)(F : precategory_fun C 
 
 (** * Sub-precategories *)
 
+Definition is_sub_precategory {C : precategory}
+    (C' : hsubtypes (precategory_objects C))
+    (Cmor' : forall a b:precategory_objects C, hsubtypes (a --> b)) :=
+dirprod (forall a : precategory_objects C,
+                         C' a ->  Cmor' _ _ (precategory_identity a ))
+              (forall (a b c: precategory_objects C) (f: a --> b) (g : b --> c),
+                   Cmor' _ _ f -> Cmor' _ _  g -> Cmor' _ _  (f ;; g)).
 
 Definition sub_precategories (C : precategory) := total2 (
    fun C' : dirprod (hsubtypes (precategory_objects C))
                     (forall a b:precategory_objects C, hsubtypes (a --> b)) =>
-      dirprod (forall a : precategory_objects C,
-                         pr1 C' a -> pr2 C' _ _ (precategory_identity a ))
-              (forall (a b c: precategory_objects C) (f: a --> b) (g : b --> c),
-                   pr2 C' _ _ f -> pr2 C' _ _  g -> pr2 C' _ _  (f ;; g))).
+        is_sub_precategory (pr1 C') (pr2 C')).
+
+Lemma is_sub_precategory_full (C : precategory)(C':hsubtypes (precategory_objects C)) :
+        is_sub_precategory C' (fun a b => fun f => htrue).
+Proof.
+  split; simpl;
+  intros; exact tt.
+Defined.
+  
+Definition full_sub_precategory (C : precategory)(C': hsubtypes (precategory_objects C)) :
+   sub_precategories C :=
+  tpair _  (dirprodpair C' (fun a b f => htrue)) (is_sub_precategory_full C C').
 
 
 (** we have a coercion [carrier] turning every predicate [P] on a type [A] into the
@@ -440,6 +472,38 @@ Definition carrier_of_sub_precategory (C : precategory)(C':sub_precategories C) 
 Coercion carrier_of_sub_precategory : sub_precategories >-> precategory.
 
 
+(** ** Functor from a sub-precategory to the ambient precategory *)
+
+Definition sub_precategory_inclusion_data (C : precategory) (C':sub_precategories C) :
+  precategory_ob_mor_fun C' C. 
+Proof.
+  exists (fun a => pr1 a).
+  intros a b f.
+  exact (pr1 f).
+Defined.
+
+Definition is_fun_sub_precategory_inclusion (C : precategory) (C':sub_precategories C) :
+    is_precategory_fun C' C (sub_precategory_inclusion_data C C').
+Proof.
+  split;
+  simpl; 
+  intros.
+  apply (idpath _ ).
+  apply (idpath _ ).
+Qed.
+
+ 
+Definition sub_precategory_inclusion (C : precategory)(C': sub_precategories C) :
+    precategory_fun C' C := tpair _ _ (is_fun_sub_precategory_inclusion C C').
+
+
+
+Definition full_img_sub_precategory {C D : precategory}(F : precategory_fun C D) :
+    sub_precategories D := 
+       full_sub_precategory D (sub_img_precategory_fun F).
+
+
+
     
 (** ** Precategories in style of essentially algebraic cats *)
 (** Of course we later want SETS of objects, rather than types,
@@ -498,7 +562,9 @@ Definition precategory_total_comp (C : precategory_data) :
      tpair _ (dirprodpair (pr1 (pr1 f))(pr2 (pr1 g)))
         ((pr2 f ;; precategory_eq_morphism _ _ _ H) ;; pr2 g).
 
+(** * Functors *)
 
+Definition is_precategory_fun
 
 
 
