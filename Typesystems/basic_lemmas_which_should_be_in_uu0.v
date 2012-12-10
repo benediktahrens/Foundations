@@ -7,6 +7,7 @@ Require Import uu0.
 Require Import hProp.
 Require Import hSet.
 
+
 Require Import pathnotations.
 Import pathnotations.PathNotations.
 
@@ -212,6 +213,23 @@ Lemma isofhlevelonestep (A : UU) n:
 Proof.
   exact (fun x => x).
 Defined.
+
+Lemma happly (A B : UU) (f g : A -> B) (H : f == g) : 
+    forall x, f x == g x.
+Proof.
+  intro x.
+  destruct H.
+  apply idpath.
+Defined.
+
+
+
+
+
+
+
+
+
 
 
 

@@ -1,3 +1,16 @@
+
+(**  OBSOLETE:
+ 
+  use 
+
+ HLevel_n_is_of_hlevel_Sn.v
+
+  instead
+
+*)
+
+
+
 Add Rec LoadPath "../Generalities".
 Add Rec LoadPath "../hlevel1".
 Add Rec LoadPath "../hlevel2".
