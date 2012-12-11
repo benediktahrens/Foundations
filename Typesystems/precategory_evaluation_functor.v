@@ -1,6 +1,7 @@
 Add Rec LoadPath "../Generalities".
 Add Rec LoadPath "../hlevel1".
 Add Rec LoadPath "../hlevel2".
+Add Rec LoadPath "../Proof_of_Extensionality".
 
 Require Import basic_lemmas_which_should_be_in_uu0.
 Require Import uu0.

@@ -925,7 +925,7 @@ Defined.
 
 
   
-
+(*
 Lemma catqalg_fun_eq_if_iso (C C' : catqalg) :
    are_iso_catqalgs C C' -> C == C'.
 Proof.
@@ -957,16 +957,15 @@ Proof.
   clear dependent Cax.
   clear dependent Cax'.
   clear Gax.
+*)
 
 
-
-
+(*
 Lemma isaprop_are_catqalg_fun_inverses (C C' : catqalg) (F : catqalg_fun C C')
      (G : catqalg_fun C' C) : isaprop (are_catqalg_fun_inverses F G).
 Proof.
   apply isofhleveldirprod.
-  
-
+*)
 
 (** lemma that two functors are equal if they are pointwise equal on objects 
     and morphisms *)

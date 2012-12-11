@@ -61,6 +61,17 @@ Notation HSET := hset_precategory.
   Canonical Structure hset_precategory. :-)
 *)
 
+
+(** * The precategory of hSets is saturated. *)
+
+(** ** Equivalence between isomorphisms and weak equivalences 
+       of two hsets. 
+*)
+
+(** Given an iso, we construct a weak equivalence.
+   This is basically unpacking and packing again.
+*)
+
 Lemma hset_iso_is_equiv (A B : precategory_objects HSET) 
    (f : iso_precat A B) : isweq (pr1 f).
 Proof.
@@ -87,6 +98,10 @@ Proof.
   apply hset_iso_is_equiv.
 Defined.
 
+(** Given a weak equivalence, we construct an iso.
+    Again mostly unwrapping and packing. 
+*)
+
 Lemma hset_equiv_is_iso (A B : hSet) 
       (f : weq (pr1 A) (pr1 B)) :
            is_precat_isomorphism (C:=HSET) (pr1 f).
@@ -112,6 +127,15 @@ Proof.
   exists (pr1 f).
   apply hset_equiv_is_iso.
 Defined.
+
+(** Both maps defined above are weak equivalences. *)
+(** Once we have one, there is a more direct proof for the 
+     other, but it is simpler to prove the statement twice,
+    in view of what follows: it simply gives a less complex
+    statement.
+    Also, we actually only need one direction,
+      from equivalences to isos.
+*)
 
 Lemma hset_iso_equiv_is_equiv (A B : precategory_objects HSET) :
       isweq (hset_iso_equiv A B).
@@ -171,6 +195,7 @@ Proof.
   apply hset_equiv_iso_is_equiv.
 Defined.
   
+(** ** HSET is saturated. *)
 
 Definition univalenceweq (X X' : UU) : weq (X == X') (weq X X') :=
    tpair _ _ (univalenceaxiom X X').
@@ -180,13 +205,13 @@ Definition hset_id_iso_weq (A B : precategory_objects HSET) :
   weqcomp (UA_for_hSets A B) (hset_equiv_iso_weq A B).
 
 
-Lemma bla (A : UU) (a : A):
-  eqweqmap  (idpath A) a == a.
-Proof.
-  simpl.
-  apply idpath.
-Defined.
-
+(** The map [precat_paths_to_iso] 
+    for which we need to show [isweq] is actually 
+    equal to the carrier of the weak equivalence we 
+    constructed above.
+    We use this fact to show that that [precat_paths_to_iso]
+    is an equivalence.
+*)
 
 Lemma hset_id_iso_weq_is (A B : precategory_objects HSET):
     precat_paths_to_iso A B == pr1 (hset_id_iso_weq A B).
@@ -199,20 +224,16 @@ Proof.
               pr1 (hset_equiv_iso A A (pr1 (UA_for_hSets A A) (idpath A)))).
   
              simpl.
-(*  destruct (UA_for_hSets A A) as [f fax].*)
   simpl in *.
   apply funextfun.
   unfold precategory_identity. simpl.
   intro x; 
-  simpl. clear p. Check pr1.
+  simpl. clear p.
   destruct A as [A As].
   simpl. apply idpath.
   
   apply (total2_paths H).
-  simpl.
-  Check (pr2 (hset_equiv_iso A A (pr1 (UA_for_hSets A A) (idpath A)))).
   apply proofirrelevance.
-  simpl.
   apply isaprop_is_precat_isomorphism.
 Defined.
 
@@ -232,68 +253,6 @@ Qed.
 
 
 
-
-
-
-
-
-
-  
-  set (H' := @uip 
-((fun f : A --> A => is_precat_isomorphism f)
-         (pr1 (hset_equiv_iso A A (pr1 (UA_for_hSets A A) (idpath A)))))).
-         simpl in H'.
-         apply H'.
-  apply uip.
-
-  simpl.
-  
-  assert (H: f (idpath A) == idpath (@pr1 UU (fun X => isaset X) A)).
-  destruct A as [A Aisset]; simpl in *.
-  change (idpath
-  About identity_refl.
-  unfold identity_refl.
-  destruct (idpath A).
-  simpl.
-
-  unfold UA_for_hSets.
-  simpl.
-              pr1 (hset_id_iso_weq A B)).
-  
-
-  exists (pr1 fax).
-   (f : iso_precat A B) : isweq (pr1 f).
-Proof.
-  destruct f as [f fax]; simpl in *.
-  apply (gradth _ (pr1 fax)).
-  destruct fax as [g [eta eps]]; simpl in *.
-  unfold precategory_compose, precategory_identity in *; 
-  simpl in *.
-  intro x.
-  apply (happly _ _ _ _ eta x).
-  destruct fax as [g [eta eps]]; simpl in *.
-  unfold precategory_compose, precategory_identity in *; 
-  simpl in *.
-  intro x.
-  apply (happly _ _ _ _ eps x).
-Qed.
-  
-
-Lemma hset_iso_equiv (A B : precategory_objects HSET) :
-  iso_precat A B -> weq (pr1 A) (pr1 B).
-
-Lemma is_saturated_hset_precategory : is_saturated hset_precategory.
-Proof.
-  unfold is_saturated.
-  simpl.
-  intros A B.
-  set (H := UA_for_HLevels 2 A B).
-  destruct H as [H H'].
-  unfold isweq.
-  simpl.
-  intro f.
-  unfold precat_paths_to_iso.
-  simpl.
 
 
 

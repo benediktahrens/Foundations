@@ -265,7 +265,7 @@ Proof.
 Qed.
   
 
-(** TODO : this is injective *)
+
 
 
 (** * Functors : Morphisms of precategories *)
@@ -384,6 +384,11 @@ Definition precategory_fun_composite (C C' C'' : precategory)
 
 (** * Sub-precategories *)
 
+(** A sub-precategory is specified through a predicate on objects 
+    and a dependent predicate on morphisms
+    which is compatible with identity and composition
+*)
+
 Definition is_sub_precategory {C : precategory}
     (C' : hsubtypes (precategory_objects C))
     (Cmor' : forall a b:precategory_objects C, hsubtypes (a --> b)) :=
@@ -396,6 +401,8 @@ Definition sub_precategories (C : precategory) := total2 (
    fun C' : dirprod (hsubtypes (precategory_objects C))
                     (forall a b:precategory_objects C, hsubtypes (a --> b)) =>
         is_sub_precategory (pr1 C') (pr2 C')).
+
+(** A full subcategory has the true predicate on morphisms *)
 
 Lemma is_sub_precategory_full (C : precategory)
          (C':hsubtypes (precategory_objects C)) :
@@ -411,8 +418,11 @@ Definition full_sub_precategory (C : precategory)
   tpair _  (dirprodpair C' (fun a b f => htrue)) (is_sub_precategory_full C C').
 
 
-(** we have a coercion [carrier] turning every predicate [P] on a type [A] into the
+(** We have a coercion [carrier] turning every predicate [P] on a type [A] into the
      total space [ { a : A & P a} ].
+   
+   For later, we define some projections with the appropriate type, also to 
+   avoid confusion with the aforementioned coercion.
 *)
 
 Definition sub_precategory_predicate_objects {C : precategory}
@@ -431,6 +441,9 @@ Definition sub_precategory_morphisms {C : precategory}(C':sub_precategories C)
       (a b : precategory_objects C) : UU := 
          (*carrier*) (sub_precategory_predicate_morphisms C' a b).
 
+(** Projections for compatibility of the predicate with identity and
+    composition.
+*)
 
 Definition sub_precategory_id (C : precategory)(C':sub_precategories C) :
    forall a : precategory_objects C,
@@ -466,11 +479,16 @@ Definition sub_precategory_morphisms_set {C : precategory}(C':sub_precategories 
     tpair _ (sub_precategory_morphisms C' a b)
         (is_set_sub_precategory_morphisms C' a b).
 
+
+(** An object of a subcategory is an object of the original precategory. *)
+
 Definition precategory_object_from_sub_precategory_object (C:precategory)
          (C':sub_precategories C) (a : sub_precategory_objects C') : 
     precategory_objects C := pr1 a.
 Coercion precategory_object_from_sub_precategory_object : 
      sub_precategory_objects >-> precategory_objects.
+
+(** A morphism of a subcategory is also a morphism of the original precategory. *)
 
 Definition precategory_morphism_from_sub_precategory_morphism (C:precategory)
           (C':sub_precategories C) (a b : precategory_objects C)
@@ -478,9 +496,11 @@ Definition precategory_morphism_from_sub_precategory_morphism (C:precategory)
 Coercion precategory_morphism_from_sub_precategory_morphism : 
          sub_precategory_morphisms >-> pr1hSet.
 
+(** ** A sub-precategory forms a precategory. *)
 
 Definition sub_precategory_ob_mor (C : precategory)(C':sub_precategories C) :
      precategory_ob_mor.
+Proof.
   exists (sub_precategory_objects C').
   exact (fun a b => @sub_precategory_morphisms_set _ C' a b).
 Defined.
@@ -506,6 +526,7 @@ split.
   apply f. apply g.
 Defined.
 
+(** A useful lemma for equality in the sub-precategory. *)
 
 Lemma eq_in_sub_precategory (C : precategory)(C':sub_precategories C)
       (a b : sub_precategory_objects C') (f g : sub_precategory_morphisms C' a b) :
@@ -579,11 +600,13 @@ Qed.
 Definition sub_precategory_inclusion (C : precategory)(C': sub_precategories C) :
     precategory_fun C' C := tpair _ _ (is_fun_sub_precategory_inclusion C C').
 
-
+(** ** The (full) image of a functor *)
 
 Definition full_img_sub_precategory {C D : precategory}(F : precategory_fun C D) :
     sub_precategories D := 
        full_sub_precategory D (sub_img_precategory_fun F).
+
+(** ** Given a functor F : C -> D, we obtain a functor F : C -> Img(F) *)
 
 Definition full_img_functor_obj {C D : precategory}(F : precategory_fun C D) :
    precategory_objects C -> precategory_objects (full_img_sub_precategory F).
@@ -633,6 +656,7 @@ Definition precategory_fun_full_img {C D: precategory}
    precategory_fun C (full_img_sub_precategory F) :=
    tpair _ _ (is_precategory_fun_full_img C D F).
 
+(** *** Image factorization C -> Img(F) -> D *)
 
 Lemma precategory_fun_full_img_factorization_ob (C D: precategory) 
    (F : precategory_fun C D):
@@ -645,14 +669,16 @@ Proof.
   apply etacorrection.
 Defined.
 
-(**  works up to eta conversion
 
+(**  works up to eta conversion *)
+
+(*
 Lemma precategory_fun_full_img_factorization (C D: precategory) 
                 (F : precategory_fun C D) :
     F == precategory_fun_composite _ _ _ (precategory_fun_full_img F) 
             (sub_precategory_inclusion D _).
 Proof.
-  apply precategory_fun_eq.
+  apply precategory_fun_eq. About precategory_fun_full_img_factorization_ob.
   set (H := precategory_fun_full_img_factorization_ob C D F).
   simpl in *.
   destruct F as [F Fax].
@@ -661,14 +687,37 @@ Proof.
   apply (total2_paths2 (H)).
   unfold precategory_fun_full_img_factorization_ob in H.
   simpl in *.
+  apply dep_funextfunax.
+  intro a.
+  apply dep_funextfunax.
+  intro b.
+  apply funextfunax.
+  intro f.
+  
   generalize Fmor.
   clear Fax.
-  generalize H.
-  clear Fmor.
+  assert (H' : Fob == (fun a : precategory_objects C => Fob a)).
+   apply H.
+
+  generalize dependent a .
+  generalize dependent b.
+  clear Fmor. 
+    generalize H.
+  clear H.
+  intro H.
+  clear H'.
+  destruct H.
+  tion H.
+  induction  H'.
+  induction H'.
   clear H.
   
 *)
 
+
+(** ** Any full subcategory of a saturated category is saturated. *)
+
+(** TODO *)
     
 (** ** Precategories in style of essentially algebraic cats *)
 (** Of course we later want SETS of objects, rather than types,
@@ -783,7 +832,7 @@ Definition precategory_fun_fun_ax {C C' : precategory_data}
   forall (x x' : precategory_objects C)(f : x --> x'),
     #F f ;; a x' == a x ;; #F' f := pr2 a.
 
-
+(** Equality between two natural transformations *)
 
 Lemma precategory_fun_fun_eq {C C' : precategory_data}
   (F F' : precategory_ob_mor_fun C C')(a a' : precategory_fun_fun F F'):
@@ -798,12 +847,15 @@ Proof.
   apply isaprop_is_precategory_fun_fun.
 Qed.
 
+(** ** Functor category (C,C') *)
+
 Definition precategory_fun_fun_precategory_ob_mor (C C' : precategory_data): 
   precategory_ob_mor := precategory_ob_mor_pair 
    (precategory_fun C C') (fun F F' : precategory_fun C C' =>
                               hSetpair (precategory_fun_fun F F') 
                                        (isaset_precategory_fun_fun F F')).
 
+(** *** Identity natural transformation *)
 
 Lemma is_precategory_fun_fun_id {C C' : precategory}
   (F : precategory_ob_mor_fun C C') : is_precategory_fun_fun F F
@@ -819,6 +871,7 @@ Definition precategory_fun_fun_id {C C' : precategory}
   (F : precategory_ob_mor_fun C C') : precategory_fun_fun F F :=
     tpair _ _ (is_precategory_fun_fun_id F).
 
+(** *** Composition of natural transformations *)
 
 Lemma is_precategory_fun_fun_comp {C C' : precategory}
   {F G H : precategory_ob_mor_fun C C'}
@@ -842,6 +895,8 @@ Definition precategory_fun_fun_comp {C C' : precategory}
     tpair _ _ (is_precategory_fun_fun_comp a b).
 
 
+(** *** The data of the functor precategory *)
+
 Definition precategory_fun_precategory_data (C C' : precategory): 
  precategory_data.
 Proof.
@@ -852,6 +907,8 @@ Proof.
   intros a b c f g.
   apply (precategory_fun_fun_comp _ _ _ f g).
 Defined.
+
+(** *** Above data forms a precategory *)
 
 Lemma is_precategory_precategory_fun_precategory_data (C C' : precategory) :
    is_precategory (precategory_fun_precategory_data C C').
