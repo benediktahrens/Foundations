@@ -802,7 +802,7 @@ Definition iso_in_sub_from_iso (a b : precategory_objects (full_sub_precategory 
    (f : iso_precat (pr1 a) (pr1 b)) : iso_precat a b :=
     tpair _ _ (is_iso_in_subcat a b f).
 
-Lemma isweq_iso_from_iso_in_sub (a b : precategory_objects (full_sub_precategory C')) :
+Lemma isweq_iso_from_iso_in_sub (a b : precategory_objects (full_sub_precategory C')):
      isweq (iso_from_iso_in_sub a b).
 Proof.
   apply (gradth _ (iso_in_sub_from_iso a b)).
@@ -818,32 +818,85 @@ Proof.
   apply idpath.
 Qed.
 
+Lemma isweq_iso_in_sub_from_iso (a b : precategory_objects (full_sub_precategory C')):
+     isweq (iso_in_sub_from_iso a b).
+Proof.
+  apply (gradth _ (iso_from_iso_in_sub a b)).
+  intro f.
+  apply eq_iso_precat.
+  simpl.
+  apply idpath.
+  simpl.
+  intro f.
+  apply eq_iso_precat.
+  simpl.
+  apply eq_in_sub_precategory.
+  apply idpath.
+Qed.
+
 
 Definition Id_in_sub_to_iso (a b : precategory_objects (full_sub_precategory C')):
      a == b -> iso_precat (pr1 a) (pr1 b) :=
        funcomp (precat_paths_to_iso a b) (iso_from_iso_in_sub a b).
 
-Definition Id_in_sub_to_iso_equal_iso_precat 
+Lemma Id_in_sub_to_iso_equal_iso_precat 
   (a b : precategory_objects (full_sub_precategory C')) :
-    Id_in_sub_to_iso a b == precat_paths_to_iso (C:=C) (pr1 a) (pr1 b).
+    Id_in_sub_to_iso a b == 
+funcomp (total_paths2_hProp_equiv C' a b)
+        (precat_paths_to_iso (C:=C) (pr1 a) (pr1 b)).
+Proof.
+  apply funextfunax.
+  intro p.
+  destruct p.
+  apply eq_iso_precat;
+  simpl; apply idpath.
+Qed.
 
 Lemma isweq_Id_in_sub_to_iso (a b : precategory_objects (full_sub_precategory C')):
     isweq (Id_in_sub_to_iso a b).
 Proof.
-  apply H.
+  rewrite Id_in_sub_to_iso_equal_iso_precat.
   apply twooutof3c.
+  apply (total_paths2_hProp_equiv C' a b).
   apply H.
+Qed.
+
+Lemma precat_paths_in_sub_as_3_maps
+   (a b : precategory_objects (full_sub_precategory C')):
+     precat_paths_to_iso a b == funcomp (Id_in_sub_to_iso a b) 
+                                        (iso_in_sub_from_iso a b).
+Proof.
+  apply funextfunax.
+  intro p.
+  destruct p.
+  simpl.
+  apply eq_iso_precat.
+  simpl.
+  unfold precategory_morphisms_in_subcat.
+  apply eq_in_sub_precategory.
+  simpl.
+  apply idpath.
+Qed.
 
 
-Definition bla :precategory_morphisms (C := C) (pr1 a) (pr1 b).
-apply f.
+Lemma isweq_sub_precat_paths_to_iso 
+  (a b : precategory_objects (full_sub_precategory C')) :
+ isweq (precat_paths_to_iso a b).
+Proof.
+  rewrite precat_paths_in_sub_as_3_maps.
+  apply twooutof3c.
+  apply isweq_Id_in_sub_to_iso.
+  apply isweq_iso_in_sub_from_iso.
+Qed.
 
-(** Equivalence between the isos of C and the isos of C' *)
-Definition is_iso_in_fullsub_if_iso 
- (a b : precategory_objects (full_sub_precategory C'))
-   (f : iso_precat a b) : 
-  is_precat_isomorphism (C:=full_sub_precategory C') 
-      (precategory_morphisms_in_subcat  (f) tt).
+
+Lemma is_saturated_full_subcat: is_saturated (full_sub_precategory C').
+Proof.
+  unfold is_saturated.
+  apply isweq_sub_precat_paths_to_iso.
+Qed.
+
+
 
 
 End full_sub_sat.
