@@ -819,6 +819,21 @@ Proof.
 Qed.
 
 
+Definition Id_in_sub_to_iso (a b : precategory_objects (full_sub_precategory C')):
+     a == b -> iso_precat (pr1 a) (pr1 b) :=
+       funcomp (precat_paths_to_iso a b) (iso_from_iso_in_sub a b).
+
+Definition Id_in_sub_to_iso_equal_iso_precat 
+  (a b : precategory_objects (full_sub_precategory C')) :
+    Id_in_sub_to_iso a b == precat_paths_to_iso (C:=C) (pr1 a) (pr1 b).
+
+Lemma isweq_Id_in_sub_to_iso (a b : precategory_objects (full_sub_precategory C')):
+    isweq (Id_in_sub_to_iso a b).
+Proof.
+  apply H.
+  apply twooutof3c.
+  apply H.
+
 
 Definition bla :precategory_morphisms (C := C) (pr1 a) (pr1 b).
 apply f.
