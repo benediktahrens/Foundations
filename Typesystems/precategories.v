@@ -14,6 +14,7 @@ Notation "a == b" := (paths a b) (at level 70, no associativity).
 Notation "! p " := (pathsinv0 p) (at level 50).
 Notation "p @ q" := (pathscomp0 p q) (at level 60, right associativity).
 
+Ltac pathvia b := (apply (@pathscomp0 _ _ b _ )).
 
 (** * Definition of a precategory *)
 (** ** Space of types (objects) together with a fibration (morphisms) *)
@@ -259,14 +260,38 @@ Proof.
 Defined.
 
 
-Lemma iso_comp {C : precategory} {a b c : precategory_objects C}
+Lemma is_iso_comp_of_isos {C : precategory} {a b c : precategory_objects C}
   (f : iso_precat a b) (g : iso_precat b c) : is_precat_isomorphism (f ;; g).
 Proof.
   exists (inv_from_iso g ;; inv_from_iso f).
   simpl; split; simpl;
   unfold inv_from_iso; simpl.
-  
-  
+  destruct f as [f [f' Hf]]. simpl in *.
+  destruct g as [g [g' Hg]]; simpl in *.
+  pathvia ((f ;; (g ;; g')) ;; f').
+  repeat rewrite precategory_assoc; apply idpath.
+  rewrite (pr1 Hg).
+  rewrite precategory_id_right.
+  rewrite (pr1 Hf).
+  apply idpath.
+
+  destruct f as [f [f' Hf]]. simpl in *.
+  destruct g as [g [g' Hg]]; simpl in *.
+  pathvia ((g' ;; (f' ;; f)) ;; g).
+  repeat rewrite precategory_assoc; apply idpath.
+  rewrite (pr2 Hf).
+  rewrite precategory_id_right.
+  rewrite (pr2 Hg).
+  apply idpath.
+Qed.
+
+
+Definition iso_comp {C : precategory} {a b c : precategory_objects C}
+  (f : iso_precat a b) (g : iso_precat b c) : iso_precat a c.
+Proof.
+  exists (f ;; g).
+  apply is_iso_comp_of_isos.
+Defined.
   
 
 
@@ -347,9 +372,26 @@ Proof.
 Qed.
 
 
-Lemma idtoiso_inv (C : precategory) (a a' a'' : precategory_objects C)
+Lemma idtoiso_concat (C : precategory) (a a' a'' : precategory_objects C)
   (p : a == a') (q : a' == a'') :
-  idtoiso (p @ q) == idtoiso p ;; idtoiso q.
+  idtoiso (p @ q) == iso_comp (idtoiso p) (idtoiso q).
+Proof.
+  induction p.
+  induction q.
+  simpl.
+  apply eq_iso_precat.
+  simpl.
+  rewrite precategory_id_left.
+  apply idpath.
+Qed.
+
+Lemma isotoid_comp (C : precategory) (H : is_saturated C) (a b c : precategory_objects C)
+  (e : iso_precat a b) (f : iso_precat b c) :
+  isotoid _ H (iso_comp e f) == isotoid _ H e @ isotoid _ H f.
+Proof.
+  Check (isotoid C H e @ isotoid C H f).
+  apply uip.
+  simpl.
 
 
 (** * Functors : Morphisms of precategories *)
