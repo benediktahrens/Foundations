@@ -259,6 +259,40 @@ Proof.
   apply is_iso_inv_from_iso.
 Defined.
 
+Lemma iso_inv_on_right (C : precategory) (a b c: precategory_objects C)
+  (f : a --> b) (g : b --> c) (h : a --> c) (H : h == f;;g) (H': is_precat_isomorphism f) :
+     inv_from_iso (tpair (is_precat_isomorphism )  f H') ;; h == g.
+Proof.
+  assert (H2 : inv_from_iso {| pr1 := f; pr2 := H' |};; h == 
+                  inv_from_iso {| pr1 := f; pr2 := H' |};; (f ;; g)).
+  apply maponpaths; assumption.
+  rewrite precategory_assoc in H2.
+  destruct H' as [f' [Hf Hf']]. simpl in *.
+  unfold inv_from_iso in *;
+  simpl in *.
+  rewrite Hf' in H2.
+  rewrite precategory_id_left in H2.
+  assumption.
+Qed.
+
+Lemma iso_inv_on_left (C : precategory) (a b c: precategory_objects C)
+  (f : a --> b) (g : b --> c) (h : a --> c) (H : h == f;;g) (H': is_precat_isomorphism g) :
+     f == h ;; inv_from_iso (tpair is_precat_isomorphism g H').
+Proof.
+  assert (H2 : h ;; inv_from_iso {| pr1 := g; pr2 := H' |} == 
+                         (f;; g) ;; inv_from_iso {| pr1 := g; pr2 := H' |}).
+    rewrite H. apply idpath.
+  rewrite <- precategory_assoc in H2.
+  destruct H' as [g' [Hg Hg']]. simpl in *.
+  unfold inv_from_iso in *;
+  simpl in *.
+  rewrite Hg in H2.
+  rewrite precategory_id_right in H2.
+  apply pathsinv0.
+  assumption.
+Qed.
+
+
 
 Lemma is_iso_comp_of_isos {C : precategory} {a b c : precategory_objects C}
   (f : iso_precat a b) (g : iso_precat b c) : is_precat_isomorphism (f ;; g).
@@ -1117,20 +1151,20 @@ Definition precategory_total_comp (C : precategory_data) :
 
 (** * Natural transformations *)
 
-
+(*
 Definition precategory_fun_fun_data {C C' : precategory_data}
   (F F' : precategory_ob_mor_fun C C') :=
      forall x : precategory_objects C, F x --> F' x.
-
+*)
 Definition is_precategory_fun_fun {C C' : precategory_data}
   (F F' : precategory_ob_mor_fun C C')
-  (t : precategory_fun_fun_data F F') := 
+  (t : forall x : precategory_objects C, F x -->  F' x) := 
   forall (x x' : precategory_objects C)(f : x --> x'),
     #F f ;; t x' == t x ;; #F' f.
 
 
 Lemma isaprop_is_precategory_fun_fun {C C' : precategory_data}
-  (F F' : precategory_ob_mor_fun C C') (t : precategory_fun_fun_data F F') :
+  (F F' : precategory_ob_mor_fun C C') (t : forall x : precategory_objects C, F x -->  F' x) :
   isaprop (is_precategory_fun_fun F F' t).
 Proof.
   apply impred; intro x.
@@ -1142,7 +1176,7 @@ Qed.
 
 Definition precategory_fun_fun {C C' : precategory_data}
   (F F' : precategory_ob_mor_fun C C') := total2 (
-   fun t : precategory_fun_fun_data F F' => 
+   fun t : forall x : precategory_objects C, F x -->  F' x => 
          is_precategory_fun_fun F F' t).
 
 Lemma isaset_precategory_fun_fun {C C' : precategory_data}
@@ -1183,6 +1217,15 @@ Proof.
   apply proofirrelevance.
   apply isaprop_is_precategory_fun_fun.
 Qed.
+
+Lemma precategory_fun_fun_eq_pointwise (C C' : precategory_data)
+   (F F' : precategory_ob_mor_fun C C') (a a' : precategory_fun_fun F F'):
+      a == a' -> forall x, a x == a' x.
+Proof.
+  destruct 1.
+  apply (fun x => idpath _ ).
+Qed.
+
 
 (** ** Functor category (C,C') *)
 
@@ -1269,8 +1312,72 @@ Qed.
 Definition precategory_fun_precategory (C C' : precategory): precategory := 
   tpair _ _ (is_precategory_precategory_fun_precategory_data C C').
 
+Notation "[ C , D ]" := (precategory_fun_precategory C D).
 
-  
+(** Characterizing isomorphisms in the functor category *)
+Print precategory_ob_mor_fun.
+Print is_precategory_fun_fun.
+Lemma is_precategory_fun_fun_inv_from_pointwise_inv (C D : precategory)
+  (F G : precategory_objects [C,D]) (A : F --> G) 
+  (H : forall a : precategory_objects C, is_precat_isomorphism (pr1 A a)) :
+  is_precategory_fun_fun _ _ 
+     (fun a : precategory_objects C => inv_from_iso (tpair _ _ (H a))).
+Proof.
+  unfold is_precategory_fun_fun.
+  intros x x' f.
+  apply pathsinv0.
+  apply iso_inv_on_right.
+  rewrite precategory_assoc.
+  apply iso_inv_on_left.
+  set (HA:= pr2 A).
+  simpl in *.
+  unfold is_precategory_fun_fun in HA.
+  rewrite HA.
+  apply idpath.
+Qed.
+
+Definition precategory_fun_fun_inv_from_pointwise_inv (C D : precategory)
+  (F G : precategory_objects [C,D]) (A : F --> G) 
+  (H : forall a : precategory_objects C, is_precat_isomorphism (pr1 A a)) :
+    G --> F := tpair _ _ (is_precategory_fun_fun_inv_from_pointwise_inv _ _ _ _ _ H).
 
 
+Lemma precategory_fun_iso_if_pointwise_iso (C C' : precategory)
+ (F G : precategory_objects [C, C']) (A : F --> G) : 
+   (forall a : precategory_objects C, is_precat_isomorphism (pr1 A a)) ->  
+           is_precat_isomorphism A .
+Proof.
+  intro H.
+  simpl in *.
+  exists (precategory_fun_fun_inv_from_pointwise_inv _ _ _ _ _ H).
+  simpl; split; simpl.
+  apply precategory_fun_fun_eq.
+  intro x; simpl.
+  apply (H).
+  apply precategory_fun_fun_eq.
+  intro x; simpl.
+  apply (H).
+Qed.  
+
+Definition precategory_fun_iso_from_pointwise_iso (C C' : precategory)
+ (F G : precategory_objects [C, C']) (A : F --> G) 
+   (H : forall a : precategory_objects C, is_precat_isomorphism (pr1 A a)) : 
+     iso_precat F G := 
+ tpair _ _ (precategory_fun_iso_if_pointwise_iso _ _ _ _ _  H).
+
+
+Lemma precategory_fun_iso_pointwise_if_iso (C C' : precategory)
+ (F G : precategory_objects [C, C']) (A : F --> G) : 
+  is_precat_isomorphism A -> 
+       forall a : precategory_objects C, is_precat_isomorphism (pr1 A a).  
+Proof.
+  intros H a.
+  destruct H as [A' [H1 H2]].
+  simpl in A'. exists (A' a).
+  unfold is_inverse_in_precat in *; simpl; split.
+  set (H1' := precategory_fun_fun_eq_pointwise _ _ _ _ _ _ H1).
+  simpl in H1'.
+  apply H1'.
+  apply (precategory_fun_fun_eq_pointwise _ _ _ _ _ _ H2).
+Qed.
 
