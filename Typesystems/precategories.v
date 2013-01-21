@@ -999,7 +999,7 @@ Proof.
   apply impred.
   intro t. apply (F t --> F' t).
   intro x. 
-  Search ( isaset).
+(*  Search ( isaset). *)
   apply isasetaprop.
   apply isaprop_is_precategory_fun_fun.
 Qed.
