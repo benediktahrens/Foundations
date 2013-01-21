@@ -28,6 +28,7 @@ Proof.
   apply isapropisaset.
 Defined.
 
+(*
 
 Lemma catqalg_from_precat_from_catqalg (C : catqalg) :
    catqalg_from_setcat (setcategory_from_catqalg C) == C.
@@ -74,3 +75,5 @@ Proof.
 
   apply 
   clear Cax.
+
+*)

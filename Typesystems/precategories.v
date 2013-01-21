@@ -239,6 +239,36 @@ Defined.
 Definition identity_iso_precat {C : precategory} (a : precategory_objects C) :
    iso_precat a a := tpair _ _ (identity_is_iso_precat C a).
 
+Definition inv_from_iso {C : precategory} {a b : precategory_objects C}
+  (f : iso_precat a b) : b --> a := pr1 (pr2 f).
+
+Lemma is_iso_inv_from_iso {C : precategory} (a b : precategory_objects C)
+  (f : iso_precat a b) : is_precat_isomorphism (inv_from_iso f).
+Proof.
+  exists (pr1 f).
+  simpl; split; simpl.
+  apply (pr2 (pr2 f)).
+  apply (pr2 (pr2 f)).
+Qed.
+
+Definition iso_inv_from_iso {C : precategory} {a b : precategory_objects C}
+  (f : iso_precat a b) : iso_precat b a.
+Proof.
+  exists (inv_from_iso f).
+  apply is_iso_inv_from_iso.
+Defined.
+
+
+Lemma iso_comp {C : precategory} {a b c : precategory_objects C}
+  (f : iso_precat a b) (g : iso_precat b c) : is_precat_isomorphism (f ;; g).
+Proof.
+  exists (inv_from_iso g ;; inv_from_iso f).
+  simpl; split; simpl;
+  unfold inv_from_iso; simpl.
+  
+  
+  
+
 
 (** ** Saturated precategories *)
 
@@ -250,6 +280,7 @@ Proof.
   exact (identity_iso_precat a).
 Defined.
       
+Notation idtoiso := (precat_paths_to_iso _ _ ).
 
 Definition is_saturated (C : precategory) := forall (a b : precategory_objects C),
     isweq (precat_paths_to_iso a b).
@@ -277,8 +308,48 @@ Proof.
   apply isaset_iso_precat.
 Qed.
   
+Definition isotoid (C : precategory) (H : is_saturated C) {a b : precategory_objects C}:
+      iso_precat a b -> a == b := invmap (weqpair _ (H a b)).
 
 
+Definition double_transport {C : precategory} {a a' b b' : precategory_objects C}
+   (p : a == a') (q : b == b') (f : a --> b) : a' --> b'.
+Proof.
+  induction p.
+  induction q.
+  exact f.
+Defined.
+
+Lemma isotoid_idtoiso (C : precategory) (H : is_saturated C) 
+ (a a' b b' : precategory_objects C) (p : a == a') (q : b == b') 
+  (f : a --> b) : 
+  double_transport p q f == inv_from_iso (idtoiso p) ;; f ;; idtoiso q.
+Proof.
+  induction p.
+  induction q.
+  simpl.
+  rewrite precategory_id_right.
+  unfold inv_from_iso.
+  simpl.
+  rewrite precategory_id_left.
+  apply idpath.
+Qed.
+
+Lemma idtoiso_inv (C : precategory) (a a' : precategory_objects C)
+  (p : a == a') : idtoiso (!p) == iso_inv_from_iso (idtoiso p).
+Proof.
+  induction p.
+  apply eq_iso_precat. 
+  simpl.
+  unfold inv_from_iso.
+  simpl.
+  apply idpath.
+Qed.
+
+
+Lemma idtoiso_inv (C : precategory) (a a' a'' : precategory_objects C)
+  (p : a == a') (q : a' == a'') :
+  idtoiso (p @ q) == idtoiso p ;; idtoiso q.
 
 
 (** * Functors : Morphisms of precategories *)
