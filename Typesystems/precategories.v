@@ -336,6 +336,26 @@ Qed.
 Definition isotoid (C : precategory) (H : is_saturated C) {a b : precategory_objects C}:
       iso_precat a b -> a == b := invmap (weqpair _ (H a b)).
 
+Lemma idtoiso_isotoid (C : precategory) (H : is_saturated C) (a b : precategory_objects C)
+    (f : iso_precat a b) : idtoiso (isotoid _ H f) == f.
+Proof.
+  unfold isotoid.
+  set (Hw := homotweqinvweq (weqpair idtoiso (H a b))).
+  simpl in Hw.
+  rewrite Hw.
+  apply idpath.
+Qed.
+
+Lemma isotoid_idtoiso (C : precategory) (H : is_saturated C) (a b : precategory_objects C)
+    (p : a == b) : isotoid _ H (idtoiso p) == p.
+Proof.
+  unfold isotoid.
+  set (Hw := homotinvweqweq (weqpair idtoiso (H a b))).
+  simpl in Hw.
+  rewrite Hw.
+  apply idpath.
+Qed.
+
 
 Definition double_transport {C : precategory} {a a' b b' : precategory_objects C}
    (p : a == a') (q : b == b') (f : a --> b) : a' --> b'.
@@ -345,9 +365,8 @@ Proof.
   exact f.
 Defined.
 
-Lemma isotoid_idtoiso (C : precategory) (H : is_saturated C) 
- (a a' b b' : precategory_objects C) (p : a == a') (q : b == b') 
-  (f : a --> b) : 
+Lemma double_transport_idtoiso (C : precategory) (a a' b b' : precategory_objects C) 
+  (p : a == a') (q : b == b')  (f : a --> b) : 
   double_transport p q f == inv_from_iso (idtoiso p) ;; f ;; idtoiso q.
 Proof.
   induction p.
@@ -385,13 +404,36 @@ Proof.
   apply idpath.
 Qed.
 
+
+Lemma idtoiso_inj (C : precategory) (H : is_saturated C) (a a' : precategory_objects C)
+   (p p' : a == a') : idtoiso p == idtoiso p' -> p == p'.
+Proof.
+  intro H'.
+  set (H'' := maponpaths (isotoid _ H )  H').
+  repeat rewrite isotoid_idtoiso in H''.
+  assumption.
+Qed.
+
+Lemma isotoid_inj (C : precategory) (H : is_saturated C) (a a' : precategory_objects C)
+   (f f' : iso_precat a a') : isotoid _ H f == isotoid _ H f' -> f == f'.
+Proof.
+  intro H'.
+  set (H'' := maponpaths idtoiso H').
+  repeat rewrite idtoiso_isotoid in H''.
+  assumption.
+Qed.
+
+
 Lemma isotoid_comp (C : precategory) (H : is_saturated C) (a b c : precategory_objects C)
   (e : iso_precat a b) (f : iso_precat b c) :
   isotoid _ H (iso_comp e f) == isotoid _ H e @ isotoid _ H f.
 Proof.
-  Check (isotoid C H e @ isotoid C H f).
-  apply uip.
-  simpl.
+  apply idtoiso_inj.
+    assumption.
+  rewrite idtoiso_concat.
+  repeat rewrite idtoiso_isotoid.
+  apply idpath.
+Qed.
 
 
 (** * Functors : Morphisms of precategories *)
