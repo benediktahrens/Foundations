@@ -216,7 +216,6 @@ Proof.
   simpl in *.
   assert (H : forall z : x == y, iscontr (transportf (fun x : A => B x) z px == py)).
   intro p.
-  Search iscontr.
   set (H := pr2 (B y)).
   simpl in H.
   apply (H _ py).
@@ -317,7 +316,7 @@ Proof. intros. unfold isweq. intro y. set (isy:= is1 y).
   apply (iscontrweqf ( ezweqpr1 B y)) . assumption. 
 Defined.
 
-About transportf.
+
 
 Lemma transportf_idpath (X : UU) (P : X -> UU) (x : X)(z : P x) :
    transportf _ (idpath x) z == z.
