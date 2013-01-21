@@ -237,14 +237,14 @@ Definition catqalg_assoc (C : catqalg) :
 
  
 (** *** Check that coercions work properly *)
-Check (fun X : catqalg => @catqalgcompose X).
-Check (fun X : catqalg => @catqalgid_morphism X).
+(* Check (fun X : catqalg => @catqalgcompose X). *)
+(* Check (fun X : catqalg => @catqalgid_morphism X). *)
 
 (** *** The next coercion closes the coercion chain from [catqalg] to [UU] *)
 
 Coercion catqalgobjects : cell_data >-> hSet.
 
-Check (fun (X : catqalg)(x : X) => catqalgid_morphism x).
+(* Check (fun (X : catqalg)(x : X) => catqalgid_morphism x). *)
 
 (** ** Criterion for two quasialgebraic categories to be equal *)
 
@@ -605,7 +605,6 @@ Proof.
   unfold catqalg_fun_obj, catqalg_fun_mor in H, H'. simpl in *.
   apply pathsdirprod; assumption.
   apply (total2_paths Hpr1).
-  Check (pr2 F').
   apply proofirrelevance.
   apply isaprop_is_cell_data_fun.
 Defined.
