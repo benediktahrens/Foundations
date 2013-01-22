@@ -1390,7 +1390,7 @@ Definition precategory_fun_iso_pointwise_if_iso (C C' : precategory)
  
 
 
-Definition pr1_functor_eq_from_functor_iso (C D : precategory)
+Definition pr1_pr1_functor_eq_from_functor_iso (C D : precategory)
     (H : is_saturated D) (F G : precategory_objects [C , D]) :
    iso_precat F G -> pr1 (pr1 F) == pr1 (pr1 G).
 Proof.
@@ -1402,6 +1402,35 @@ Proof.
   apply (precategory_fun_iso_pointwise_if_iso _ _ _ _ A).
   apply A.
 Defined.
+
+Definition pr1_functor_eq_from_functor_iso (C D : precategory)
+    (H : is_saturated D) (F G : precategory_objects [C , D]) :
+   iso_precat F G -> pr1 F == pr1 G.
+Proof.
+  intro A.
+  apply (total2_paths (pr1_pr1_functor_eq_from_functor_iso C D H F G A)).
+  simpl in *.
+  unfold pr1_pr1_functor_eq_from_functor_iso.
+  simpl in *.
+  destruct F as [[F F'] HF]; simpl in *.
+  destruct G as [[G G'] HG]; simpl in *.
+  apply funextsec.
+  intro a.
+  apply funextsec.
+  intro b.
+  apply funextsec.
+  intro f.
+  
+  apply (total2_paths ().
+  apply funextsec.
+  intro t.
+  apply isotoid.
+  assumption.
+  apply (precategory_fun_iso_pointwise_if_iso _ _ _ _ A).
+  apply A.
+Defined.
+
+
 
 Lemma functor_precat_saturated_if_target_precat_is (C D : precategory)
     (H : is_saturated D) (F G : precategory_objects [C , D]) :
