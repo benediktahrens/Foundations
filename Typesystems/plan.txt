@@ -53,9 +53,11 @@ but do we need this equality?
 10. If F : C ---> D is an equivalence of precategories, then the following
 type is inhabited: Id(C, D).
 
-missing, but is bonus anyway
+Shulman
 
 11. Combining 9. and 10. we get an inhabitant of Id(C, S(C)).I fill in what is to be found where:
+
+Shulman
 
 =====
 
