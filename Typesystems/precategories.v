@@ -1379,7 +1379,8 @@ Proof.
   simpl in H1'.
   apply H1'.
   apply (precategory_fun_fun_eq_pointwise _ _ _ _ _ _ H2).
-Qed.
+Defined.
+
 
 Definition precategory_fun_iso_pointwise_if_iso (C C' : precategory)
  (F G : precategory_objects [C, C']) (A : F --> G) 
@@ -1420,6 +1421,9 @@ Proof.
   intro b.
   apply funextsec.
   intro f.
+  unfold precategory_fun_iso_pointwise_if_iso.
+  unfold is_precategory_fun_iso_pointwise_if_iso.
+  simpl.
   
   apply (total2_paths ().
   apply funextsec.
