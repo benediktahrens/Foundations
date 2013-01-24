@@ -1404,6 +1404,90 @@ Proof.
   apply A.
 Defined.
 
+
+Lemma weird_lemma (C D : precategory) 
+      (F0 G0 : precategory_objects C -> precategory_objects D)
+    (F1 : forall a b : precategory_objects C, a --> b -> F0 a --> F0 b)
+    (G1 : forall a b : precategory_objects C, a --> b -> G0 a --> G0 b)
+   (gamma : F0  == G0 ) 
+    (a b : precategory_objects C) (f : a --> b) :
+   
+transportf (fun x : precategory_objects C -> precategory_objects D => 
+  forall a0 b0 : precategory_objects  C, a0 --> b0 -> x a0 --> x b0)
+  (*funextsec (fun _ : precategory_objects C => D) F0 G0
+     (fun t : precategory_objects C => gamma t)*)
+  gamma
+(*      isotoid D H
+        (precategory_fun_iso_pointwise_if_iso C D
+           {| pr1 := {| pr1 := F0; pr2 := F1 |}; pr2 := HF |}
+           {| pr1 := {| pr1 := G0; pr2 := G1 |}; pr2 := HG |} A (pr2 A) t))) *)
+  F1 a b f == G1 a b f.
+Proof.
+  Check @transportf.
+  set (X := F1 a b f).
+  Check @toforallpaths.
+  set (X' := transportf (fun SS => SS --> F0 b)  (toforallpaths _ _ _ gamma a) X).
+  pathvia (transportf (fun TT => G0 a --> TT)  (toforallpaths _ _ _ gamma b) 
+        (transportf (fun SS => SS --> F0 b) (toforallpaths _ _ _ gamma a) (F1 a b f))).
+  induction gamma.
+  simpl.
+
+  rewrite transportfidpath.
+
+
+
+
+Lemma weird_lemma (C D : precategory) 
+      (F0 G0 : precategory_objects C -> precategory_objects D)
+    (F1 : forall a b : precategory_objects C, a --> b -> F0 a --> F0 b)
+    (G1 : forall a b : precategory_objects C, a --> b -> G0 a --> G0 b)
+   (gamma : forall a, F0 a == G0 a) 
+    (a b : precategory_objects C) (f : a --> b) :
+   
+transportf (fun x : precategory_objects C -> precategory_objects D => 
+  forall a0 b0 : precategory_objects  C, a0 --> b0 -> x a0 --> x b0)
+  (funextsec (fun _ : precategory_objects C => D) F0 G0
+     (fun t : precategory_objects C => gamma t))
+(*      isotoid D H
+        (precategory_fun_iso_pointwise_if_iso C D
+           {| pr1 := {| pr1 := F0; pr2 := F1 |}; pr2 := HF |}
+           {| pr1 := {| pr1 := G0; pr2 := G1 |}; pr2 := HG |} A (pr2 A) t))) *)
+  F1 a b f == G1 a b f.
+Proof.
+  Check @transportf.
+  set (X := F1 a b f).
+  set (X' := transportf (fun SS => SS --> F0 b)  (gamma a) X).
+  pathvia (transportf (fun TT => G0 a --> TT)  (gamma b) 
+        (transportf (fun SS => SS --> F0 b) (gamma a) (F1 a b f))).
+  induction gamma.
+
+
+   transportf (fun F : C -> D => forall a b : c, a --> b -> F a --> F b)
+    (funextsec _ (pr1 (pr1 F)) 
+                 (fun a : C => gamma a))
+      (pr2 (pr1 F)) a b f ==
+        
+      transportf (
+
+
+1 subgoal
+C : precategory
+D : precategory
+H : is_saturated D
+F0 : C -> D
+F1 : forall a b : C, a --> b -> F0 a --> F0 b
+HF : is_precategory_fun {| pr1 := F0; pr2 := F1 |}
+G : precategory_fun C D
+A : iso_precat {| pr1 := {| pr1 := F0; pr2 := F1 |}; pr2 := HF |} G
+______________________________________(1/1)
+transportf (fun x : C -> D => forall a b : C, a --> b -> x a --> x b)
+  (funextsec (fun _ : C => D) F0 (pr1 (pr1 G))
+     (fun t : C =>
+      isotoid D H
+        (precategory_fun_iso_pointwise_if_iso C D
+           {| pr1 := {| pr1 := F0; pr2 := F1 |}; pr2 := HF |} G A (pr2 A) t)))
+  F1 == pr2 (pr1 G)
+*)
 Definition pr1_functor_eq_from_functor_iso (C D : precategory)
     (H : is_saturated D) (F G : precategory_objects [C , D]) :
    iso_precat F G -> pr1 F == pr1 G.
@@ -1413,14 +1497,30 @@ Proof.
   simpl in *.
   unfold pr1_pr1_functor_eq_from_functor_iso.
   simpl in *.
-  destruct F as [[F0 F1] HF]; simpl in *.
-  destruct G as [[G0 G1] HG]; simpl in *.
   apply funextsec.
   intro a.
   apply funextsec.
   intro b.
   apply funextsec.
   intro f.
+  pattern ((fun t : precategory_objects C =>
+      isotoid D H (precategory_fun_iso_pointwise_if_iso C D F G A (pr2 A) t))).
+    destruct F as [[F0 F1] HF]; simpl in *.
+  destruct G as [[G0 G1] HG]; simpl in *.
+
+  
+  Check (fun t : precategory_objects C =>
+      isotoid D H
+        (precategory_fun_iso_pointwise_if_iso C D
+           {| pr1 := {| pr1 := F0; pr2 := F1 |}; pr2 := HF |}
+           {| pr1 := {| pr1 := G0; pr2 := G1 |}; pr2 := HG |} A (pr2 A) t)).
+  generalize dependent (.
+  
+  transitivitity (
+      transportf (isotoid D H 
+
+).
+  
   unfold precategory_fun_iso_pointwise_if_iso.
   unfold is_precategory_fun_iso_pointwise_if_iso.
   simpl.
