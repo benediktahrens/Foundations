@@ -1413,8 +1413,8 @@ Proof.
   simpl in *.
   unfold pr1_pr1_functor_eq_from_functor_iso.
   simpl in *.
-  destruct F as [[F F'] HF]; simpl in *.
-  destruct G as [[G G'] HG]; simpl in *.
+  destruct F as [[F0 F1] HF]; simpl in *.
+  destruct G as [[G0 G1] HG]; simpl in *.
   apply funextsec.
   intro a.
   apply funextsec.
