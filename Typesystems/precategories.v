@@ -1611,6 +1611,9 @@ Proof.
   apply idpath.
 Qed.
   
+
+(*
+
   replace (A' a ;; A a) with ((A' ;; A ) a).
   unfold is_precategory_fun_iso_pointwise_if_iso in H5.
   simpl in *.
@@ -1710,7 +1713,7 @@ Proof.
   intros F G.
   simpl in *.
 
-
+*)
 
 
 
