@@ -536,14 +536,14 @@ Definition precategory_ob_mor_fun_from_precategory_fun (C C': precategory_data)
 Coercion precategory_ob_mor_fun_from_precategory_fun : precategory_fun >->
       precategory_ob_mor_fun.
 
-
+(*
 Definition precategory_fun_ob_eq_from_precategory_fun_eq (C C' : precategory_data)
    (F G : precategory_fun C C') (H : F == G) : 
       precategory_ob_mor_fun_objects F == precategory_ob_mor_fun_objects G.
 Proof.
   apply (base_paths _ _ (base_paths _ _ H)).
 Defined.
-
+*)
 
 Definition precategory_fun_eq_eq_from_precategory_fun_ob_eq (C C' : precategory_data)
    (F G : precategory_fun C C') (p q : F == G) 
@@ -555,24 +555,26 @@ Proof.
   simpl.
   assert (H' : base_paths _ _ p == base_paths _ _ q).
   apply equal_equalities_between_pairs.
-  Check (total_paths_equiv_fibr
-   (fun x : precategory_objects C -> precategory_objects C' => forall a b : precategory_objects C, a --> b -> x a --> x b) (pr1 F)
+(*  Check (total_paths_equiv_fibr
+   (fun x : precategory_objects C -> precategory_objects C' => 
+    forall a b : precategory_objects C, a --> b -> x a --> x b) (pr1 F)
    (pr1 G)) (base_paths F G p).
-
-simpl.
-  Print total2_paths2.
-  set  (H3:= @total2_paths2 _ (fun p : pr1 (pr1 F) == pr1 (pr1 G) =>
+*)
+  simpl. 
+(*  Print total2_paths2. *)
+  apply (@total2_paths2 _ (fun p : pr1 (pr1 F) == pr1 (pr1 G) =>
           transportf
             (fun x : precategory_objects C -> precategory_objects C' =>
-             (fun x0 : precategory_objects C -> precategory_objects C' => forall a b : precategory_objects C, a --> b -> x0 a --> x0 b) x)
+            (fun x0 : precategory_objects C -> precategory_objects C' => 
+            forall a b : precategory_objects C, a --> b -> x0 a --> x0 b) x)
             p (pr2 (pr1 F)) == pr2 (pr1 G)) _ 
    (fiber_path_fibr (base_paths F G p)) _ (fiber_path_fibr (base_paths F G q))  H).
-   apply H3.
-   clear H3.
-   Check fiber_path_fibr (base_paths F G q).
+(*   Check fiber_path_fibr (base_paths F G q).
    Check (pr2 (pr1 G)).
+*)
    apply uip.
-   Check impred.
+(* Check impred.
+*)
    change (isaset) with (isofhlevel 2).
    apply impred.
    intro a.
@@ -581,25 +583,27 @@ simpl.
    apply impred.
    intro f.
    apply (pr1 (pr1 G ) a --> pr1 (pr1 G) b).
-   Check base_paths F G p.
+(*   Check base_paths F G p.
    Check (fiber_path_fibr q).
    Check fiber_path_fibr p.
    Check @total2_paths2.
-   set (H3:= @total2_paths2 (pr1 F == pr1 G)  
+*)
+   apply (@total2_paths2 (pr1 F == pr1 G)  
     (fun x : pr1 F == pr1 G => transportf _ x (pr2 F) == pr2 G)
 (*
 precategory_ob_mor_fun C C' =>
                    is_precategory_fun x) *)
           (base_paths F G p) (fiber_path_fibr p) (base_paths F G q) (fiber_path_fibr q) H').
-   apply H3.
+(*   apply H3.
    Check fiber_path_fibr q.
+*)
    apply uip.
    apply isasetaprop.
    apply isaprop_is_precategory_fun.
 Defined.
 
 
-
+(*
 Definition precategory_fun_eq_eq_from_precategory_fun_ob_eq (C C' : precategory_data)
    (F G : precategory_fun C C') (p q : F == G) 
    (H : precategory_fun_ob_eq_from_precategory_fun_eq _ _ _ _ p == 
@@ -613,7 +617,7 @@ Proof.
   simpl in *.
   apply (total2_paths H).
   simpl.
-  
+*)
   
 
 Definition precategory_fun_id (C C' : precategory_data)(F : precategory_fun C C'):
@@ -1303,12 +1307,14 @@ Proof.
   apply isaprop_is_precategory_fun_fun.
 Qed.
 
-Lemma precategory_fun_fun_eq_pointwise (C C' : precategory_data)
+Definition precategory_fun_fun_eq_pointwise (C C' : precategory_data)
    (F F' : precategory_ob_mor_fun C C') (a a' : precategory_fun_fun F F'):
       a == a' -> forall x, a x == a' x.
 Proof.
-  destruct 1.
-  apply (fun x => idpath _ ).
+  intro h.
+  apply toforallpaths.
+  apply maponpaths.
+  assumption.
 Qed.
 
 
@@ -1495,7 +1501,13 @@ Definition precategory_fun_iso_pointwise_if_iso (C C' : precategory)
        iso_precat (pr1 F a) (pr1 G a) := 
   fun a => tpair _ _ (is_precategory_fun_iso_pointwise_if_iso C C' F G A H a).
  
-
+(*
+Lemma precategory_fun_iso_pointwise_if_iso_on_idtoiso (C C' : precategory)
+  (F G : precategory_objects [C, C']) (A : F == G) :
+    forall a : precategory_objects C,
+   precategory_fun_iso_pointwise_if_iso C C' F G (idtoiso F) a
+    ==  toforallpaths 
+  *)  
 
 Definition pr1_pr1_functor_eq_from_functor_iso (C D : precategory)
     (H : is_saturated D) (F G : precategory_objects [C , D]) :
@@ -1509,100 +1521,34 @@ Proof.
   apply (precategory_fun_iso_pointwise_if_iso _ _ _ _ A).
   apply A.
 Defined.
+Check @toforallpaths.
+
+(*
+Definition pr1_pr1_functor_eq_from_functor_iso_on_idtoiso (C D : precategory)
+    (H : is_saturated D) (F G : precategory_objects [C , D]) 
+    (p : F == G) : forall a : precategory_objects C,
+    toforallpaths _ _ _ (pr1_pr1_functor_eq_from_functor_iso _ _ _ _ _ (idtoiso p)) a  ==
+         idtoiso _ (maponpaths (@pr1 _ _ ) (maponpaths (@pr1 _ _ ) p)) a.
+   iso_precat F G -> pr1 (pr1 F) == pr1 (pr1 G).
+*)
 
 
 Lemma weird_lemma (C D : precategory) 
       (F0 G0 : precategory_objects C -> precategory_objects D)
     (F1 : forall a b : precategory_objects C, a --> b -> F0 a --> F0 b)
-    (*G1 : forall a b : precategory_objects C, a --> b -> G0 a --> G0 b*)
    (gamma : F0  == G0 ) 
     (a b : precategory_objects C) (f : a --> b) :
-   
 transportf (fun x : precategory_objects C -> precategory_objects D => 
-  forall a0 b0 : precategory_objects  C, a0 --> b0 -> x a0 --> x b0)
-  (*funextsec (fun _ : precategory_objects C => D) F0 G0
-     (fun t : precategory_objects C => gamma t)*)
-  gamma
-(*      isotoid D H
-        (precategory_fun_iso_pointwise_if_iso C D
-           {| pr1 := {| pr1 := F0; pr2 := F1 |}; pr2 := HF |}
-           {| pr1 := {| pr1 := G0; pr2 := G1 |}; pr2 := HG |} A (pr2 A) t))) *)
-  F1 a b f == 
+            forall a0 b0 : precategory_objects  C, a0 --> b0 -> x a0 --> x b0)
+           gamma  F1 a b f == 
 transportf (fun TT : precategory_objects D => G0 a --> TT)
   (toforallpaths (fun _ : precategory_objects C => D) F0 G0 gamma b)
   (transportf (fun SS : precategory_objects D => SS --> F0 b)
      (toforallpaths (fun _ : precategory_objects C => D) F0 G0 gamma a) (F1 a b f)).
 Proof.
-  Check @transportf.
-  set (X := F1 a b f).
-  Check @toforallpaths.
-  set (X' := transportf (fun SS => SS --> F0 b)  (toforallpaths _ _ _ gamma a) X).
-  
-(*  pathvia (transportf (fun TT => G0 a --> TT)  (toforallpaths _ _ _ gamma b) 
-        (transportf (fun SS => SS --> F0 b) (toforallpaths _ _ _ gamma a) (F1 a b f))).
-*)
   induction gamma.
   apply idpath.
-Qed.
-
-(*
-Lemma weird_lemma (C D : precategory) 
-      (F0 G0 : precategory_objects C -> precategory_objects D)
-    (F1 : forall a b : precategory_objects C, a --> b -> F0 a --> F0 b)
-    (G1 : forall a b : precategory_objects C, a --> b -> G0 a --> G0 b)
-   (gamma : forall a, F0 a == G0 a) 
-    (a b : precategory_objects C) (f : a --> b) :
-   
-transportf (fun x : precategory_objects C -> precategory_objects D => 
-  forall a0 b0 : precategory_objects  C, a0 --> b0 -> x a0 --> x b0)
-  (funextsec (fun _ : precategory_objects C => D) F0 G0
-     (fun t : precategory_objects C => gamma t))
-(*      isotoid D H
-        (precategory_fun_iso_pointwise_if_iso C D
-           {| pr1 := {| pr1 := F0; pr2 := F1 |}; pr2 := HF |}
-           {| pr1 := {| pr1 := G0; pr2 := G1 |}; pr2 := HG |} A (pr2 A) t))) *)
-  F1 a b f == G1 a b f.
-Proof.
-  Check @transportf.
-  set (X := F1 a b f).
-  set (X' := transportf (fun SS => SS --> F0 b)  (gamma a) X).
-  pathvia (transportf (fun TT => G0 a --> TT)  (gamma b) 
-        (transportf (fun SS => SS --> F0 b) (gamma a) (F1 a b f))).
-  induction gamma.
-
-
-   transportf (fun F : C -> D => forall a b : c, a --> b -> F a --> F b)
-    (funextsec _ (pr1 (pr1 F)) 
-                 (fun a : C => gamma a))
-      (pr2 (pr1 F)) a b f ==
-        
-      transportf (
-
-
-1 subgoal
-C : precategory
-D : precategory
-H : is_saturated D
-F0 : C -> D
-F1 : forall a b : C, a --> b -> F0 a --> F0 b
-HF : is_precategory_fun {| pr1 := F0; pr2 := F1 |}
-G : precategory_fun C D
-A : iso_precat {| pr1 := {| pr1 := F0; pr2 := F1 |}; pr2 := HF |} G
-______________________________________(1/1)
-transportf (fun x : C -> D => forall a b : C, a --> b -> x a --> x b)
-  (funextsec (fun _ : C => D) F0 (pr1 (pr1 G))
-     (fun t : C =>
-      isotoid D H
-        (precategory_fun_iso_pointwise_if_iso C D
-           {| pr1 := {| pr1 := F0; pr2 := F1 |}; pr2 := HF |} G A (pr2 A) t)))
-  F1 == pr2 (pr1 G)
-*)
-
-Check @toforallpaths.
-(*
-orall (T : UU) (P : T -> UU) (f g : forall t : T, P t),
-       f == g -> forall t : T, f t == g t
-*)
+Defined.
 
 
 Lemma toforallpaths_funextsec : forall (T : UU) (P : T -> UU) (f g : forall t : T, P t)
@@ -1610,7 +1556,6 @@ Lemma toforallpaths_funextsec : forall (T : UU) (P : T -> UU) (f g : forall t : 
             toforallpaths _  _ _ (funextsec _ _ _ h) == h.
 Proof.
   intros T P f g h.
-(*  set (H := homotinvweqweq (weqtoforallpaths _ f g)). *)
   set (H':= homotweqinvweq (weqtoforallpaths _ f g)).
   simpl in H'.
   apply H'.
@@ -1679,7 +1624,7 @@ Proof.
   apply idpath.
 Defined.
 
-Definition functor_eq_from_functor_iso (C D : precategory)
+Definition functor_eq_from_functor_iso {C D : precategory}
     (H : is_saturated D) (F G : precategory_objects [C , D]) 
     (H' : iso_precat F G) : F == G.
 Proof.
@@ -1688,6 +1633,132 @@ Proof.
   assumption.
 Defined.
 
+
+Lemma idtoiso_compute_pointwise (C D : precategory)
+  (*H : is_saturated D*) (F G : precategory_objects [C, D])
+     (p : F == G) (a : precategory_objects C) :
+
+precategory_fun_iso_pointwise_if_iso C D F G (idtoiso p) (pr2 (idtoiso p)) a ==
+idtoiso
+  (toforallpaths (fun _ : precategory_objects C => D) (pr1 (pr1 F)) (pr1 (pr1 G))
+     (base_paths (pr1 F) (pr1 G) (base_paths F G p)) a).
+Proof.
+  induction p.
+  simpl.
+  apply eq_iso_precat. simpl. apply idpath.
+Qed.
+
+
+Lemma functor_eq_from_functor_iso_idtoiso (C D : precategory)
+    (H : is_saturated D)
+    (F G : precategory_objects [C, D]) (p : F == G) :
+  functor_eq_from_functor_iso H F G (idtoiso p) == p.
+Proof.
+  simpl.
+  apply precategory_fun_eq_eq_from_precategory_fun_ob_eq.
+  unfold functor_eq_from_functor_iso.
+  unfold precategory_fun_eq.
+  simpl.
+  rewrite base_total_path_fibr.
+  unfold pr1_functor_eq_from_functor_iso.
+  rewrite base_total_path_fibr.
+  unfold pr1_pr1_functor_eq_from_functor_iso.
+  
+(* here maybe use transport of equality along weq toforallpath *)  
+  Check equal_transport_along_weq.
+  apply (equal_transport_along_weq _ _  _ _ (weqtoforallpaths _ _ _ )).
+  
+  simpl.
+  rewrite toforallpaths_funextsec.
+  simpl.
+  apply funextsec.
+  intro a. Check (pr2 (idtoiso p)).
+  rewrite idtoiso_compute_pointwise.
+  
+(*  
+  pathvia (isotoid D H
+       
+    (idtoiso (     toforallpaths (fun _ : precategory_objects C => D) (pr1 (pr1 F)) (pr1 (pr1 G))
+  (base_paths (pr1 F) (pr1 G) (base_paths F G p)) a))
+
+).
+  apply maponpaths.
+  induction p.
+  simpl.
+  Check identity_iso_precat (pr1 (pr1 F) a).
+  apply eq_iso_precat. simpl. apply idpath.
+*)
+  rewrite isotoid_idtoiso.
+  apply idpath.
+Qed.
+
+Lemma idtoiso_functor_eq_from_functor_iso (C D : precategory)
+    (H : is_saturated D)
+    (F G : precategory_objects [C, D]) (gamma : iso_precat F G) :
+        idtoiso  (functor_eq_from_functor_iso H F G gamma) == gamma.
+Proof.
+  apply eq_iso_precat.
+  simpl.
+  apply precategory_fun_fun_eq.
+  intro a.
+  Check idtoiso_compute_pointwise.
+  set (H':= idtoiso_compute_pointwise C D F G (functor_eq_from_functor_iso H F G gamma) a).
+  simpl in *.
+  set (H2 := maponpaths (@pr1 _ _ ) H').
+  simpl in H2.
+  pathvia (pr1
+       (idtoiso
+          (toforallpaths (fun _ : precategory_objects C => D) (pr1 (pr1 F)) (pr1 (pr1 G))
+             (base_paths (pr1 F) (pr1 G)
+                (base_paths F G (functor_eq_from_functor_iso H F G gamma))) a))).
+  apply H2. clear H2.
+  unfold functor_eq_from_functor_iso.
+  simpl.
+  unfold precategory_fun_eq.
+  rewrite base_total_path_fibr.
+  unfold pr1_functor_eq_from_functor_iso.
+  rewrite base_total_path_fibr.
+  simpl.
+  rewrite H2.
+  rewrite idtoiso_compute_pointwise.
+  destruct gamma as [gamma gamma_iso].
+  simpl.
+
+
+  simpl.
+  induction p.
+  simpl. apply idpath.
+
+  simpl.
+  simpl.
+  unfold base_paths.
+(*  pathvia (pr1_pr1_functor_eq_from_functor_iso _ _ H F G (idtoiso p)). 
+   correct, but done thru base_total_path_fibr
+    *)
+  induction p.
+  simpl.
+  unfold functor_eq_from_functor_iso.
+  simpl.
+
+  Check (maponpaths (@pr1 _ _ ) (maponpaths (@pr1 _ _ ) p)).
+  assert (H3 : forall a, toforallpaths _ _ _ (maponpaths (@pr1 _ _ )
+  (maponpaths (@pr1 _ _ ) (functor_eq_from_functor_iso H F G (precat_paths_to_iso F G p)))) a ==
+                    toforallpaths _ _ _ (maponpaths (@pr1 _ _ ) (maponpaths (@pr1 _ _ ) p)) a).
+  intro a.
+  induction p.
+  simpl.
+  apply funextsec.
+  pathvia (idtoiso (
+  induction p.
+  simpl.
+  unfold identity_iso_precat.
+  simpl.
+  simpl.
+  unfold functor_eq_from_functor_iso.
+  simpl.
+  unfold precategory_fun_eq.
+  simpl.
+  simpl.
 
 
 
