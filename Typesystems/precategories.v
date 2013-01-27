@@ -1728,49 +1728,29 @@ Check isotoid.
       ))).
   apply maponpaths.
   apply maponpaths.
-  simpl.
+  unfold pr1_pr1_functor_eq_from_functor_iso.
+  rewrite toforallpaths_funextsec.
+  apply idpath.
+  rewrite idtoiso_isotoid.
+  apply idpath.
+Qed.
 
-  simpl.
-  rewrite H2.
-  rewrite idtoiso_compute_pointwise.
-  destruct gamma as [gamma gamma_iso].
-  simpl.
+Lemma isweq_idtoiso_functorcat (C D : precategory) (H : is_saturated D) 
+    (F G : precategory_objects [C, D]) :
+   isweq (precat_paths_to_iso F G).
+Proof.
+  apply (gradth _ (functor_eq_from_functor_iso H F G)).
+  apply functor_eq_from_functor_iso_idtoiso.
+  apply idtoiso_functor_eq_from_functor_iso.
+Qed.
 
-
-  simpl.
-  induction p.
-  simpl. apply idpath.
-
-  simpl.
-  simpl.
-  unfold base_paths.
-(*  pathvia (pr1_pr1_functor_eq_from_functor_iso _ _ H F G (idtoiso p)). 
-   correct, but done thru base_total_path_fibr
-    *)
-  induction p.
-  simpl.
-  unfold functor_eq_from_functor_iso.
-  simpl.
-
-  Check (maponpaths (@pr1 _ _ ) (maponpaths (@pr1 _ _ ) p)).
-  assert (H3 : forall a, toforallpaths _ _ _ (maponpaths (@pr1 _ _ )
-  (maponpaths (@pr1 _ _ ) (functor_eq_from_functor_iso H F G (precat_paths_to_iso F G p)))) a ==
-                    toforallpaths _ _ _ (maponpaths (@pr1 _ _ ) (maponpaths (@pr1 _ _ ) p)) a).
-  intro a.
-  induction p.
-  simpl.
-  apply funextsec.
-  pathvia (idtoiso (
-  induction p.
-  simpl.
-  unfold identity_iso_precat.
-  simpl.
-  simpl.
-  unfold functor_eq_from_functor_iso.
-  simpl.
-  unfold precategory_fun_eq.
-  simpl.
-  simpl.
+Lemma is_saturated_functor_category (C D : precategory) (H : is_saturated D) :
+   is_saturated [C, D].
+Proof.
+  intros F G.
+  apply isweq_idtoiso_functorcat.
+  apply H.
+Qed.
 
 
 
