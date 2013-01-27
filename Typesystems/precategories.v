@@ -1718,6 +1718,18 @@ Proof.
   rewrite base_total_path_fibr.
   unfold pr1_functor_eq_from_functor_iso.
   rewrite base_total_path_fibr.
+Check isotoid.
+
+  pathvia (pr1 (idtoiso
+     (
+        (* toforallpaths (fun _ : C => D) (pr1 (pr1 F)) (pr1 (pr1 G))
+            (pr1_pr1_functor_eq_from_functor_iso C D H F G gamma) a *)
+         isotoid D H (precategory_fun_iso_pointwise_if_iso C D F G gamma (pr2 gamma) a)
+      ))).
+  apply maponpaths.
+  apply maponpaths.
+  simpl.
+
   simpl.
   rewrite H2.
   rewrite idtoiso_compute_pointwise.
