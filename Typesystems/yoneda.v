@@ -80,9 +80,9 @@ Definition yoneda_precategory_morphisms_ob_mor_fun
     precategory_ob_mor_fun (C^op) HSET.
 Proof.
   exists (yoneda_objects_ob C c).
-  simpl.
-  unf. unfold yoneda_objects_ob. unf. simpl.
-  intros a b f g.
+(*  simpl.
+  unf. unfold yoneda_objects_ob. unf. simpl. *)
+  intros a b f g. unfold yoneda_objects_ob in *. simpl in *.
   exact (f ;; g).
 Defined.
 
@@ -168,6 +168,8 @@ Definition yoneda (C : precategory) : precategory_fun C [C^op, HSET] :=
 
 Notation "'ob' F" := (precategory_ob_mor_fun_objects F)(at level 4).
 
+(** ** Yoneda lemma *)
+
 Definition yoneda_map_1 (C : precategory)(c : precategory_objects C)
    (F : precategory_fun C^op HSET) :
        hom _ (ob (yoneda C) c) F -> pr1(F c) := 
@@ -180,35 +182,127 @@ Proof.
   exact (ha (precategory_identity c)).
 *)
 
+Print is_precategory_fun_fun.
+
+Lemma yoneda_map_2_ax (C : precategory)(c : precategory_objects C)
+       (F : precategory_fun C^op HSET) (x : pr1 (F c)) :
+  is_precategory_fun_fun (pr1 (ob (yoneda C) c)) F 
+         (fun (d : precategory_objects C) (f : hom (C ^op) c d) => #F f x).
+Proof.
+ intros a b f.
+  (*
+  set (H:= @precategory_fun_comp _ _ F  _ _ _ g).
+*)
+  simpl in *.
+  apply funextsec.
+  unf. simpl.
+  unfold yoneda_objects_ob. simpl.
+  intro g.
+  set (H:= @precategory_fun_comp _ _ F  _ _  b g).
+  unfold precategory_fun_comp in H.
+  unfold opp_precat_data in H.
+  simpl in H.
+  unf.
+  set (H':= H f).
+  set (H2 := toforallpaths _ _ _  H' x).
+  apply H2.
+Qed.
+
 Definition yoneda_map_2 (C : precategory)(c : precategory_objects C)
    (F : precategory_fun C^op HSET) :
        pr1 (F c) -> hom _ (ob (yoneda C) c) F.
 Proof.
   intro x.
   exists (fun d : precategory_objects C => fun f => #F f x).
-  intros a b f.
-  set (H:= @precategory_fun_comp _ _ F  _ _ a f).
+  apply yoneda_map_2_ax.
+Defined.
+
+Lemma yoneda_map_1_2 (C : precategory)(c : precategory_objects C)
+  (F : precategory_fun C^op HSET)
+  (alpha : hom _ (ob (yoneda C) c) F) :
+      yoneda_map_2 _ _ _ (yoneda_map_1 _ _ _ alpha) == alpha.
+Proof.
   simpl in *.
+  apply precategory_fun_fun_eq.
+  intro a'. simpl.
   apply funextsec.
+  intro f.
+  unfold yoneda_map_1.
+  simpl.
+  Check #F f.
+  Check alpha c.
+  pathvia ((alpha c ;; #F f) (precategory_identity c)).
+  apply idpath.
+  set (H':= precategory_fun_fun_ax _ _ alpha  c a' f). simpl in H'.
+  simpl in *.
+  rewrite <- H'.
+  clear H'. 
   unf. simpl.
-  unfold yoneda_objects_ob. simpl.
-  intro g.
-  set (H:= @precategory_fun_comp _ _ F  _ _ _ f).
-  unfold precategory_fun_comp in H.
-  unfold opp_precat_data in H.
-  simpl in H.
+  unfold yoneda_objects_ob in f.
+  set (H' := precategory_id_right C a' c f ).
+  apply maponpaths.
+  apply H'.
+Qed.
+
+
+Lemma yoneda_map_2_1 (C : precategory) (c : precategory_objects C)
+   (F : precategory_fun C^op HSET) (x : pr1 (F c)) : 
+   yoneda_map_1 _ _ _ (yoneda_map_2 _ _ _ x) == x.
+Proof.
+  simpl.
+  rewrite (precategory_fun_id _ _ F).
+  apply idpath.
+Qed.
+
+
+Lemma yoneda_iso_sets (C : precategory) (c : precategory_objects C)
+   (F : precategory_fun C^op HSET) : 
+   is_precat_isomorphism (C:=HSET) (a := hom _ ((yoneda C) c) F) (b := F c)
+     (yoneda_map_1 C c F).
+Proof.
+  exists (yoneda_map_2 C c F).
+  repeat split; simpl.
+  apply funextsec.
+  intro alpha.
   unf.
-  
-  set (H':= H f).
-  
-  unfold precategory
-  intro t.
-  unfold is_precategory_fun
-  := 
-   fun h => pr1 h c (precategory_identity c).
+  simpl.
+  apply (yoneda_map_1_2 C c F).
+  apply funextsec.
+  intro x.
+  unf.
+  rewrite (precategory_fun_id _ _ F).
+  apply idpath.
+Qed.
 
 
-  
+
+Definition fully_faithful {C D : precategory} (F : precategory_fun C D) := 
+  forall a b : precategory_objects C, 
+    isweq (precategory_ob_mor_fun_morphisms F (a:=a) (b:=b)).
+
+Lemma yoneda_fully_faithful (C : precategory) : fully_faithful (yoneda C).
+Proof.
+  intros a b.
+  simpl.
+  set (H := yoneda_map_2 C b (yoneda C a)).
+  set (H' := yoneda_map_2 C a (yoneda C b)).
+  assert (eximio : yoneda_morphisms C a b == yoneda_map_2 C a (yoneda C b)).
+  apply funextsec.
+  intro f.
+  simpl.
+  apply precategory_fun_fun_eq.
+  simpl. intro c.
+  apply funextsec.
+  intro g.
+  apply idpath.
+  rewrite eximio.
+  apply (gradth _ 
+      (yoneda_map_1 C a (pr1 (yoneda C) b))).
+      intro bla.
+      apply yoneda_map_2_1.
+  intro y.
+  apply yoneda_map_1_2.
+Qed.
 
 
 
