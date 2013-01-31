@@ -138,12 +138,57 @@ Definition equivalence_of_precats (A B : precategory)(F : precategory_objects [A
                     (eps_from_left_adjoint A B F H b))
              ).
 
+Print iso_precat.
+Definition eta_iso_from_equivalence_of_precats (A B : precategory)
+  (F : precategory_objects [A, B]) (HF : equivalence_of_precats _ _ F) : 
+       iso_precat (C:=[A, A]) (precategory_fun_identity A) 
+                              (right_adjoint _ _ _ (pr1 HF) O F).
+Proof.
+  exists (eta_from_left_adjoint _ _ _ (pr1 HF)).
+  apply precategory_fun_iso_if_pointwise_iso.
+  apply (pr1 (pr2 HF)).
+Defined.
 
+Definition eps_iso_from_equivalence_of_precats (A B : precategory)
+  (F : precategory_objects [A, B]) (HF : equivalence_of_precats _ _ F) : 
+       iso_precat (C:=[B, B]) (F O right_adjoint _ _ _ (pr1 HF))
+                (precategory_fun_identity B).
+Proof.
+  exists (eps_from_left_adjoint _ _ _ (pr1 HF)).
+  apply precategory_fun_iso_if_pointwise_iso.
+  apply (pr2 (pr2 HF)).
+Defined.
 
+Lemma equiv_of_cats_is_weq_of_objects (A B : precategory)
+   (HA : is_saturated A) (HB : is_saturated B) (F : precategory_objects [A, B])
+   (HF : equivalence_of_precats A B F) : 
+     isweq (pr1 (pr1 F)).
+Proof.
+  set (G := right_adjoint _ _ _ (pr1 HF)).
+  set (et := eta_iso_from_equivalence_of_precats _ _ _ HF).
+  set (ep := eps_iso_from_equivalence_of_precats _ _ _ HF).
+  set (AAsat := is_saturated_functor_category A _ HA).
+  set (BBsat := is_saturated_functor_category B _ HB).
+  set (Et := isotoid _ AAsat et).
+  set (Ep := isotoid _ BBsat ep).
+  apply (gradth _ (fun b => pr1 (right_adjoint A B F (pr1 HF)) b)).
+  intro a.
+  set (ou := toforallpaths _ _ _ (base_paths _ _ (base_paths _ _ Et)) a).
+  simpl in ou.
+  apply (! ou).
+  intro y.
+  set (ou := toforallpaths _ _ _ (base_paths _ _ (base_paths _ _ Ep)) y).
+  apply ou.
+Qed.
 
-Check triangle_id_right_ad.
-
-
+Definition weq_on_objects_from_equiv_of_cats (A B : precategory)
+   (HA : is_saturated A) (HB : is_saturated B) (F : precategory_objects [A, B])
+   (HF : equivalence_of_precats A B F) : weq 
+          (precategory_objects A) (precategory_objects B).
+Proof.
+  exists (pr1 (pr1 F)).
+  apply equiv_of_cats_is_weq_of_objects; assumption.
+Defined.
 
 
 
