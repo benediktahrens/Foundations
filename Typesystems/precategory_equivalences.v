@@ -32,7 +32,7 @@ Notation "G 'O' F" := (functor_composite _ _ _ F G) (at level 25).
 
 (** * Whiskering: Composition of a natural transformation with a functor *)
 
-Lemma is_precat_fun_fun_left_whisker (A B C : precategory) (F : precategory_objects [A, B])
+Lemma is_precat_fun_fun_pre_whisker (A B C : precategory) (F : precategory_objects [A, B])
    (G H : precategory_objects [B, C]) (gamma : G --> H) : 
   is_precategory_fun_fun (precategory_fun_composite _ _ _ F G ) 
                          (precategory_fun_composite _ _ _ F H) 
@@ -45,18 +45,18 @@ Proof.
   apply idpath.
 Qed.
 
-Definition left_whisker (A B C : precategory) (F : precategory_objects [A, B])
+Definition pre_whisker (A B C : precategory) (F : precategory_objects [A, B])
    (G H : precategory_objects [B, C]) (gamma : G --> H) : 
        G O F --> H O F.
 Proof.
   exists (fun a => pr1 gamma (pr1 F a)).
-  apply is_precat_fun_fun_left_whisker.
+  apply is_precat_fun_fun_pre_whisker.
 Defined.
 
 
 
 
-Lemma is_precat_fun_fun_right_whisker (B C D : precategory) 
+Lemma is_precat_fun_fun_post_whisker (B C D : precategory) 
    (G H : precategory_objects [B, C]) (gamma : G --> H) 
         (K : precategory_objects [C, D]): 
   is_precategory_fun_fun (precategory_fun_composite _ _ _ G K) 
@@ -71,18 +71,77 @@ Proof.
   apply idpath.
 Qed.
 
-Definition right_whisker (B C D : precategory) 
+Definition post_whisker (B C D : precategory) 
    (G H : precategory_objects [B, C]) (gamma : G --> H) 
         (K : precategory_objects [C, D]) : K O G --> K O H.
 Proof.
   exists (fun a : precategory_objects B => # (pr1 K) (pr1 gamma  a)).
-  apply is_precat_fun_fun_right_whisker.
+  apply is_precat_fun_fun_post_whisker.
 Defined.
 
 
 Definition form_adjunction (A B : precategory) (F : precategory_objects [A, B])
        (G : precategory_objects [B, A]) 
-       (eta : precategory_fun_id
+       (eta : precategory_fun_fun (precategory_fun_identity A) (pr1 (G O F)))  
+       (eps : precategory_fun_fun (pr1 (F O G)) (precategory_fun_identity B)) : UU :=
+dirprod 
+  (forall a : precategory_objects A,
+       # (pr1 F) (pr1 eta a) ;;   pr1 eps (pr1 F a) == precategory_identity (pr1 F a))
+  (forall b : precategory_objects B,
+       pr1 eta (pr1 G b) ;; # (pr1 G) (pr1 eps b) == precategory_identity (pr1 G b)).
+
+Definition are_adjoints (A B : precategory) (F : precategory_objects [A, B])
+    (G : precategory_objects [B, A]) : UU :=
+  total2 (fun etaeps : dirprod 
+            (precategory_fun_fun (precategory_fun_identity A) (pr1 (G O F)))
+            (precategory_fun_fun (pr1 (F O G)) (precategory_fun_identity B)) =>
+      form_adjunction A B F G (pr1 etaeps) (pr2 etaeps)).
+
+Definition is_left_adjoint (A B : precategory) (F : precategory_objects [A, B]) : UU :=
+   total2 (fun G : precategory_objects [B, A] => are_adjoints A B F G).
+
+Definition right_adjoint (A B : precategory) (F : precategory_objects [A, B]) 
+      (H : is_left_adjoint _ _ F) : precategory_objects [B, A] := pr1 H.
+
+Definition eta_from_left_adjoint (A B : precategory) (F : precategory_objects [A, B]) 
+      (H : is_left_adjoint _ _ F) : 
+  precategory_fun_fun (precategory_fun_identity A) (pr1 (pr1 H O F)) := pr1 (pr1 (pr2 H)).
+
+
+Definition eps_from_left_adjoint (A B : precategory) (F : precategory_objects [A, B]) 
+      (H : is_left_adjoint _ _ F)  : 
+ precategory_fun_fun (pr1 (F O pr1 H)) (precategory_fun_identity B)
+   := pr2 (pr1 (pr2 H)).
+
+
+Definition triangle_id_left_ad (A B : precategory) (F : precategory_objects [A, B]) 
+      (H : is_left_adjoint _ _ F) :
+  forall (a : precategory_objects A),
+       #(pr1 F) (pr1 (pr1 (pr1 (pr2 H))) a);;
+       pr1 (pr2 (pr1 (pr2 H))) ((pr1 F) a) ==
+       precategory_identity ((pr1 F) a) := pr1 (pr2 (pr2 H)).
+
+Definition triangle_id_right_ad (A B : precategory) (F : precategory_objects [A, B]) 
+      (H : is_left_adjoint _ _ F) :
+  forall b : precategory_objects B,
+        pr1 (pr1 (pr1 (pr2 H))) ((pr1 (pr1 H)) b);;
+        #(pr1 (pr1 H)) (pr1 (pr2 (pr1 (pr2 H))) b) ==
+        precategory_identity ((pr1 (pr1 H)) b)
+   := pr2 (pr2 (pr2 H)).
+
+
+Definition equivalence_of_precats (A B : precategory)(F : precategory_objects [A, B]) : UU :=
+   total2 (fun H : is_left_adjoint _ _ F =>
+     dirprod (forall a, is_precat_isomorphism 
+                    (eta_from_left_adjoint A B F H a))
+             (forall b, is_precat_isomorphism
+                    (eps_from_left_adjoint A B F H b))
+             ).
+
+
+
+
+Check triangle_id_right_ad.
 
 
 

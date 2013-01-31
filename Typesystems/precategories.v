@@ -701,7 +701,7 @@ Proof.
 Qed.
 
 Definition precategory_fun_identity (C : precategory) :
-  precategory_fun C C.
+     precategory_fun C  C.
 Proof.
   exists (tpair (fun F : precategory_objects C -> precategory_objects C => 
              forall a b : precategory_objects C, a --> b -> F a --> F b) 
