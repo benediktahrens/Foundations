@@ -80,8 +80,9 @@ Proof.
 Defined.
 
 
-
-
+Definition form_adjunction (A B : precategory) (F : precategory_objects [A, B])
+       (G : precategory_objects [B, A]) 
+       (eta : precategory_fun_id
 
 
 

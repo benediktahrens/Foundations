@@ -656,6 +656,7 @@ Definition sub_img_precategory_fun {C D : precategory}(F : precategory_fun C D) 
 
 (** ** Composition of Functors, Identity Functors *)
 
+(** *** Composition *)
 Lemma precategory_fun_composite_ob_mor {C C' C'' : precategory}
        (F : precategory_fun C C') (F' : precategory_fun C' C'') :
  is_precategory_fun  
@@ -681,6 +682,33 @@ Definition precategory_fun_composite (C C' C'' : precategory)
        (F : precategory_fun C C') (F' : precategory_fun C' C'') :
   precategory_fun C C'' := tpair _ _ (precategory_fun_composite_ob_mor F F').
 
+(** *** Identity functor *)
+
+Lemma precategory_fun_identity_ob_mor (C : precategory) :
+ is_precategory_fun  
+  (tpair (fun F : precategory_objects C -> precategory_objects C => 
+             forall a b : precategory_objects C, a --> b -> F a --> F b) 
+    (fun a => a)
+               (fun (a b : precategory_objects C) f => f)).
+Proof.
+  split;
+  simpl.
+  intro a.
+  apply (idpath _).
+  
+  intros a b c f g.
+  apply idpath.
+Qed.
+
+Definition precategory_fun_identity (C : precategory) :
+  precategory_fun C C.
+Proof.
+  exists (tpair (fun F : precategory_objects C -> precategory_objects C => 
+             forall a b : precategory_objects C, a --> b -> F a --> F b) 
+    (fun a => a)
+               (fun (a b : precategory_objects C) f => f)).
+  apply  (precategory_fun_identity_ob_mor C).
+Defined.
 
 
 (** * Sub-precategories *)
