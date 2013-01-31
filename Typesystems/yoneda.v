@@ -275,10 +275,11 @@ Proof.
 Qed.
 
 
-
+(*    moved to precategories.v
 Definition fully_faithful {C D : precategory} (F : precategory_fun C D) := 
   forall a b : precategory_objects C, 
     isweq (precategory_ob_mor_fun_morphisms F (a:=a) (b:=b)).
+*)
 
 Lemma yoneda_fully_faithful (C : precategory) : fully_faithful (yoneda C).
 Proof.
