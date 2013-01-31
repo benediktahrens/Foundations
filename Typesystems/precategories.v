@@ -631,7 +631,9 @@ Definition precategory_fun_comp (C C' : precategory_data)
                  forall g : b --> c, 
                 #F (f ;; g) == #F f ;; #F g := pr2 (pr2 F).
 
-(** ** Image of a functor is a subcategory *)
+(** ** Image on objects of a functor  *)
+(** is used later to define the full image subcategory of a category [D] 
+       defined by a functor [F : C -> D] *)
 
 Definition is_in_img_precategory_fun {C D : precategory} (F : precategory_fun C D) 
       (d : precategory_objects D) :=
@@ -871,7 +873,7 @@ Definition precategory_object_in_subcat {C : precategory} {C':sub_precategories 
    (a : precategory_objects C)(p : sub_precategory_predicate_objects C' a) :
        precategory_objects C' := tpair _ a p.
 
-(** An object satisfying the predicate is an object of the subcategory *)
+(** A morphism satisfying the predicate is a morphism of the subcategory *)
 Definition precategory_morphisms_in_subcat {C : precategory} {C':sub_precategories C}
    {a b : precategory_objects C'}(f : pr1 a --> pr1 b)
    (p : sub_precategory_predicate_morphisms C' (pr1 a) (pr1 b) (f)) :
@@ -882,9 +884,9 @@ Definition precategory_morphisms_in_subcat {C : precategory} {C':sub_precategori
 Definition sub_precategory_inclusion_data (C : precategory) (C':sub_precategories C):
   precategory_ob_mor_fun C' C. 
 Proof.
-  exists (fun a => pr1 a).
-  intros a b f.
-  exact (pr1 f).
+  exists (@pr1 _ _ ). 
+  intros a b. 
+  exact (@pr1 _ _ ).
 Defined.
 
 Definition is_fun_sub_precategory_inclusion (C : precategory) 
@@ -1019,7 +1021,6 @@ Proof.
 
 (** ** Any full subcategory of a saturated category is saturated. *)
 
-(** TODO *)
 
 Section full_sub_sat.
 
@@ -1042,7 +1043,42 @@ Defined.
 Print arrow_in_precat.
  := pr1 f.
 *)
-Lemma is_iso_in_precat (a b : precategory_objects (full_sub_precategory C'))
+
+
+(** *** Small exercise: Morphisms in the full subcategory are equivalent to 
+        morphisms in the precategory *)
+(** does of course not need the saturation hypothesis *)
+
+Definition hom_in_subcat_from_hom_in_precat (a b : precategory_objects (full_sub_precategory C'))
+      (f : pr1 a --> pr1 b) : a --> b := 
+       tpair _ f tt.
+
+Definition hom_in_precat_from_hom_in_full_subcat 
+  (a b : precategory_objects (full_sub_precategory C')) :
+     a --> b -> pr1 a --> pr1 b := @pr1 _ _ .
+
+
+Lemma isweq_hom_in_precat_from_hom_in_full_subcat 
+    (a b : precategory_objects (full_sub_precategory C')): 
+ isweq (hom_in_precat_from_hom_in_full_subcat a b).
+Proof.
+  apply (gradth _ 
+         (hom_in_subcat_from_hom_in_precat a b)).
+  intro f. 
+  destruct f. simpl.
+  apply eq_in_sub_precategory.
+  simpl.
+  apply idpath.
+  intros. apply idpath.
+Qed.
+
+
+
+
+
+(** *** Isos in the full subcategory are equivalent to isos in the precategory *)
+
+Lemma iso_in_subcat_is_iso_in_precat (a b : precategory_objects (full_sub_precategory C'))
        (f : iso_precat a b): is_precat_isomorphism (C:=C) (a:=pr1 a) (b:=pr1 b) 
      (pr1 (pr1 f)).
 Proof.
@@ -1056,7 +1092,7 @@ Proof.
   apply (base_paths _ _ pr2).
 Qed.
 
-Lemma is_iso_in_subcat (a b : precategory_objects (full_sub_precategory C'))
+Lemma iso_in_precat_is_iso_in_subcat (a b : precategory_objects (full_sub_precategory C'))
      (f : iso_precat (pr1 a) (pr1 b)) : 
    is_precat_isomorphism (C:=full_sub_precategory C')  
      (precategory_morphisms_in_subcat f tt).
@@ -1074,11 +1110,11 @@ Qed.
 
 Definition iso_from_iso_in_sub (a b : precategory_objects (full_sub_precategory C'))
        (f : iso_precat a b) : iso_precat (pr1 a) (pr1 b) :=
-   tpair _ _ (is_iso_in_precat a b f).
+   tpair _ _ (iso_in_subcat_is_iso_in_precat a b f).
 
 Definition iso_in_sub_from_iso (a b : precategory_objects (full_sub_precategory C'))
    (f : iso_precat (pr1 a) (pr1 b)) : iso_precat a b :=
-    tpair _ _ (is_iso_in_subcat a b f).
+    tpair _ _ (iso_in_precat_is_iso_in_subcat a b f).
 
 Lemma isweq_iso_from_iso_in_sub (a b : precategory_objects (full_sub_precategory C')):
      isweq (iso_from_iso_in_sub a b).
@@ -1113,6 +1149,8 @@ Proof.
 Qed.
 
 
+(** *** From Identity in the subcategory to isos in the category  *)
+(** This gives a weak equivalence *)
 Definition Id_in_sub_to_iso (a b : precategory_objects (full_sub_precategory C')):
      a == b -> iso_precat (pr1 a) (pr1 b) :=
        funcomp (precat_paths_to_iso a b) (iso_from_iso_in_sub a b).
@@ -1138,6 +1176,9 @@ Proof.
   apply (total_paths2_hProp_equiv C' a b).
   apply H.
 Qed.
+Check Id_in_sub_to_iso.
+(** *** Decomposition of the map from identities in the subcat to 
+       isos in the subcat via isos in the category  *)
 
 Lemma precat_paths_in_sub_as_3_maps
    (a b : precategory_objects (full_sub_precategory C')):
@@ -1156,6 +1197,8 @@ Proof.
   apply idpath.
 Qed.
 
+(** *** The aforementioned decomposed map is a weak equivalence since
+        its decomposition pieces are *)
 
 Lemma isweq_sub_precat_paths_to_iso 
   (a b : precategory_objects (full_sub_precategory C')) :
@@ -1167,6 +1210,7 @@ Proof.
   apply isweq_iso_in_sub_from_iso.
 Qed.
 
+(** ** Proof of the targeted theorem: full subcats of cats are cats *)
 
 Lemma is_saturated_full_subcat: is_saturated (full_sub_precategory C').
 Proof.
