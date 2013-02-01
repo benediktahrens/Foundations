@@ -259,6 +259,16 @@ Proof.
   apply is_iso_inv_from_iso.
 Defined.
 
+
+Definition iso_inv_after_iso (C : precategory) (a b : precategory_objects C)
+   (f : iso_precat a b) : f;; inv_from_iso f == precategory_identity _ :=
+      pr1 (pr2 (pr2 f)).
+
+Definition iso_after_iso_inv (C : precategory) (a b : precategory_objects C)
+   (f : iso_precat a b) : inv_from_iso f ;; f == precategory_identity _ :=
+      pr2 (pr2 (pr2 f)).
+
+
 Lemma iso_inv_on_right (C : precategory) (a b c: precategory_objects C)
   (f : a --> b) (g : b --> c) (h : a --> c) (H : h == f;;g) (H': is_precat_isomorphism f) :
      inv_from_iso (tpair (is_precat_isomorphism )  f H') ;; h == g.
@@ -326,7 +336,54 @@ Proof.
   exists (f ;; g).
   apply is_iso_comp_of_isos.
 Defined.
+
+Lemma inv_iso_unique (C : precategory) (a b : precategory_objects C)
+  (f : iso_precat a b) (g : iso_precat b a) :
+  is_inverse_in_precat f g -> g == iso_inv_from_iso f.
+Proof.
+  intro H.
+  apply eq_iso_precat.
+  apply (inverse_unique_precat _ _ _ f).
+  assumption.
+  split.
+  apply iso_inv_after_iso.
+  set (h := iso_after_iso_inv _ _ _ f).
+  unfold iso_inv_from_iso.
+  simpl in *.
+  apply h.
+Qed.
+
+
+Lemma iso_inv_of_iso_comp (C : precategory) (a b c : precategory_objects C)
+   (f : iso_precat a b) (g : iso_precat b c) :
+   iso_inv_from_iso (iso_comp f g) == iso_comp (iso_inv_from_iso g) (iso_inv_from_iso f).
+Proof.
+  apply pathsinv0.
+  apply inv_iso_unique.
+  split; simpl.
+  pathvia (f ;; (g ;; inv_from_iso g) ;; inv_from_iso f).
+  repeat rewrite precategory_assoc. apply idpath.
+  rewrite iso_inv_after_iso.
+  rewrite precategory_id_right.
+  apply iso_inv_after_iso.
   
+  pathvia ((inv_from_iso g;; (inv_from_iso f;; f);; g)).
+  repeat rewrite precategory_assoc. apply idpath.
+  rewrite iso_after_iso_inv.
+  rewrite precategory_id_right.
+  apply iso_after_iso_inv.
+Qed.
+
+Lemma iso_inv_iso_inv (C : precategory) (a b : precategory_objects C)
+   (f : iso_precat a b) : 
+     iso_inv_from_iso (iso_inv_from_iso f) == f.
+Proof.
+  apply pathsinv0.
+  apply inv_iso_unique.
+  split; simpl.
+  apply iso_after_iso_inv.
+  apply iso_inv_after_iso.
+Qed.
 
 
 (** ** Saturated precategories *)
@@ -632,22 +689,58 @@ Definition precategory_fun_comp (C C' : precategory_data)
                  forall g : b --> c, 
                 #F (f ;; g) == #F f ;; #F g := pr2 (pr2 F).
 
+(** *** Functors preserve isomorphisms *)
+
+Lemma precategory_fun_on_iso_is_iso (C C' : precategory) (F : precategory_fun C C')
+    (a b : precategory_objects C)(f : iso_precat a b) :
+       is_precat_isomorphism (#F f).
+Proof.
+  exists (#F (inv_from_iso f)).
+  simpl; split; simpl.
+  rewrite <- precategory_fun_comp.
+  rewrite iso_inv_after_iso.
+  apply precategory_fun_id.
+  
+  rewrite <- precategory_fun_comp.
+  rewrite (iso_after_iso_inv _ _ _ f).
+  apply precategory_fun_id.
+Qed.
+
+
+Definition precategory_fun_on_iso (C C' : precategory) (F : precategory_fun C C')
+    (a b : precategory_objects C)(f : iso_precat a b) : iso_precat (F a) (F b).
+Proof.
+  exists (#F f).
+  apply precategory_fun_on_iso_is_iso.
+Defined.
+ 
+
+
 (** *** Fully faithful functors *)
 
 Definition fully_faithful {C D : precategory} (F : precategory_fun C D) := 
   forall a b : precategory_objects C, 
     isweq (precategory_ob_mor_fun_morphisms F (a:=a) (b:=b)).
 
+Definition weq_from_fully_faithful (C D : precategory) (F : precategory_fun C D) 
+      (HF : fully_faithful F) (a b : precategory_objects C) : 
+   weq (a --> b) (F a --> F b).
+Proof.
+  exists (precategory_ob_mor_fun_morphisms F (a:=a) (b:=b)).
+  exact (HF a b).
+Defined.
+
+
 Definition fully_faithful_inv_hom (C D : precategory) (F : precategory_fun C D) 
-      (HF : fully_faithful F) (a b : precategory_objects C)
-      (f : F a --> F b) : a --> b :=
- invmap (tpair (fun f => isweq f) (precategory_ob_mor_fun_morphisms F (a:=a) (b:=b))
-                            (HF a b)) f.
+      (HF : fully_faithful F) (a b : precategory_objects C) :
+      F a --> F b -> a --> b :=
+ invweq (weq_from_fully_faithful C D F HF a b).
+
 
 
 (** Fully faithful functors reflect isos *)
 
-Lemma fully_faithful_reflects_iso (C D : precategory)(F : precategory_fun C D) 
+Lemma fully_faithful_reflects_iso_proof (C D : precategory)(F : precategory_fun C D) 
         (HF : fully_faithful F)
     (a b : precategory_objects C) (f : iso_precat (F a) (F b)) : 
      is_precat_isomorphism (fully_faithful_inv_hom C D F HF a b f).
@@ -655,9 +748,44 @@ Proof.
   exists (fully_faithful_inv_hom C D F HF b a (inv_from_iso f)).
   simpl.
   unfold fully_faithful_inv_hom.
-  split; simpl.
-  unfold invmap. simpl.
+  split.
+(*  unfold weq_from_fully_faithful.*)
+  set (hhh := equal_transport_along_weq _ _ (weq_from_fully_faithful C D F HF a a)).
+  apply hhh.
+  set (HFFab := homotweqinvweq (weq_from_fully_faithful C D F HF a b)).
+  set (HFFba := homotweqinvweq (weq_from_fully_faithful C D F HF b a)).
+  simpl in *.
+  rewrite precategory_fun_comp.
+  rewrite HFFab.
+  rewrite HFFba.
+  rewrite precategory_fun_id.
+  apply iso_inv_after_iso.
   
+  set (hhh := equal_transport_along_weq _ _ (weq_from_fully_faithful C D F HF b b)).
+  apply hhh.
+  set (HFFab := homotweqinvweq (weq_from_fully_faithful C D F HF a b)).
+  set (HFFba := homotweqinvweq (weq_from_fully_faithful C D F HF b a)).
+  simpl in *.
+  rewrite precategory_fun_comp.
+  rewrite HFFab.
+  rewrite HFFba.
+  rewrite precategory_fun_id.
+  set (Hff := pr2 (pr2 (pr2 f))).
+  simpl in *.
+  unfold inv_from_iso.
+  destruct f.
+  simpl. assumption.
+Qed.
+
+Definition  iso_from_fully_faithful_reflection (C D : precategory)(F : precategory_fun C D) 
+        (HF : fully_faithful F)
+    (a b : precategory_objects C) (f : iso_precat (F a) (F b)) : 
+      iso_precat a b.
+Proof.
+  exists (fully_faithful_inv_hom C D F HF a b f).
+  apply fully_faithful_reflects_iso_proof.
+Defined.
+
 
 
 (** ** Image on objects of a functor  *)
@@ -1838,7 +1966,7 @@ Proof.
   
 (* here maybe use transport of equality along weq toforallpath *)  
   Check equal_transport_along_weq.
-  apply (equal_transport_along_weq _ _  _ _ (weqtoforallpaths _ _ _ )).
+  apply (equal_transport_along_weq _ _   (weqtoforallpaths _ _ _ )).
   
   simpl.
   rewrite toforallpaths_funextsec.

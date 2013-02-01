@@ -256,7 +256,7 @@ Proof.
   apply fiber_total_path_fibr.
 Defined.
 
-Theorem equal_transport_along_weq (A B : UU) (a a' : A) (f : weq A B) :
+Theorem equal_transport_along_weq (A B : UU)  (f : weq A B) (a a' : A) :
       f a == f a' -> a == a'.
 Proof.
   intro H.
