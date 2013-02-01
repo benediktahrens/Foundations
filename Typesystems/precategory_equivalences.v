@@ -393,7 +393,95 @@ Proof.
   unfold rad_mor. simpl.
   rewrite precategory_id_right.
   rewrite iso_inv_after_iso.
+  rewrite fully_faithful_inv_identity.
+  apply idpath.
   
+  intros a b c f g.
+  unfold rad_mor; simpl.
+  rewrite <- fully_faithful_inv_comp.
+  apply maponpaths.
+  repeat rewrite <- precategory_assoc.
+  apply maponpaths.
+  apply maponpaths.
+  rewrite precategory_assoc.
+  rewrite iso_after_iso_inv.
+  rewrite precategory_id_left.
+  apply idpath.
+Qed.
+
+Definition rad : precategory_objects [B, A].
+Proof.
+  exists rad_precategory_ob_mor_fun.
+  apply rad_is_precategory_fun.
+Defined.
+
+Lemma rad_eps_is_precategory_fun_fun : is_precategory_fun_fun 
+    (pr1 (F O rad)) (precategory_fun_identity B)
+       (fun b => rad_eps b).
+Proof.
+  unfold is_precategory_fun_fun.
+  simpl.
+  intros b b' g.
+  unfold rad_mor.
+  set (H3 := homotweqinvweq (weq_from_fully_faithful _ _ _ HF (pr1 rad b) (pr1 rad b'))).
+  simpl in H3.
+  unfold fully_faithful_inv_hom.
+  simpl.
+  rewrite H3.
+  repeat rewrite <- precategory_assoc.
+  rewrite iso_after_iso_inv.
+  rewrite precategory_id_right.
+  apply idpath.
+Qed.
+
+Lemma rad_eta_is_precategory_fun_fun : is_precategory_fun_fun 
+         (precategory_fun_identity A) (pr1 (rad O F)) 
+       (fun a => rad_eta a).
+Proof.
+  unfold is_precategory_fun_fun.
+  simpl.
+  intros a a' f.
+  unfold rad_mor. simpl.
+  Check f ;; rad_eta a'.
+  set (h' := equal_transport_along_weq _ _ 
+          (weq_from_fully_faithful _ _ _ HF a (rad_ob ((pr1 F) a')))).
+  apply h'.
+  simpl.
+  rewrite precategory_fun_comp.
+  rewrite precategory_fun_comp.
+  unfold rad_eta.
+  set (HHH := rad_eps_is_precategory_fun_fun (pr1 F a) (pr1 F a')).
+  simpl in HHH.
+  rewrite <- HHH.
+  clear h'.
+  clear HHH.
+
+  (* do the series of lemmas for fully faithful functors on morphisms 
+     also for isomorphisms 
+  *)
+
+  set (H3 := homotweqinvweq (weq_from_fully_faithful _ _ _ HF a' (rad_ob ((pr1 F) a')))).
+  simpl in H3.
+  unfold iso_from_fully_faithful_reflection.
+  simpl.
+  unfold 
+  simpl.
+  (precategory_ob_mor_fun _  (pr1 F) f)).
+  apply (
+  set (H3 := homotweqinvweq (weq_from_fully_faithful _ _ _ HF (pr1 rad b) (pr1 rad b'))).
+  simpl in H3.
+  unfold fully_faithful_inv_hom.
+  simpl.
+  rewrite H3.
+  repeat rewrite <- precategory_assoc.
+  rewrite iso_after_iso_inv.
+  rewrite precategory_id_right.
+  apply idpath.
+Qed.
+
+
+  set (H
+  simpl.
   
   
   

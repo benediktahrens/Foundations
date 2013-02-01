@@ -736,7 +736,7 @@ Definition fully_faithful_inv_hom (C D : precategory) (F : precategory_fun C D)
       F a --> F b -> a --> b :=
  invweq (weq_from_fully_faithful C D F HF a b).
 
-Lemma full_faithful_inv_identity (C D : precategory) (F : precategory_fun C D)
+Lemma fully_faithful_inv_identity (C D : precategory) (F : precategory_fun C D)
       (HF : fully_faithful F) (a : precategory_objects C) : 
     fully_faithful_inv_hom _ _ _ HF _ _ (precategory_identity (F a)) ==
          precategory_identity _ .
@@ -752,7 +752,7 @@ Proof.
 Qed.
 
 
-Lemma full_faithful_inv_comp (C D : precategory) (F : precategory_fun C D)
+Lemma fully_faithful_inv_comp (C D : precategory) (F : precategory_fun C D)
       (HF : fully_faithful F) (a b c : precategory_objects C) 
       (f : F a --> F b) (g : F b --> F c) : 
     fully_faithful_inv_hom _ _ _ HF _ _ (f ;; g) ==
