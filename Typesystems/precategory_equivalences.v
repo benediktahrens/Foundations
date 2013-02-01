@@ -376,8 +376,8 @@ Defined.
 
 Definition rad_eta (a : precategory_objects A) : a --> rad_ob (pr1 F a).
 Proof.
-  set (epsFa := iso_inv_from_iso (rad_eps (pr1 F a))).
-  exact (iso_from_fully_faithful_reflection _ _ _ HF _ _ epsFa).
+  set (epsFa := inv_from_iso (rad_eps (pr1 F a))).
+  exact (fully_faithful_inv_hom  _ _ _ HF _ _ epsFa).
 Defined.
 
 Definition rad_precategory_ob_mor_fun : precategory_ob_mor_fun B A.
@@ -434,6 +434,9 @@ Proof.
   apply idpath.
 Qed.
 
+Definition rad_eps_trans : precategory_fun_fun _ _ :=
+   tpair _ _ rad_eps_is_precategory_fun_fun.
+
 Lemma rad_eta_is_precategory_fun_fun : is_precategory_fun_fun 
          (precategory_fun_identity A) (pr1 (rad O F)) 
        (fun a => rad_eta a).
@@ -462,22 +465,131 @@ Proof.
 
   set (H3 := homotweqinvweq (weq_from_fully_faithful _ _ _ HF a' (rad_ob ((pr1 F) a')))).
   simpl in H3.
-  unfold iso_from_fully_faithful_reflection.
-  simpl.
-  unfold 
-  simpl.
-  (precategory_ob_mor_fun _  (pr1 F) f)).
-  apply (
-  set (H3 := homotweqinvweq (weq_from_fully_faithful _ _ _ HF (pr1 rad b) (pr1 rad b'))).
+  unfold fully_faithful_inv_hom. simpl.
+  rewrite H3. clear H3.
+  set (H3 := homotweqinvweq (weq_from_fully_faithful _ _ _ HF a (rad_ob ((pr1 F) a)))).
   simpl in H3.
-  unfold fully_faithful_inv_hom.
-  simpl.
+  unfold fully_faithful_inv_hom. simpl.
+  rewrite H3. clear H3.
+  set (H3 := homotweqinvweq 
+      (weq_from_fully_faithful _ _ _ HF (rad_ob (pr1 F a)) (rad_ob ((pr1 F) a')))).
+  simpl in H3.
+  unfold fully_faithful_inv_hom. simpl.
   rewrite H3.
+  unfold rad_mor. simpl.
   repeat rewrite <- precategory_assoc.
-  rewrite iso_after_iso_inv.
+  rewrite iso_inv_after_iso.
   rewrite precategory_id_right.
+  unfold fully_faithful_inv_hom; simpl.
+  rewrite H3.
+  repeat rewrite precategory_assoc.
+  rewrite iso_after_iso_inv. 
+  rewrite precategory_id_left.
   apply idpath.
 Qed.
+
+Definition rad_eta_trans : precategory_fun_fun _ _ :=
+   tpair _ _ rad_eta_is_precategory_fun_fun.
+
+Lemma rad_form_adjunction : form_adjunction A B F rad rad_eta_trans rad_eps_trans.
+Proof.
+  split; simpl.
+  intro a.
+  unfold rad_eta. 
+  set (H3 := homotweqinvweq 
+      (weq_from_fully_faithful _ _ _ HF a (rad_ob (pr1 F a)) )).
+  simpl in H3.
+  unfold fully_faithful_inv_hom. simpl.
+  rewrite H3.
+  rewrite iso_after_iso_inv.
+  apply idpath.
+  
+  intro b.
+  
+  set (h' := equal_transport_along_weq _ _ 
+          (weq_from_fully_faithful _ _ _ HF (rad_ob b) (rad_ob b))).
+       apply h'.
+  simpl.
+  rewrite precategory_fun_comp.
+  set (Heta := precategory_fun_fun_ax _ _ rad_eta_trans).
+  simpl in Heta.
+  unfold rad_eta.
+  unfold fully_faithful_inv_hom.
+  simpl.
+  set (H3 := homotweqinvweq 
+      (weq_from_fully_faithful _ _ _ HF (rad_ob b) (rad_ob (pr1 F (rad_ob b))) )).
+  simpl in H3.
+  rewrite H3. clear H3.
+  unfold rad_mor. unfold fully_faithful_inv_hom.
+  simpl.
+  set (H3 := homotweqinvweq 
+      (weq_from_fully_faithful _ _ _ HF (rad_ob (pr1 F (rad_ob b))) 
+                                        (rad_ob b))).
+  simpl in H3.
+  rewrite H3. clear H3.
+  repeat rewrite precategory_assoc.
+  rewrite iso_after_iso_inv.
+  rewrite <- precategory_assoc.
+  rewrite iso_inv_after_iso.
+  rewrite precategory_id_left.
+  rewrite precategory_fun_id.
+  apply idpath.
+Qed.
+  
+Definition rad_are_adjoints : are_adjoints _ _ F rad.
+Proof.
+  exists (dirprodpair rad_eta_trans rad_eps_trans).
+  apply rad_form_adjunction.
+Defined.
+
+Definition rad_is_left_adjoint : is_left_adjoint _ _ F.
+Proof.
+  exists rad.
+  apply rad_are_adjoints.
+Defined.
+
+Lemma rad_equivalence_of_precats : equivalence_of_precats _ _ F.
+Proof.
+  exists rad_is_left_adjoint.
+  split; simpl.
+  intro a.
+  unfold rad_eta.
+  set (H := fully_faithful_reflects_iso_proof _ _ _ HF
+       a (rad_ob ((pr1 F) a))).
+  simpl in *.
+  set (H' := H (iso_inv_from_iso (rad_eps ((pr1 F) a)))).
+  change ((fully_faithful_inv_hom A B F HF a (rad_ob ((pr1 F) a))
+     (inv_from_iso (rad_eps ((pr1 F) a))))) with
+      (fully_faithful_inv_hom A B F HF a (rad_ob ((pr1 F) a))
+     (iso_inv_from_iso (rad_eps ((pr1 F) a)))).
+  apply H'.
+  
+  intro b. apply (pr2 (rad_eps b)).
+Defined.
+
+End from_fully_faithful_and_ess_surj_to_equivalence.
+
+  unfold rad_eps.
+
+  assert (H2 : pr1 (iso_inv_from_iso (rad_eps ((pr1 F) a))) == 
+                  inv_from_iso (rad_eps ((pr1 F) a))).
+   apply idpath.
+   rewrite H2.
+      simpl.
+  apply H.
+
+  rewrite <- Heta.
+  set (Heps := precategory_fun_fun_ax _ _ rad_eps_trans).
+  simpl in Heps.
+  unfold rad_eps in Heps.
+  simpl in Heps.
+  rewrite Heps.
+  
+  unfold rad_eta. simpl.
+  unfold rad_eta. simpl.
+  simpl.
+  unfold 
+
 
 
   set (H
