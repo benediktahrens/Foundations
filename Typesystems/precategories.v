@@ -638,6 +638,27 @@ Definition fully_faithful {C D : precategory} (F : precategory_fun C D) :=
   forall a b : precategory_objects C, 
     isweq (precategory_ob_mor_fun_morphisms F (a:=a) (b:=b)).
 
+Definition fully_faithful_inv_hom (C D : precategory) (F : precategory_fun C D) 
+      (HF : fully_faithful F) (a b : precategory_objects C)
+      (f : F a --> F b) : a --> b :=
+ invmap (tpair (fun f => isweq f) (precategory_ob_mor_fun_morphisms F (a:=a) (b:=b))
+                            (HF a b)) f.
+
+
+(** Fully faithful functors reflect isos *)
+
+Lemma fully_faithful_reflects_iso (C D : precategory)(F : precategory_fun C D) 
+        (HF : fully_faithful F)
+    (a b : precategory_objects C) (f : iso_precat (F a) (F b)) : 
+     is_precat_isomorphism (fully_faithful_inv_hom C D F HF a b f).
+Proof.
+  exists (fully_faithful_inv_hom C D F HF b a (inv_from_iso f)).
+  simpl.
+  unfold fully_faithful_inv_hom.
+  split; simpl.
+  unfold invmap. simpl.
+  
+
 
 (** ** Image on objects of a functor  *)
 (** is used later to define the full image subcategory of a category [D] 

@@ -191,7 +191,22 @@ Proof.
 Defined.
 
 
-
+Lemma isaprop_pi_sigma_iso (A B : precategory) (HA : is_saturated A)
+     (F : precategory_objects [A, B]) (HF : fully_faithful F) :
+  isaprop (forall b : precategory_objects B, 
+             total2 (fun a : precategory_objects A => iso_precat (pr1 F a) b)).
+Proof.
+  apply impred.
+  intro b.
+  apply invproofirrelevance.
+  intros x x'.
+  destruct x as [a f].
+  destruct x' as [a' f'].
+  set (fminusf := iso_comp f (iso_inv_from_iso f')).
+  set (
+  assert (H' : pr1 x == pr1 x').
+    
+  apply (total2_paths
 
 
 
