@@ -276,6 +276,125 @@ Proof.
   set (h':= base_paths _ _ H).
   assumption.
 Qed.
+
+Lemma isaprop_sigma_iso (A B : precategory) (HA : is_saturated A)
+     (F : precategory_objects [A, B]) (HF : fully_faithful F) :
+      forall b : precategory_objects B,
+  isaprop (total2 (fun a : precategory_objects A => iso_precat (pr1 F a) b)).
+Proof.
+  intro b.
+  apply invproofirrelevance.
+  intros x x'.
+  destruct x as [a f].
+  destruct x' as [a' f'].
+  set (fminusf := iso_comp f (iso_inv_from_iso f')).
+  set (g := iso_from_fully_faithful_reflection _ _ _ HF _ _ fminusf).
+  set (p := isotoid _ HA g).
+  Print total2_paths2.
+  apply (total2_paths2 (B:=fun a' => iso_precat ((pr1 F) a') b) (isotoid _ HA g)).
+  pathvia (iso_comp (iso_inv_from_iso 
+    (precategory_fun_on_iso _ _ F _ _ (idtoiso (isotoid _ HA g)))) f).
+  generalize (isotoid _ HA g).
+  intro p0.
+  induction p0.
+  simpl.
+  
+  apply eq_iso_precat.
+  simpl. 
+  rewrite transportf_idpath.
+  rewrite bla.
+  rewrite precategory_id_left.
+  apply idpath.
+  
+  rewrite idtoiso_isotoid.
+  unfold g.
+  unfold fminusf.
+  simpl.
+  clear p.
+  clear g.
+  clear fminusf.
+  assert (HFg : precategory_fun_on_iso A B F a a'
+        (iso_from_fully_faithful_reflection A B F HF a a'
+           (iso_comp f (iso_inv_from_iso f'))) == 
+           iso_comp f (iso_inv_from_iso f')).
+  generalize (iso_comp f (iso_inv_from_iso f')).
+  intro h.
+  set (HH := weq_from_fully_faithful _ _ _ HF a a').
+  apply eq_iso_precat.
+  simpl.
+  set (H3 := homotweqinvweq (weq_from_fully_faithful _ _ _ HF a a')).
+  simpl in H3.
+  set (H' := HF a a').
+  unfold fully_faithful_inv_hom.
+  unfold invweq.
+  simpl.
+  rewrite H3.
+  apply idpath.
+  
+  rewrite HFg.
+  rewrite iso_inv_of_iso_comp.
+  apply eq_iso_precat.
+  simpl.
+  repeat rewrite <- precategory_assoc.
+  rewrite iso_after_iso_inv.
+  rewrite precategory_id_right.
+  set (H := iso_inv_iso_inv _ _ _ f').
+  set (h':= base_paths _ _ H).
+  assumption.
+Qed.
+  
+
+
+Section from_fully_faithful_and_ess_surj_to_equivalence.
+
+Variables A B : precategory.
+Hypothesis HA : is_saturated A.
+Variable F : precategory_objects [A, B].
+Hypothesis HF : fully_faithful F.
+Hypothesis HS : essentially_surjective F.
+
+Definition rad_ob : precategory_objects B -> precategory_objects A.
+Proof.
+  intro b.
+  apply (pr1 (HS b (tpair (fun x => isaprop x) _ 
+               (isaprop_sigma_iso A B HA F HF b)) (fun x => x))).
+Defined.
+
+Definition rad_eps (b : precategory_objects B) : iso_precat (pr1 F (rad_ob b)) b.
+Proof.
+  apply (pr2 (HS b (tpair (fun x => isaprop x) _ 
+               (isaprop_sigma_iso A B HA F HF b)) (fun x => x))).
+Defined.
+
+Definition rad_mor (b b' : precategory_objects B) (g : b --> b') : rad_ob b --> rad_ob b'.
+Proof.
+  
+  set (epsgebs' := rad_eps b ;; g ;; iso_inv_from_iso (rad_eps b')).
+  set (Gg := fully_faithful_inv_hom _ _ _ HF (rad_ob b) _ epsgebs').
+  exact Gg.
+Defined.
+
+Definition rad_eta (a : precategory_objects A) : a --> rad_ob (pr1 F a).
+Proof.
+  set (epsFa := iso_inv_from_iso (rad_eps (pr1 F a))).
+  exact (iso_from_fully_faithful_reflection _ _ _ HF _ _ epsFa).
+Defined.
+
+Definition rad_precategory_ob_mor_fun : precategory_ob_mor_fun B A.
+Proof.
+  exists rad_ob.
+  exact rad_mor.
+Defined.
+  
+Lemma rad_is_precategory_fun : is_precategory_fun rad_precategory_ob_mor_fun.
+Proof.
+  split; simpl.
+  intro b.
+  unfold rad_mor. simpl.
+  rewrite precategory_id_right.
+  rewrite iso_inv_after_iso.
+  
+  
   
   
 

@@ -736,6 +736,45 @@ Definition fully_faithful_inv_hom (C D : precategory) (F : precategory_fun C D)
       F a --> F b -> a --> b :=
  invweq (weq_from_fully_faithful C D F HF a b).
 
+Lemma full_faithful_inv_identity (C D : precategory) (F : precategory_fun C D)
+      (HF : fully_faithful F) (a : precategory_objects C) : 
+    fully_faithful_inv_hom _ _ _ HF _ _ (precategory_identity (F a)) ==
+         precategory_identity _ .
+Proof.
+  set (h' := equal_transport_along_weq _ _ (weq_from_fully_faithful _ _ _ HF a a)).
+  apply h'.
+  set (HFFaa := homotweqinvweq (weq_from_fully_faithful _ _ _ HF a a)
+                 (precategory_identity _ )).
+  unfold fully_faithful_inv_hom.
+  simpl in *.
+  rewrite HFFaa.
+  rewrite precategory_fun_id; apply idpath.
+Qed.
+
+
+Lemma full_faithful_inv_comp (C D : precategory) (F : precategory_fun C D)
+      (HF : fully_faithful F) (a b c : precategory_objects C) 
+      (f : F a --> F b) (g : F b --> F c) : 
+    fully_faithful_inv_hom _ _ _ HF _ _ (f ;; g) ==
+       fully_faithful_inv_hom _ _ _ HF _ _ f ;; 
+           fully_faithful_inv_hom _ _ _ HF _ _ g.
+Proof.
+  set (h' := equal_transport_along_weq _ _ (weq_from_fully_faithful _ _ _ HF a c)).
+  apply h'.
+  set (HFFac := homotweqinvweq (weq_from_fully_faithful _ _ _ HF a c)
+                 (f ;; g)).
+  unfold fully_faithful_inv_hom.
+  simpl in *.
+  rewrite HFFac.
+  rewrite precategory_fun_comp.
+  set (HFFab := homotweqinvweq (weq_from_fully_faithful _ _ _ HF a b) f).
+  set (HFFbc := homotweqinvweq (weq_from_fully_faithful _ _ _ HF b c) g).
+  simpl in *.
+  rewrite HFFab.
+  rewrite HFFbc.
+  apply idpath.
+Qed.
+
 
 
 (** Fully faithful functors reflect isos *)
@@ -786,6 +825,11 @@ Proof.
   apply fully_faithful_reflects_iso_proof.
 Defined.
 
+(** *** Essentially surjective functors *)
+
+Definition essentially_surjective {C D : precategory} (F : precategory_fun C D) :=
+  forall b, ishinh (total2 (fun a => iso_precat (F a) b)).
+   
 
 
 (** ** Image on objects of a functor  *)
