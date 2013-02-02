@@ -791,6 +791,14 @@ Definition fully_faithful {C D : precategory} (F : precategory_fun C D) :=
   forall a b : precategory_objects C, 
     isweq (precategory_ob_mor_fun_morphisms F (a:=a) (b:=b)).
 
+Lemma isaprop_fully_faithful (C D : precategory) (F : precategory_fun C D) :
+   isaprop (fully_faithful F).
+Proof.
+  apply impred; intro a.
+  apply impred; intro b.
+  apply isapropisweq.
+Qed.
+
 Definition weq_from_fully_faithful (C D : precategory) (F : precategory_fun C D) 
       (HF : fully_faithful F) (a b : precategory_objects C) : 
    weq (a --> b) (F a --> F b).
@@ -921,6 +929,110 @@ Definition essentially_surjective {C D : precategory} (F : precategory_fun C D) 
 Definition faithful {C D : precategory} (F : precategory_fun C D) := 
   forall a b : precategory_objects C, forall f g : a --> b,
        #F f == #F g -> f == g.
+
+Lemma isaprop_faithful (C D : precategory) (F : precategory_fun C D) : 
+   isaprop (faithful F).
+Proof.
+  apply impred; intro c.
+  apply impred; intro b.
+  apply impred; intro f.
+  apply impred; intro g.
+  apply impred; intro H.
+  apply (pr2 (c --> b)).
+Qed.
+
+(** *** Full functors *)
+
+Definition full {C D : precategory} (F : precategory_fun C D) :=
+   forall a b (g : F a --> F b), total2 (fun f : a --> b => #F f == g).
+
+
+
+
+
+(** *** Fully faithful is the same as full and faithful *)
+
+Definition full_and_faithful {C D : precategory} (F : precategory_fun C D) :=
+   dirprod (full F) (faithful F).
+
+
+
+Lemma fully_faithful_implies_full_and_faithful (C D : precategory) (F : precategory_fun C D) :
+   fully_faithful F -> full_and_faithful F.
+Proof.
+  intro H.
+  split; simpl.
+  unfold full. 
+  intros a b f.
+  exists (fully_faithful_inv_hom _ _ _ H _ _ f).
+  set (HFFaa := homotweqinvweq (weq_from_fully_faithful _ _ _ H a b)).
+  simpl in HFFaa.
+  apply HFFaa.
+  
+  unfold faithful.
+  intros a b f g Heq.
+  apply (equal_transport_along_weq _ _ (weq_from_fully_faithful C D F H a b)).
+  simpl. assumption.
+Qed.
+
+Lemma full_and_faithful_implies_fully_faithful (C D : precategory) (F : precategory_fun C D) :
+   full_and_faithful F -> fully_faithful F.
+Proof. 
+  intros [Hfull Hfaith].
+  intros a b g.
+  unfold full in Hfull.
+  exists (Hfull a b g).
+  unfold hfiber.
+  intro t.
+  unfold faithful in Hfaith.
+  assert (X : pr1 t == pr1 (Hfull a b g)).
+  apply Hfaith.
+  rewrite (pr2 t). 
+  set (H':= pr2 (Hfull a b g)).
+  simpl in H'.
+  rewrite H'. apply idpath.
+  simpl in *.
+  apply (total2_paths  X).
+  apply proofirrelevance.
+  apply (pr2 (F a --> F b)).
+Qed.
+ 
+Lemma isaprop_full_and_faithful (C D : precategory) (F : precategory_fun C D) :
+   isaprop (full_and_faithful F).
+Proof.
+  apply isofhlevelsn.
+  intro H.
+  apply isofhleveldirprod.
+  apply impred; intro b.
+  apply impred; intro c.
+  apply impred; intro g.
+  apply invproofirrelevance.
+  intros f f'.
+  assert (HH : pr1 f == pr1 f').
+  
+  set (HF := full_and_faithful_implies_fully_faithful _ _ _ H).
+  set (h' := equal_transport_along_weq _ _
+          (weq_from_fully_faithful _ _ _ HF b c)).
+       apply h'.
+       simpl.
+  rewrite (pr2 f).
+  rewrite (pr2 f').
+  apply idpath.
+  
+  apply (total2_paths HH).
+  apply proofirrelevance.
+  apply (pr2 (F b --> F c)).
+  
+  apply isaprop_faithful.
+Qed.
+  
+  
+Definition weq_fully_faithful_full_and_faithful (C D : precategory) (F : precategory_fun C D) :
+   weq (fully_faithful F) (full_and_faithful F) :=
+  weqimplimpl (fully_faithful_implies_full_and_faithful _ _ F)
+              (full_and_faithful_implies_fully_faithful _ _ F)
+              (isaprop_fully_faithful _ _ F)
+              (isaprop_full_and_faithful _ _ F).
 
 (** ** Image on objects of a functor  *)
 (** is used later to define the full image subcategory of a category [D] 
