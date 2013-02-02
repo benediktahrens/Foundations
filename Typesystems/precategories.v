@@ -402,7 +402,22 @@ Proof.
   apply idpath.
 Qed.
   
-
+Lemma post_comp_with_iso_is_inj (C : precategory) (b c : precategory_objects C)
+     (h : b --> c) (H : is_precat_isomorphism h) 
+   (a : precategory_objects C) (f g : a --> b) : f ;; h == g ;; h -> f == g.
+Proof.
+  intro HH.
+  pathvia (f ;; (h ;; pr1 H)).
+  rewrite (pr1 (pr2 H)).
+  rewrite precategory_id_right.
+  apply idpath.
+  pathvia (g ;; (h ;; pr1 H)).
+  repeat rewrite precategory_assoc.
+  rewrite HH. apply idpath.
+  rewrite (pr1 (pr2 H)).
+  rewrite precategory_id_right.
+  apply idpath.
+Qed.
 
 (** ** Saturated precategories *)
 
@@ -732,6 +747,22 @@ Proof.
   apply precategory_fun_on_iso_is_iso.
 Defined.
  
+Lemma precategory_fun_on_iso_inv (C C' : precategory) (F : precategory_fun C C')
+    (a b : precategory_objects C) (f : iso_precat a b) : 
+   precategory_fun_on_iso _ _ F _ _ (iso_inv_from_iso f) == 
+       iso_inv_from_iso (precategory_fun_on_iso _ _ F _ _ f).
+Proof.
+  apply inv_iso_unique.
+  simpl.
+  split; simpl.
+  rewrite <- precategory_fun_comp.
+  rewrite iso_inv_after_iso.
+  apply precategory_fun_id.
+  rewrite <- precategory_fun_comp.
+  rewrite iso_after_iso_inv.
+  apply precategory_fun_id.
+Qed.
+  
 
 
 (** *** Fully faithful functors *)
@@ -842,6 +873,23 @@ Proof.
   exists (fully_faithful_inv_hom C D F HF a b f).
   apply fully_faithful_reflects_iso_proof.
 Defined.
+
+Lemma precategory_fun_on_iso_iso_from_fully_faithful_reflection (C D : precategory)
+      (F : precategory_fun C D) (HF : fully_faithful F) (a b : precategory_objects C)
+   (f : iso_precat (F a) (F b)) :
+      precategory_fun_on_iso _ _  F a b
+        (iso_from_fully_faithful_reflection _ _  F HF a b f) == f.
+Proof.
+  apply eq_iso_precat.
+  simpl.
+  set (H3 := homotweqinvweq (weq_from_fully_faithful _ _ _ HF a b)).
+  simpl in H3.
+  unfold fully_faithful_inv_hom. simpl.
+  rewrite H3.
+  apply idpath.
+Qed.
+
+
 
 (** *** Essentially surjective functors *)
 
