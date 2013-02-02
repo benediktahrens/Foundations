@@ -396,10 +396,26 @@ Proof.
   set (g := pr1 tr).
   set (q := pr2 tr).
   simpl in *. 
-  set (gaid := q a (identity_iso_precat a)).
+  set (gaid := q a (identity_iso_precat _ )).
+  simpl in *.
+  change (gamma a) with (pr1 gamma a). 
+  pathvia ((#(pr1 F) (precategory_identity ((pr1 H) a));; pr1 tr);;
+       #(pr1 G) (inv_from_iso (identity_iso_precat ((pr1 H) a)))).
+       Focus 2. apply pathsinv0. apply gaid.
+  rewrite (precategory_fun_id _ _ F).
+  rewrite precategory_id_left.
+  set (P := iso_inv_of_iso_id _ (pr1 H a)).
+  set (Pr := base_paths _ _ P); simpl in Pr.
+  rewrite Pr. clear Pr P. simpl in *.
+  rewrite (precategory_fun_id _ _ G) .
+  rewrite precategory_id_right.
+  apply idpath.
+Qed.
   
 
+End preimage.
 
+End lemma61.
 
 
 

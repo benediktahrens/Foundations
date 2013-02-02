@@ -374,6 +374,16 @@ Proof.
   apply iso_after_iso_inv.
 Qed.
 
+Lemma iso_inv_of_iso_id (C : precategory) (a : precategory_objects C) :
+   iso_inv_from_iso (identity_iso_precat a) == identity_iso_precat a.
+Proof.
+  apply pathsinv0.
+  apply inv_iso_unique.
+  split; simpl; rewrite precategory_id_left;
+  apply idpath.
+Qed.
+
+
 Lemma iso_inv_iso_inv (C : precategory) (a b : precategory_objects C)
    (f : iso_precat a b) : 
      iso_inv_from_iso (iso_inv_from_iso f) == f.
