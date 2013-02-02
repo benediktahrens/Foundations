@@ -35,6 +35,10 @@ Hypothesis Hff : fully_faithful H.
 
 
 Variables F G : precategory_objects [B, C].
+
+
+Section preimage.
+
 Variable gamma : F O H --> G O H.
 
 
@@ -253,7 +257,7 @@ Definition pdelta : forall b : precategory_objects B, pr1 F b --> pr1 G b :=
 (*
 Notation delta := preimage_pre_whisker.
 *)
-Lemma is_precategory_fun_fun_preimage_pre_whisker : 
+Lemma is_precategory_fun_fun_pdelta : 
      is_precategory_fun_fun (pr1 F) (pr1 G) pdelta.
 Proof.
   intros b b' f.
@@ -375,12 +379,25 @@ Proof.
 Qed.
 
 
+Definition delta : F --> G.
+Proof.
+  exists pdelta.
+  apply is_precategory_fun_fun_pdelta.
+Defined.
 
-
-
-
-
-
+Lemma pdelta_preimage : pre_whisker _ _ _ H _ _ delta == gamma.
+Proof.
+  simpl in *.
+  apply precategory_fun_fun_eq.
+  intro a.
+  unfold pre_whisker.
+  simpl.
+  set (tr := pr1 (claim1 (H a))).
+  set (g := pr1 tr).
+  set (q := pr2 tr).
+  simpl in *. 
+  set (gaid := q a (identity_iso_precat a)).
+  
 
 
 
