@@ -32,6 +32,8 @@ Notation "G 'O' F" := (functor_composite _ _ _ F G) (at level 25).
 
 (** * Whiskering: Composition of a natural transformation with a functor *)
 
+(** moved to precategory_whiskering
+
 Lemma is_precat_fun_fun_pre_whisker (A B C : precategory) (F : precategory_objects [A, B])
    (G H : precategory_objects [B, C]) (gamma : G --> H) : 
   is_precategory_fun_fun (precategory_fun_composite _ _ _ F G ) 
@@ -78,7 +80,7 @@ Proof.
   exists (fun a : precategory_objects B => # (pr1 K) (pr1 gamma  a)).
   apply is_precat_fun_fun_post_whisker.
 Defined.
-
+*)
 
 Definition form_adjunction (A B : precategory) (F : precategory_objects [A, B])
        (G : precategory_objects [B, A]) 

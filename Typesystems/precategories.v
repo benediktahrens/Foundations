@@ -386,6 +386,24 @@ Proof.
 Qed.
 
 
+Lemma pre_comp_with_iso_is_inj (C : precategory) (a b c : precategory_objects C)
+    (f : a --> b) (H : is_precat_isomorphism f) (g h : b --> c) : f ;; g == f ;; h -> g == h.
+Proof.
+  intro HH.
+  pathvia (pr1 H ;; f ;; g).
+  rewrite (pr2 (pr2 H)).
+  rewrite precategory_id_left.
+  apply idpath.
+  pathvia ((pr1 H ;; f) ;; h).
+  repeat rewrite <- precategory_assoc.
+  apply maponpaths. assumption.
+  rewrite (pr2 (pr2 H)).
+  rewrite precategory_id_left.
+  apply idpath.
+Qed.
+  
+
+
 (** ** Saturated precategories *)
 
 Definition precat_paths_to_iso {C : precategory} (a b : precategory_objects C):
@@ -830,7 +848,11 @@ Defined.
 Definition essentially_surjective {C D : precategory} (F : precategory_fun C D) :=
   forall b, ishinh (total2 (fun a => iso_precat (F a) b)).
    
+(** *** Faithful functors *)
 
+Definition faithful {C D : precategory} (F : precategory_fun C D) := 
+  forall a b : precategory_objects C, forall f g : a --> b,
+       #F f == #F g -> f == g.
 
 (** ** Image on objects of a functor  *)
 (** is used later to define the full image subcategory of a category [D] 
