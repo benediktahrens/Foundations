@@ -763,6 +763,16 @@ Proof.
   apply precategory_fun_id.
 Qed.
   
+(** *** Functors preserve inverses *)
+
+Lemma precategory_fun_on_inv_from_iso (C C' : precategory) (F : precategory_fun C C')
+    (a b : precategory_objects C)(f : iso_precat a b) :
+      #F (inv_from_iso f) == inv_from_iso (precategory_fun_on_iso _ _ F _ _ f) .
+Proof.
+  set (H := precategory_fun_on_iso_inv _ _ F _ _ f).
+  set (H' := base_paths _ _ H). simpl in *.
+  apply H'.
+Qed. 
 
 
 (** *** Fully faithful functors *)

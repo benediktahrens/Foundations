@@ -339,7 +339,40 @@ Proof.
   simpl in *.
   rewrite <- (precategory_fun_comp _ _ G _ _ _ h f).
   clear HH q g gq.
-  
+  pathvia (inv_from_iso (precategory_fun_on_iso B C F (H a) b h);;
+       (gamma a;; #G (h;; f ;; iso_inv_from_iso h' ;; h')) ).
+    repeat rewrite <- precategory_assoc.
+    simpl. rewrite iso_after_iso_inv. 
+           rewrite precategory_id_right.
+           apply idpath.
+  repeat rewrite precategory_assoc.
+  rewrite (precategory_fun_comp _ _ G).
+  set (P := precategory_fun_fun_ax _ _ gamma _ _ k). simpl in *.
+      unfold k in P. simpl in P.
+  set (H3 := homotweqinvweq (weq_from_fully_faithful _ _ _ Hff a a')).
+  simpl in H3. 
+  unfold fully_faithful_inv_hom in P. simpl in P.
+  rewrite H3 in P.
+  repeat rewrite <- precategory_assoc.
+  rewrite (precategory_assoc _ _ _ _ _ (gamma a)).
+  simpl in *.
+  rewrite <- P.
+  clear H3 P.
+  set (H4 := precategory_fun_on_iso_inv _ _ F _ _ h).
+  set (H5 := base_paths _ _ H4). simpl in H5.
+  rewrite <- H5.
+  repeat rewrite precategory_assoc.
+  rewrite <- (precategory_fun_comp _ _ F).
+  repeat rewrite precategory_assoc.
+  rewrite iso_after_iso_inv.
+  rewrite precategory_id_left.
+  rewrite (precategory_fun_comp _ _ F).
+  rewrite precategory_fun_on_inv_from_iso.
+  apply pathsinv0.
+  rewrite Hb'.
+  repeat rewrite precategory_assoc.
+  apply idpath.
+Qed.
 
 
 
