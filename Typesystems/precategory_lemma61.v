@@ -33,13 +33,101 @@ Variable H : precategory_objects [A, B].
 Hypothesis p : essentially_surjective H.
 Hypothesis Hff : fully_faithful H.
 
-Lemma claim1 (F G : precategory_objects [B, C]) (gamma : F O H --> G O H) 
-        (b : precategory_objects B) : 
-   iscontr (total2 (fun g : pr1 F b --> pr1 G b => 
+
+Variables F G : precategory_objects [B, C].
+Variable gamma : F O H --> G O H.
+Variable b : precategory_objects B.
+
+Lemma claim1_isinhabited : isaprop (total2 (fun g : pr1 F b --> pr1 G b => 
       forall a : precategory_objects A, forall f : iso_precat (pr1 H a) b,
-           pr1 gamma a == #(pr1 F) f ;; g ;; #(pr1 G) (inv_from_iso f)  )).
+           pr1 gamma a == #(pr1 F) f ;; g ;; #(pr1 G) (inv_from_iso f))).
 Proof.
-  Check isapropiscontr.
+  apply invproofirrelevance.
+  intros x x'.
+  destruct x as [g q].
+  destruct x' as [g' q'].
+  assert (Hgg' : g == g'). Focus 1.
+  set (pbg := p b (tpair (fun x => isaprop x) (g == g') (pr2 (pr1 F b --> pr1 G b) _ _ ))).
+  simpl in pbg.
+  apply pbg.
+  intro anoth.
+  destruct anoth as [anot h].
+  set (qanoth := q anot h).
+  assert (H1 : g == iso_inv_from_iso (precategory_fun_on_iso _ _ F _ _ h) ;; 
+                      pr1 gamma anot ;; precategory_fun_on_iso _ _ G _ _ h).
+  apply (pre_comp_with_iso_is_inj _ _ _ _ (precategory_fun_on_iso _ _ F _ _ h)
+                                          (pr2 (precategory_fun_on_iso _ _ F _ _ h))).
+                                          
+  repeat rewrite precategory_assoc.
+     rewrite iso_inv_after_iso. rewrite precategory_id_left.
+  apply ( post_comp_with_iso_is_inj _ _ _  
+          (iso_inv_from_iso (precategory_fun_on_iso _ _ G _ _ h))
+                     (pr2 (iso_inv_from_iso (precategory_fun_on_iso _ _ G _ _ h)))).
+                     simpl.
+  set (H3 :=  base_paths _ _ (precategory_fun_on_iso_inv _ _ G _ _ h)).
+  simpl in H3.
+  rewrite <- H3.
+  repeat rewrite <- precategory_assoc.
+  rewrite <- precategory_fun_comp.
+  rewrite iso_inv_after_iso.
+  rewrite precategory_fun_id.
+  rewrite precategory_id_right.
+  apply pathsinv0.
+  rewrite precategory_assoc.
+  apply qanoth.
+  
+  set (q'anoth := q' anot h).
+  
+  assert (H2 : g' == iso_inv_from_iso (precategory_fun_on_iso _ _ F _ _ h) ;; 
+                      pr1 gamma anot ;; precategory_fun_on_iso _ _ G _ _ h).
+  apply (pre_comp_with_iso_is_inj _ _ _ _ (precategory_fun_on_iso _ _ F _ _ h)
+                                          (pr2 (precategory_fun_on_iso _ _ F _ _ h))).
+                                          
+  repeat rewrite precategory_assoc.
+     rewrite iso_inv_after_iso. rewrite precategory_id_left.
+  apply ( post_comp_with_iso_is_inj _ _ _  
+          (iso_inv_from_iso (precategory_fun_on_iso _ _ G _ _ h))
+                     (pr2 (iso_inv_from_iso (precategory_fun_on_iso _ _ G _ _ h)))).
+                     simpl.
+  set (H3 :=  base_paths _ _ (precategory_fun_on_iso_inv _ _ G _ _ h)).
+  simpl in H3.
+  rewrite <- H3.
+  repeat rewrite <- precategory_assoc.
+  rewrite <- precategory_fun_comp.
+  rewrite iso_inv_after_iso.
+  rewrite precategory_fun_id.
+  rewrite precategory_id_right.
+  apply pathsinv0.
+  rewrite precategory_assoc.
+  apply q'anoth.
+  rewrite H1.
+  rewrite H2.
+  apply idpath.
+
+  apply (total2_paths2 Hgg').
+  apply proofirrelevance.
+  apply impred. intro a.
+  apply impred. intro a'.
+  Check (pr1 gamma a).
+  apply (pr2 (pr1 (F O H) a --> pr1 (G O H) a)).
+Qed.
+  
+
+inv_from_iso_precateory_fun_on_iso.
+  apply bla.
+                                           
+
+     simpl.
+
+    
+  simpl.
+
+Definition claim1_center (F G : precategory_objects [B, C]) (gamma : F O H --> G O H) 
+        (b : precategory_objects B) : 
+   total2 (fun g : pr1 F b --> pr1 G b => 
+      forall a : precategory_objects A, forall f : iso_precat (pr1 H a) b,
+           pr1 gamma a == #(pr1 F) f ;; g ;; #(pr1 G) (inv_from_iso f)  ).
+Proof.
   set (X := isapropiscontr (total2
      (fun g : (pr1 F) b --> (pr1 G) b =>
       forall (a : precategory_objects A) (f : iso_precat ((pr1 H) a) b),
@@ -89,7 +177,7 @@ Proof.
   repeat rewrite precategory_assoc.
   apply idpath.
   
-  exists bla.
+  exists g.
 
 
 
