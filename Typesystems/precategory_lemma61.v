@@ -36,9 +36,10 @@ Hypothesis Hff : fully_faithful H.
 
 Variables F G : precategory_objects [B, C].
 Variable gamma : F O H --> G O H.
-Variable b : precategory_objects B.
 
-Lemma claim1_isinhabited : isaprop (total2 (fun g : pr1 F b --> pr1 G b => 
+
+Lemma claim1_isinhabited (b : precategory_objects B) : 
+    isaprop (total2 (fun g : pr1 F b --> pr1 G b => 
       forall a : precategory_objects A, forall f : iso_precat (pr1 H a) b,
            pr1 gamma a == #(pr1 F) f ;; g ;; #(pr1 G) (inv_from_iso f))).
 Proof.
@@ -113,6 +114,8 @@ Proof.
 Qed.
   
 
+(*
+
 inv_from_iso_precateory_fun_on_iso.
   apply bla.
                                            
@@ -179,9 +182,9 @@ Proof.
   
   exists g.
 
+*)
 
-
-Lemma claim1 (F G : precategory_objects [B, C]) (gamma : F O H --> G O H) 
+Lemma claim1 (*F G : precategory_objects [B, C]) (gamma : F O H --> G O H) *)
         (b : precategory_objects B) : 
    iscontr (total2 (fun g : pr1 F b --> pr1 G b => 
       forall a : precategory_objects A, forall f : iso_precat (pr1 H a) b,
@@ -236,30 +239,107 @@ Proof.
   unfold g.
   repeat rewrite precategory_assoc.
   apply idpath.
+  Search  ( _ -> iscontr _ ).
+  apply iscontraprop1.
+  apply claim1_isinhabited.
   
-  exists bla.
+  exists g.
+  apply gp.
+Qed.
   
-  rewrite iso_inv_iso_inv.
-  rewrite precategory_fun_on_iso_comp.
-  rewrite <- precategory_fun_fun_ax.
-set (HHH := iso_after_iso_inv _ _ _ GHk).
-  unfold inv_from_iso in HHH. 
-  unfold iso_inv_from_iso. simpl. rewrite HHH.
-  simpl.
-
-  simpl.
+ 
+Definition pdelta : forall b : precategory_objects B, pr1 F b --> pr1 G b :=
+         fun b => pr1 (pr1 (claim1 b)).
+(*
+Notation delta := preimage_pre_whisker.
+*)
+Lemma is_precategory_fun_fun_preimage_pre_whisker : 
+     is_precategory_fun_fun (pr1 F) (pr1 G) pdelta.
+Proof.
+  intros b b' f.
+  apply pathsinv0. Check (#(pr1 F) f;; pdelta b').
+  set (pb1 := p b (tpair (fun x => isaprop x) 
+                       (pdelta b;; #(pr1 G) f == 
+                         #(pr1 F) f;; pdelta b')
+                       (pr2 ((pr1 F) b --> (pr1 G) b') _ _ ))).
+  simpl in *.
+  apply pb1. clear pb1.
+  intro t; destruct t as [a h].
+  set (pb1 := p b' (tpair (fun x => isaprop x) 
+                       (pdelta b;; # (G) f == 
+                         #(pr1 F) f;; pdelta b')
+                       (pr2 ((pr1 F) b --> (pr1 G) b') _ _ ))).
+  simpl in *.
+  apply pb1. clear pb1.
+  intro t; destruct t as [a' h'].
   
-                
-  set (fff := #F (#H k) ;; gamma anot ). simpl in *. 
-  set (fffGhK := fff ;; iso_inv_from_iso GHk) . simpl in fff.   
-  pathvia (#F (#H k) ;; gamma anot ;; pr1 GHk).
+  set (k := fully_faithful_inv_hom _ _ H Hff _ _ 
+             (h ;; (f ;; (iso_inv_from_iso h')))).
+  
+  set (gq := pr1 (claim1 b)). 
+  set (g := pr1 gq).
+  set (q := pr2 gq). simpl in *. unfold gq in *.
+  (*destruct gq as [g q].
+(*  unfold pdelta. *)*)
+  
+  set (HH := (q a h)). simpl in *.
+  
+  assert (Hb : pdelta b == inv_from_iso (precategory_fun_on_iso _ _ F _ _ h) ;; 
+                                gamma a ;; #G h).
+  apply (pre_comp_with_iso_is_inj _ _ _ _ (precategory_fun_on_iso _ _ F _ _ h)
+                                          (pr2 (precategory_fun_on_iso _ _ F _ _ h))).
+  repeat rewrite precategory_assoc.
+     rewrite iso_inv_after_iso. rewrite precategory_id_left.
+  apply ( post_comp_with_iso_is_inj _ _ _  
+          (iso_inv_from_iso (precategory_fun_on_iso _ _ G _ _ h))
+                     (pr2 (iso_inv_from_iso (precategory_fun_on_iso _ _ G _ _ h)))).
+                     simpl.
+  set (H3 :=  base_paths _ _ (precategory_fun_on_iso_inv _ _ G _ _ h)).
+  simpl in H3.
+  rewrite <- H3.
+  repeat rewrite <- precategory_assoc.
+  rewrite <- precategory_fun_comp.
+  rewrite iso_inv_after_iso.
+  rewrite precategory_fun_id.
+  rewrite precategory_id_right.
+  apply pathsinv0.
+  clear H3.
+  rewrite precategory_assoc.
+  apply HH.
   
   
-
-
-
-
-
+  assert (Hb' : pdelta b' == inv_from_iso (precategory_fun_on_iso _ _ F _ _ h') ;; 
+                                gamma a' ;; #G h').
+  apply (pre_comp_with_iso_is_inj _ _ _ _ (precategory_fun_on_iso _ _ F _ _ h')
+                                          (pr2 (precategory_fun_on_iso _ _ F _ _ h'))).
+  repeat rewrite precategory_assoc.
+     rewrite iso_inv_after_iso. rewrite precategory_id_left.
+  apply ( post_comp_with_iso_is_inj _ _ _  
+          (iso_inv_from_iso (precategory_fun_on_iso _ _ G _ _ h'))
+                     (pr2 (iso_inv_from_iso (precategory_fun_on_iso _ _ G _ _ h')))).
+                     simpl.
+  set (H3 :=  base_paths _ _ (precategory_fun_on_iso_inv _ _ G _ _ h')).
+  simpl in H3.
+  rewrite <- H3.
+  repeat rewrite <- precategory_assoc.
+  rewrite <- precategory_fun_comp.
+  rewrite iso_inv_after_iso.
+  rewrite precategory_fun_id.
+  rewrite precategory_id_right.
+  apply pathsinv0.
+  clear H3.
+  rewrite precategory_assoc.
+  set (gq' := pr1 (claim1 b')).
+  set (q' := pr2 gq').
+  set (HH' := q' a' h').
+  apply HH'.
+  
+  rewrite Hb.
+  repeat rewrite <- precategory_assoc.
+  simpl in *.
+  rewrite <- (precategory_fun_comp _ _ G _ _ _ h f).
+  clear HH q g gq.
+  
 
 
 
