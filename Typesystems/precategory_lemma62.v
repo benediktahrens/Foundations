@@ -33,6 +33,7 @@ Variable H : precategory_objects [A, B].
 Hypothesis p : essentially_surjective H.
 Hypothesis Hff : fully_faithful H.
 
+Section full.
 
 Variables F G : precategory_objects [B, C].
 
@@ -414,6 +415,33 @@ Qed.
   
 
 End preimage.
+
+End full.
+
+Lemma pre_whisker_with_ess_surj_and_fully_faithful_is_full :
+  full (pre_whisker_functor A B C H).
+Proof.
+  unfold full.
+  intros F G gamma.
+  exists (delta F G gamma).
+  apply pdelta_preimage.
+Defined.
+
+Lemma pre_whisker_with_ess_surj_and_fully_faithful_is_full_and_faithful : 
+   full_and_faithful (pre_whisker_functor A B C H).
+Proof.
+  split.
+  apply pre_whisker_with_ess_surj_and_fully_faithful_is_full.
+  apply pre_whisker_with_ess_surj_is_faithful. assumption.
+Qed.
+
+Lemma pre_whisker_with_ess_surj_and_fully_faithful_is_fully_faithful : 
+   fully_faithful (pre_whisker_functor A B C H).
+Proof.
+  apply full_and_faithful_implies_fully_faithful.
+  apply pre_whisker_with_ess_surj_and_fully_faithful_is_full_and_faithful.
+Qed.
+
 
 End lemma61.
 
