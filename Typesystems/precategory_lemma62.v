@@ -26,7 +26,7 @@ Notation "[ C , D ]" := (precategory_fun_precategory C D).
 Local Notation "# F" := (precategory_ob_mor_fun_morphisms F)(at level 3).
 
 
-Section lemma61.
+Section lemma62.
 
 Variables A B C : precategory.
 Variable H : precategory_objects [A, B].
@@ -443,7 +443,7 @@ Proof.
 Qed.
 
 
-End lemma61.
+End lemma62.
 
 
 
