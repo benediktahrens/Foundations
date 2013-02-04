@@ -50,7 +50,53 @@ Let X (b : precategory_objects B) :=
              (#(pr1 H) f ;; pr2 t' == pr2 t -> 
                     #(pr1 F) f ;; k (pr1 t') (pr2 t') == k (pr1 t) (pr2 t)))).
 
+Check X.
 
+Definition center_of_contr (b : precategory_objects B) 
+    (anot : precategory_objects A)(hnot : iso_precat (pr1 H anot) b) : X b.
+Proof.
+  set (cnot := pr1 F anot).
+  set (g := fun (a : precategory_objects A)(h : iso_precat (pr1 H a) b) =>
+              (iso_from_fully_faithful_reflection _ _ H Hff _ _  
+                  (iso_comp h (iso_inv_from_iso hnot)))).
+  set (knot := fun (a : precategory_objects A)(h : iso_precat (pr1 H a) b) =>
+                    precategory_fun_on_iso _ _ F _ _  (g a h)).
+  exists (pr1 F anot).
+  exists knot.
+  intros t t' f.
+  destruct t as [a h].
+  destruct t' as [a' h'].
+  simpl in *.
+  intro star.
+  rewrite <- (precategory_fun_comp _ _ F).
+  apply maponpaths.
+  Check (g a h).
+  set (h2 := equal_transport_along_weq _ _
+          (weq_from_fully_faithful _ _ _ Hff a anot)).
+          apply h2. clear h2.
+  simpl.
+  rewrite precategory_fun_comp.
+  set (H3 := homotweqinvweq (weq_from_fully_faithful _ _ _ Hff a' anot)).
+  simpl in H3.
+  unfold fully_faithful_inv_hom. simpl.
+  rewrite H3.
+  (*rewrite H3.*)
+  clear H3.
+  rewrite precategory_assoc.
+  set (H3 := homotweqinvweq (weq_from_fully_faithful _ _ _ Hff a anot)).
+  simpl in H3.
+  unfold fully_faithful_inv_hom. simpl.
+  rewrite H3.
+  (*rewrite H3.*)
+  clear H3.
+  rewrite <- star.
+  apply idpath.
+Defined.
+  
+  apply h'.
+  simpl.
+  
+  
 
 
 
