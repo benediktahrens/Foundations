@@ -547,10 +547,71 @@ Proof.
   apply Y_contr_eq.
 Defined.
 
+Print precategory_ob_mor_fun.
+Definition G_precategory_ob_mor_fun : precategory_ob_mor_fun B C.
+Proof.
+  exists Go.
+  intros b b' f.
+  exact (pr1 (pr1 (Y_iscontr b b' f))).
+Defined.
 
-
-
+Lemma is_precategory_fun : is_precategory_fun G_precategory_ob_mor_fun.
+Proof.
+  split; simpl.
+  intro b.
   
+  assert (PR2 : forall (a : ob A) (h : iso ((pr1 H) a) b) (a' : ob A) (h' : iso ((pr1 H) a') b)
+    (l : a --> a'),
+  #(pr1 H) l;; h' == h;; precategory_identity b ->
+  #(pr1 F) l;; k b a' h' == k b a h;; precategory_identity (Go b)).
+  intros a h a' h' l LL.
+  rewrite precategory_id_right.
+  set (qb := q b (tpair _ a h) (tpair _ a' h') l).
+  simpl in qb.
+  apply qb.
+  rewrite precategory_id_right in LL.
+  apply LL.
+  set (Gbrtilde :=
+           tpair _ (precategory_identity (Go b)) PR2 : Y b b (precategory_identity b)).
+(*   (Gbrtilde : Y b b (precategory_identity b)).
+  exists (precategory_identity (Go b)).
+    
+  intros a h a' h' l LL.
+  rewrite precategory_id_right.
+  set (qb := q b (tpair _ a h) (tpair _ a' h') l).
+  simpl in qb.
+  apply qb.
+  rewrite precategory_id_right in LL.
+  apply LL.
+*)
+  
+  set (H' := pr2 (Y_iscontr b b (precategory_identity b)) Gbrtilde).
+  set (H'' := base_paths _ _ H').
+  simpl in H'.
+  rewrite <- H'.
+  apply idpath.
+  
+  
+  (** composition *)
+
+  intros b b' b'' f f'.
+  Check pr1 (pr1 (Y_iscontr b b'' (f;; f'))).
+  assert (HHHH : isaprop (pr1 (pr1 (Y_iscontr b b'' (f;; f'))) ==
+                        pr1 (pr1 (Y_iscontr b b' f));; pr1 (pr1 (Y_iscontr b' b'' f')))).
+  apply (pr2 (Go b --> Go b'')).
+  apply (p b (tpair (fun x => isaprop x) (pr1 (pr1 (Y_iscontr b b'' (f;; f'))) ==
+           pr1 (pr1 (Y_iscontr b b' f));; pr1 (pr1 (Y_iscontr b' b'' f'))) HHHH)).
+  intros [a0 h0].
+  simpl.
+  apply (p b' (tpair (fun x => isaprop x) (pr1 (pr1 (Y_iscontr b b'' (f;; f'))) ==
+           pr1 (pr1 (Y_iscontr b b' f));; pr1 (pr1 (Y_iscontr b' b'' f'))) HHHH)).
+  intros [a0' h0'].
+  simpl.
+  apply (p b'' (tpair (fun x => isaprop x) (pr1 (pr1 (Y_iscontr b b'' (f;; f'))) ==
+           pr1 (pr1 (Y_iscontr b b' f));; pr1 (pr1 (Y_iscontr b' b'' f'))) HHHH)).
+  intros [a0'' h0''].
+  simpl.
+
 
 
 
