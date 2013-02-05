@@ -504,6 +504,15 @@ Definition double_transport {C : precategory} {a a' b b' : precategory_objects C
    (p : a == a') (q : b == b') (f : a --> b) : a' --> b' :=
   transportf (fun TT => a' --> TT) q (transportf (fun SS => SS --> b) p f).
 
+Lemma idtoiso_postcompose (C : precategory) (a b b' : precategory_objects C)
+  (p : b == b') (f : a --> b) :
+      f ;; idtoiso p == transportf (fun b => a --> b) p f.
+Proof.
+  induction p.
+  simpl.
+  rewrite precategory_id_right.
+  apply idpath.
+Qed.
 
 Lemma double_transport_idtoiso (C : precategory) (a a' b b' : precategory_objects C) 
   (p : a == a') (q : b == b')  (f : a --> b) : 
