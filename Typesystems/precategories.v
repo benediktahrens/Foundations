@@ -270,33 +270,27 @@ Definition iso_after_iso_inv (C : precategory) (a b : precategory_objects C)
 
 
 Lemma iso_inv_on_right (C : precategory) (a b c: precategory_objects C)
-  (f : a --> b) (g : b --> c) (h : a --> c) (H : h == f;;g) (H': is_precat_isomorphism f) :
-     inv_from_iso (tpair (is_precat_isomorphism )  f H') ;; h == g.
+  (f : iso_precat a  b) (g : b --> c) (h : a --> c) (H : h == f;;g) :
+     inv_from_iso f ;; h == g.
 Proof.
-  assert (H2 : inv_from_iso {| pr1 := f; pr2 := H' |};; h == 
-                  inv_from_iso {| pr1 := f; pr2 := H' |};; (f ;; g)).
+  assert (H2 : inv_from_iso f;; h == 
+                  inv_from_iso f;; (f ;; g)).
   apply maponpaths; assumption.
   rewrite precategory_assoc in H2.
-  destruct H' as [f' [Hf Hf']]. simpl in *.
-  unfold inv_from_iso in *;
-  simpl in *.
-  rewrite Hf' in H2.
-  rewrite precategory_id_left in H2.
-  assumption.
+  rewrite H2.
+  rewrite iso_after_iso_inv.
+  apply precategory_id_left.
 Qed.
 
 Lemma iso_inv_on_left (C : precategory) (a b c: precategory_objects C)
-  (f : a --> b) (g : b --> c) (h : a --> c) (H : h == f;;g) (H': is_precat_isomorphism g) :
-     f == h ;; inv_from_iso (tpair is_precat_isomorphism g H').
+  (f : a --> b) (g : iso_precat b c) (h : a --> c) (H : h == f;;g) :
+     f == h ;; inv_from_iso g.
 Proof.
-  assert (H2 : h ;; inv_from_iso {| pr1 := g; pr2 := H' |} == 
-                         (f;; g) ;; inv_from_iso {| pr1 := g; pr2 := H' |}).
+  assert (H2 : h ;; inv_from_iso g == 
+                         (f;; g) ;; inv_from_iso g).
     rewrite H. apply idpath.
   rewrite <- precategory_assoc in H2.
-  destruct H' as [g' [Hg Hg']]. simpl in *.
-  unfold inv_from_iso in *;
-  simpl in *.
-  rewrite Hg in H2.
+  rewrite iso_inv_after_iso in H2.
   rewrite precategory_id_right in H2.
   apply pathsinv0.
   assumption.
