@@ -610,14 +610,45 @@ Proof.
   apply (p b'' (tpair (fun x => isaprop x) (pr1 (pr1 (Y_iscontr b b'' (f;; f'))) ==
            pr1 (pr1 (Y_iscontr b b' f));; pr1 (pr1 (Y_iscontr b' b'' f'))) HHHH)).
   intros [a0'' h0''].
+  simpl; clear HHHH.
+
+(*  
+  set (hfh := h0 ;; f ;; inv_from_iso h0').
+  set (l0 := fully_faithful_inv_hom _ _ H Hff _ _ hfh).
+*)
+  set (l0 := fully_faithful_inv_hom A B H Hff _ _ (h0 ;; f ;; inv_from_iso h0')).
+  set (l0' := fully_faithful_inv_hom A B H Hff _ _ (h0' ;; f' ;; inv_from_iso h0'')).
+  set (l0'' := fully_faithful_inv_hom A B H Hff _ _ (h0 ;; (f;; f') ;; inv_from_iso h0'')).
+
+  
+  assert (L : l0 ;; l0' == l0'').
+  apply (equal_transport_along_weq _ _ (weq_from_fully_faithful _ _ _ Hff a0 a0'')).
   simpl.
-
-
-
-
-
-
-
+  rewrite precategory_fun_comp.
+  unfold l0'.
+  set (HFFaa := homotweqinvweq (weq_from_fully_faithful A B H Hff a0' a0'')).
+  unfold fully_faithful_inv_hom.
+  simpl in *.
+  rewrite HFFaa.
+  clear HFFaa.
+  
+  unfold l0.
+  set (HFFaa := homotweqinvweq (weq_from_fully_faithful A B H Hff a0 a0')).
+  unfold fully_faithful_inv_hom.
+  simpl in *.
+  rewrite HFFaa.
+  clear HFFaa.
+  pathvia (h0 ;; f ;; (inv_from_iso h0' ;; h0') ;; f' ;; inv_from_iso h0'').
+  repeat rewrite precategory_assoc; apply idpath.
+  rewrite iso_after_iso_inv. rewrite precategory_id_right.
+  unfold l0''.
+  set (HFFaa := homotweqinvweq (weq_from_fully_faithful A B H Hff a0 a0'')).
+  unfold fully_faithful_inv_hom.
+  simpl in *.
+  rewrite HFFaa.
+  clear HFFaa.
+  repeat rewrite precategory_assoc; apply idpath.
+  simpl.
 
 End preimage.
 
