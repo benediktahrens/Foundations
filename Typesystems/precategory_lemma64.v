@@ -490,13 +490,66 @@ Proof.
   rewrite star4.
   apply idpath.
 Defined.
- 
+
+Lemma Y_contr_eq (b b' : ob B) (f : b --> b')
+     (a0 : ob A) (h0 : iso (pr1 H a0) b)
+     (a0' : ob A) (h0' : iso (pr1 H a0') b') :
+  forall t : Y b b' f, t == Y_inhab b b' f a0 h0 a0' h0'.
+Proof.
+  intro t.
+  apply pathsinv0.
+  assert (Hpr : pr1 (Y_inhab b b' f a0 h0 a0' h0') == pr1 t).
+  destruct t as [g1 r1]; simpl in *.
+  rewrite <- precategory_assoc.
+  apply iso_inv_on_right.
+  set (hfh := h0 ;; f ;; inv_from_iso h0').
+  set (l0 := fully_faithful_inv_hom _ _ H Hff _ _ hfh).
+  set (r1aioel := r1 a0 h0 a0' h0' l0).
+  apply r1aioel.
+  unfold l0.
+  set (H3 := homotweqinvweq (weq_from_fully_faithful _ _ _ Hff a0 a0')).
+  simpl in H3.
+  unfold fully_faithful_inv_hom. simpl.
+  rewrite H3. clear H3.
+  unfold hfh.
+  repeat rewrite <- precategory_assoc.
+  rewrite iso_after_iso_inv. rewrite precategory_id_right.
+  apply idpath.
+  apply (total2_paths Hpr).
+  apply proofirrelevance.
+  apply impred; intro a.
+  apply impred; intro h.
+  apply impred; intro a'.
+  apply impred; intro h'.
+  apply impred; intro l.
+  apply impred; intro rtu.
+  Check k b a h;; pr1 t.
+  apply (pr2 ((pr1 F) a --> Go b')).
+Qed.
 
 Definition Y_iscontr  (b b' : ob B) (f : b --> b') : 
    iscontr (Y b b' f).
 Proof.
+  assert (HH : isaprop (iscontr (Y b b' f))).
+  apply isapropiscontr.
+  set (pbH := p b (tpair (fun x => isaprop x) (iscontr (Y b b' f)) HH)).
+  simpl in *.
+  apply pbH; clear pbH.
+  intros [a0 h0].
+  set (pbH := p b' (tpair (fun x => isaprop x) (iscontr (Y b b' f)) HH)).
+  Check f.
+  simpl in *.
+  apply pbH; clear pbH.
+  intros [a0' h0'].
+  clear HH.
   
-  
+  exists (Y_inhab b b' f a0 h0 a0' h0').
+  apply Y_contr_eq.
+Defined.
+
+
+
+
   
 
 
