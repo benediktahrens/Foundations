@@ -144,7 +144,7 @@ Proof.
   clear H3.
   rewrite <- star.
   apply idpath.
-Qed.
+Defined.
 
 
 Definition center_of_contr (b : precategory_objects B) 
@@ -294,7 +294,7 @@ Proof.
   apply impred; intro f.
   apply impred; intro g.
   apply (pr2 (((pr1 F) (pr1 t0)) --> (pr1 (pr1 t)))).
-Qed.
+Defined.
 
 (*
 Lemma lemma64_claim1 : forall b : precategory_objects B,
@@ -402,7 +402,7 @@ Proof.
   intro t.
   exists (center_of_contr b (pr1 t) (pr2 t)).
   apply (claim1_contr_eq b (pr1 t) (pr2 t)).
-Qed.
+Defined.
 
 
 
@@ -1290,10 +1290,71 @@ Qed.
 
 Definition GG : ob [B, C] := tpair _ G_precategory_ob_mor_fun is_precategory_fun.
 
+Lemma pr1pr1functor : pr1 (pr1 (GG O H)) == pr1 (pr1 F).
+Proof.
+  apply funextsec; intro a0.
+  set (kFa := fun (a : ob A) (h : iso (pr1 H a) (pr1 H a0)) =>
+                precategory_fun_on_iso A C F _ _ 
+                  (iso_from_fully_faithful_reflection _ _ H Hff _ _ h)).
+
+  assert (HYpr2 : forall (t t' : total2 (fun a : ob A => iso ((pr1 H) a) ((pr1 H) a0)))
+         (f : pr1 t --> pr1 t'),
+              #(pr1 H) f;; pr2 t' == pr2 t ->
+     #(pr1 F) f;; #(pr1 F) (fully_faithful_inv_hom A B H Hff (pr1 t') a0 (pr2 t')) ==
+         #(pr1 F) (fully_faithful_inv_hom A B H Hff (pr1 t) a0 (pr2 t))).
+
+(*  
+*)
+  simpl.
+  intros [a h] [a' h'] f L.
+  simpl in L; simpl.
+  rewrite <- (precategory_fun_comp A C F).
+  apply maponpaths.
+  set (hhh':=equal_transport_along_weq _ _ (weq_from_fully_faithful A B H Hff a a0)
+                 (f;; fully_faithful_inv_hom A B H Hff a' a0 h')                      
+                 (fully_faithful_inv_hom A B H Hff a a0 h)  ).
+  simpl in *.
+  apply hhh'. clear hhh'.
+  set (HFFaa := homotweqinvweq (weq_from_fully_faithful _ _ H Hff a a0)).
+  unfold fully_faithful_inv_hom.
+  simpl in *.
+  rewrite HFFaa. clear HFFaa.
+  rewrite precategory_fun_comp.
+  set (HFFaa := homotweqinvweq (weq_from_fully_faithful _ _ H Hff a' a0)).
+  unfold fully_faithful_inv_hom.
+  simpl in *.
+  rewrite HFFaa. clear HFFaa.
+  apply L.
+  
+  set (HY := tpair _ (tpair _ (pr1 F a0) kFa) HYpr2 : X (pr1 H a0)).
+  
+  set (hula := pr2 (lemma64_claim1 (pr1 H a0)) HY ).
+  set (hulapr2 := base_paths _ _ (base_paths _ _ hula)).
+  simpl in hulapr2.
+  apply pathsinv0.
+  simpl in hulapr2.
+  change (pr1 (pr1 F) a0) with (pr1 F a0).
+  rewrite hulapr2.
+  apply idpath.
+Defined.
 
 Lemma bla : GG O H == F.
 Proof.
   apply (precategory_fun_eq _ _ (GG O H) F).
+  apply (total2_paths pr1pr1functor).
+  apply funextsec. intro a.
+  apply funextsec. intro b.
+  apply funextsec. intro f.
+  
+  rewrite weird_lemma.
+  simpl.
+  unfold pr1pr1functor.
+  simpl.
+  generalize (pr1pr1functor).
+  simpl.
+  intro i.
+  
+  simpl.
   assert (HH : pr1 (pr1 (GG O H)) == pr1 (pr1 F)).
   simpl.
   apply funextsec; intro a0.
