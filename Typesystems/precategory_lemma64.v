@@ -206,7 +206,6 @@ Proof.
 
 (*  apply eq_iso_precat. *)
   simpl.
-  Check w.
   pathvia (iso_comp  (precategory_fun_on_iso A C F a anot
      (iso_from_fully_faithful_reflection A B H Hff a anot
         (iso_comp h (iso_inv_from_iso hnot)))) (idtoiso w) ).
@@ -344,7 +343,7 @@ Proof.
   intro t.
   exists (center_of_contr b (pr1 t) (pr2 t)).
   apply (claim1_contr_eq b (pr1 t) (pr2 t)).
-Defined.
+Qed.
 
 
 
@@ -450,7 +449,6 @@ Proof.
   apply iso_inv_on_right.
   rewrite precategory_assoc.
   apply iso_inv_on_left.
-  Check l0 ;; m'.
   apply (equal_transport_along_weq _ _ (weq_from_fully_faithful _ _ _ Hff a0 a' )).
   apply pathsinv0.
   apply sssss.
@@ -545,7 +543,7 @@ Proof.
   
   exists (Y_inhab b b' f a0 h0 a0' h0').
   apply Y_contr_eq.
-Defined.
+Qed.
 
 Print precategory_ob_mor_fun.
 Definition G_precategory_ob_mor_fun : precategory_ob_mor_fun B C.
