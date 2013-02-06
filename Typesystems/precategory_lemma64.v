@@ -11,7 +11,7 @@ Require Import hSet.
 Require Import AXIOM_dep_funext.
 
 Require Import precategories.
-(*Require Import precategory_whiskering.*)
+Require Import precategory_whiskering.
 
 Notation "a == b" := (paths a b) (at level 70, no associativity).
 Notation "! p " := (pathsinv0 p) (at level 50).
@@ -108,21 +108,15 @@ Defined.
 *)
 
 
-Definition center_of_contr (b : precategory_objects B) 
-    (anot : precategory_objects A)(hnot : iso_precat (pr1 H anot) b) : X b.
+Lemma center_of_contr_proof (b : ob B) (anot : ob A) (hnot : iso ((pr1 H) anot) b) :
+  forall (t t' : total2 (fun a : ob A => iso ((pr1 H) a) b))
+    (f : pr1 t --> pr1 t'),
+  #(pr1 H) f;; pr2 t' == pr2 t ->
+  #(pr1 F) f;;
+  #(pr1 F) (fully_faithful_inv_hom A B H Hff (pr1 t') anot
+     (pr2 t';; inv_from_iso hnot)) ==
+  #(pr1 F) (fully_faithful_inv_hom A B H Hff (pr1 t) anot (pr2 t;; inv_from_iso hnot)).
 Proof.
-  set (cnot := pr1 F anot).
-  set (g := fun (a : precategory_objects A)(h : iso_precat (pr1 H a) b) =>
-              (iso_from_fully_faithful_reflection _ _ H Hff _ _  
-                  (iso_comp h (iso_inv_from_iso hnot)))).
-  set (knot := fun (a : precategory_objects A)(h : iso_precat (pr1 H a) b) =>
-                    precategory_fun_on_iso _ _ F _ _  (g a h)).
-  simpl in *.
-  exists (tpair _ (pr1 F anot) knot).
-(*  exists (pr1 F anot).
-  exists knot.
-*)
-
   intros t t' f.
   destruct t as [a h].
   destruct t' as [a' h'].
@@ -130,7 +124,6 @@ Proof.
   intro star.
   rewrite <- (precategory_fun_comp _ _ F).
   apply maponpaths.
-  Check (g a h).
   set (h2 := equal_transport_along_weq _ _
           (weq_from_fully_faithful _ _ _ Hff a anot)).
           apply h2. clear h2.
@@ -151,7 +144,75 @@ Proof.
   clear H3.
   rewrite <- star.
   apply idpath.
+Qed.
+
+
+Definition center_of_contr (b : precategory_objects B) 
+    (anot : precategory_objects A)(hnot : iso_precat (pr1 H anot) b) : X b.
+Proof.
+  set (cnot := pr1 F anot).
+  set (g := fun (a : precategory_objects A)(h : iso_precat (pr1 H a) b) =>
+              (iso_from_fully_faithful_reflection _ _ H Hff _ _  
+                  (iso_comp h (iso_inv_from_iso hnot)))).
+  set (knot := fun (a : precategory_objects A)(h : iso_precat (pr1 H a) b) =>
+                    precategory_fun_on_iso _ _ F _ _  (g a h)).
+  simpl in *.
+  exists (tpair _ (pr1 F anot) knot).
+  simpl.
+  apply center_of_contr_proof.
 Defined.
+(*
+  apply HH.
+ assert (HH : forall (t t' : total2 (fun a : ob A => iso ((pr1 H) a) b))
+  (f : pr1 t --> pr1 t'),
+#(pr1 H) f;; pr2 t' == pr2 t ->
+#(pr1 F) f;;
+#F
+  (fully_faithful_inv_hom A B H Hff (pr1 t') anot
+     (pr2 t';; inv_from_iso hnot)) ==
+#F
+  (fully_faithful_inv_hom A B H Hff (pr1 t) anot (pr2 t;; inv_from_iso hnot))).
+
+  clear knot. clear g. clear cnot.
+  unfold knot.
+
+(*  exists (tpair _ (pr1 F anot) knot). *)
+  simpl.
+(*  exists (pr1 F anot).
+  exists knot.
+*)
+
+  intros t t' f.
+  destruct t as [a h].
+  destruct t' as [a' h'].
+  simpl in *.
+  intro star.
+  rewrite <- (precategory_fun_comp _ _ F).
+  apply maponpaths.
+  set (h2 := equal_transport_along_weq _ _
+          (weq_from_fully_faithful _ _ _ Hff a anot)).
+          apply h2. clear h2.
+  simpl.
+  rewrite precategory_fun_comp.
+  set (H3 := homotweqinvweq (weq_from_fully_faithful _ _ _ Hff a' anot)).
+  simpl in H3.
+  unfold fully_faithful_inv_hom. simpl.
+  rewrite H3.
+  (*rewrite H3.*)
+  clear H3.
+  rewrite precategory_assoc.
+  set (H3 := homotweqinvweq (weq_from_fully_faithful _ _ _ Hff a anot)).
+  simpl in H3.
+  unfold fully_faithful_inv_hom. simpl.
+  rewrite H3.
+  (*rewrite H3.*)
+  clear H3.
+  rewrite <- star.
+  apply idpath.
+  exists (tpair _ (pr1 F anot) knot). 
+  apply HH.
+Defined.
+*)
 
 
 Lemma claim1_contr_eq (b : ob B) (anot : ob A) (hnot : iso (pr1 H anot) b) : 
@@ -232,7 +293,6 @@ Proof.
   apply impred; intro t'.
   apply impred; intro f.
   apply impred; intro g.
-  Check pr2 (pr1 t) (pr1 t0) (pr2 t0).
   apply (pr2 (((pr1 F) (pr1 t0)) --> (pr1 (pr1 t)))).
 Qed.
 
@@ -331,8 +391,7 @@ Qed.
 *)
 
 
-Definition lemma64_claim1 : forall b : precategory_objects B,
-    iscontr (X b).
+Definition lemma64_claim1 : forall b : precategory_objects B, iscontr (X b).
 Proof.
   intro b.
   assert (HH : isaprop (iscontr (X b))).
@@ -369,6 +428,135 @@ Let Y {b b' : precategory_objects B} (f : b --> b') :=
               forall l : a --> a',
                 #(pr1 H) l ;; h' == h ;; f -> #(pr1 F) l ;; k b' a' h' == k b a h ;; g).
 
+Lemma Y_inhab_proof (b b' : ob B) (f : b --> b') (a0 : ob A) (h0 : iso ((pr1 H) a0) b)
+    (a0' : ob A) (h0' : iso ((pr1 H) a0') b') :
+  forall (a : ob A) (h : iso ((pr1 H) a) b) (a' : ob A) (h' : iso ((pr1 H) a') b')
+    (l : a --> a'),
+  #(pr1 H) l;; h' == h;; f ->
+  #(pr1 F) l;; k b' a' h' ==
+    k b a h;; ((inv_from_iso (k b a0 h0);;
+  #(pr1 F) (fully_faithful_inv_hom A B H Hff a0 a0' ((h0;; f);; inv_from_iso h0')));;
+       k b' a0' h0').
+Proof.
+  intros a h a' h' l alpha.
+  set (m := iso_from_fully_faithful_reflection _ _ H Hff _ _ 
+                  (iso_comp h0 (iso_inv_from_iso h))).
+  set (m' := iso_from_fully_faithful_reflection _ _ H Hff _ _ 
+                  (iso_comp h0' (iso_inv_from_iso h'))).
+  
+  assert (sss : iso_comp (precategory_fun_on_iso _ _ F _ _  m) (k b a h) == 
+                   k b a0 h0).
+  set (qb := q b ). simpl in qb.
+  set (qb' := qb (tpair _ a0 h0) (tpair _ a h) m).
+  simpl in qb'.
+  apply eq_iso_precat; simpl.
+  apply qb'. clear qb' qb. 
+  set (H3 := homotweqinvweq (weq_from_fully_faithful _ _ _ Hff a0 a)).
+  simpl in H3.
+  unfold fully_faithful_inv_hom. simpl.
+  rewrite H3.
+  rewrite <- precategory_assoc.
+  rewrite iso_after_iso_inv.
+  apply precategory_id_right.
+  
+  assert (ssss : iso_comp (precategory_fun_on_iso _ _ F _ _  m') (k b' a' h') == 
+                   k b' a0' h0').
+  set (qb' := q b' (tpair _ a0' h0') (tpair _ a' h') m').
+  simpl in qb'.
+  apply eq_iso_precat; simpl.
+  apply qb'. clear qb'. 
+  set (H3 := homotweqinvweq (weq_from_fully_faithful _ _ _ Hff a0' a')).
+  simpl in H3.
+  unfold fully_faithful_inv_hom. simpl.
+  rewrite H3.
+  rewrite <- precategory_assoc.
+  rewrite iso_after_iso_inv.
+  apply precategory_id_right.
+  
+  set (hfh := h0 ;; f ;; inv_from_iso h0').
+  set (l0 := fully_faithful_inv_hom _ _ H Hff _ _ hfh).
+  set (g0 := inv_from_iso (k b a0 h0) ;; #(pr1 F) l0  ;; k b' a0' h0').
+  
+  assert (sssss : #(pr1 H) (l0 ;; m') == #(pr1 H) (m ;; l)).
+  rewrite (precategory_fun_comp _ _ H).
+  unfold m'. simpl.
+  set (H3 := homotweqinvweq (weq_from_fully_faithful _ _ _ Hff a0' a')).
+  simpl in H3.
+  unfold fully_faithful_inv_hom. simpl.
+  rewrite H3. clear H3.
+  unfold l0.
+  set (H3 := homotweqinvweq (weq_from_fully_faithful _ _ _ Hff a0 a0')).
+  simpl in H3.
+  unfold fully_faithful_inv_hom. simpl.
+  rewrite H3. clear H3.
+  
+  unfold hfh.
+  
+  pathvia (h0 ;; f ;; (inv_from_iso h0' ;; h0') ;; inv_from_iso h').
+  repeat rewrite precategory_assoc; apply idpath.
+  
+  rewrite iso_after_iso_inv. rewrite precategory_id_right.
+  
+  rewrite (precategory_fun_comp _ _ H).
+  set (H3 := homotweqinvweq (weq_from_fully_faithful _ _ _ Hff a0 a)).
+  simpl in H3.
+  unfold fully_faithful_inv_hom. simpl.
+  rewrite H3. clear H3.
+  repeat rewrite <- precategory_assoc.
+  apply maponpaths.
+  apply pathsinv0.
+  apply iso_inv_on_right.
+  rewrite precategory_assoc.
+  apply iso_inv_on_left.
+  apply pathsinv0.
+  apply alpha.
+
+  assert (star5 : inv_from_iso m ;; l0 == l ;; inv_from_iso m').
+  apply iso_inv_on_right.
+  rewrite precategory_assoc.
+  apply iso_inv_on_left.
+  apply (equal_transport_along_weq _ _ (weq_from_fully_faithful _ _ _ Hff a0 a' )).
+  apply pathsinv0.
+  apply sssss.
+  
+  unfold g0.
+  set (sss':= base_paths _ _ sss); simpl in sss'.
+  
+  assert (sss'' : k b a h ;; inv_from_iso (k b a0 h0) == 
+             inv_from_iso (precategory_fun_on_iso _ _ F _ _  m)).
+  apply pathsinv0.
+  apply iso_inv_on_left.
+  apply pathsinv0.
+  apply iso_inv_on_right.
+  unfold m; simpl.
+  apply pathsinv0.
+  apply sss'.
+  
+  repeat rewrite precategory_assoc.
+  rewrite sss''. clear sss'' sss' sss.
+  
+  rewrite <- precategory_fun_on_inv_from_iso.
+  rewrite <- (precategory_fun_comp _ _ F).
+  rewrite star5. clear star5 sssss.
+  
+  rewrite precategory_fun_comp.
+  rewrite precategory_fun_on_inv_from_iso.
+  
+  assert (star4 : 
+        inv_from_iso (precategory_fun_on_iso A C F a0' a' m');; k b' a0' h0'
+           == k b' a' h' ).
+  apply iso_inv_on_right.
+  set (ssss' := base_paths _ _ ssss).
+  apply pathsinv0.
+  simpl in ssss'. simpl.
+  apply ssss'.
+  rewrite <- precategory_assoc.
+  rewrite star4.
+  apply idpath.
+Qed.
+
+
+
 Definition Y_inhab (b b' : ob B) (f : b --> b')
       (a0 : ob A) (h0 : iso (pr1 H a0) b) (a0' : ob A) (h0' : iso (pr1 H a0') b') : Y b b' f.
 Proof.
@@ -376,6 +564,19 @@ Proof.
   set (l0 := fully_faithful_inv_hom _ _ H Hff _ _ hfh).
   set (g0 := inv_from_iso (k b a0 h0) ;; #(pr1 F) l0  ;; k b' a0' h0').
   exists g0.
+  apply Y_inhab_proof.
+Defined.
+
+(*
+   apply H456.
+  assert (H456 : forall (a : ob A) (h : iso ((pr1 H) a) b) (a' : ob A) 
+           (h' : iso ((pr1 H) a') b')
+      (l : a --> a'),
+         #(pr1 H) l;; h' == h;; f -> #(pr1 F) l;; k b' a' h' == k b a h;; g0).
+  unfold g0. clear g0.
+  unfold l0; clear l0.
+  unfold hfh; clear hfh.
+  
   intros a h a' h' l alpha.
   set (m := iso_from_fully_faithful_reflection _ _ H Hff _ _ 
                   (iso_comp h0 (iso_inv_from_iso h))).
@@ -487,7 +688,11 @@ Proof.
   rewrite <- precategory_assoc.
   rewrite star4.
   apply idpath.
+  
+   exists g0.
+   apply H456.
 Defined.
+*)
 
 Lemma Y_contr_eq (b b' : ob B) (f : b --> b')
      (a0 : ob A) (h0 : iso (pr1 H a0) b)
@@ -521,7 +726,6 @@ Proof.
   apply impred; intro h'.
   apply impred; intro l.
   apply impred; intro rtu.
-  Check k b a h;; pr1 t.
   apply (pr2 ((pr1 F) a --> Go b')).
 Qed.
 
@@ -535,7 +739,6 @@ Proof.
   apply pbH; clear pbH.
   intros [a0 h0].
   set (pbH := p b' (tpair (fun x => isaprop x) (iscontr (Y b b' f)) HH)).
-  Check f.
   simpl in *.
   apply pbH; clear pbH.
   intros [a0' h0'].
@@ -545,7 +748,7 @@ Proof.
   apply Y_contr_eq.
 Qed.
 
-Print precategory_ob_mor_fun.
+
 Definition G_precategory_ob_mor_fun : precategory_ob_mor_fun B C.
 Proof.
   exists Go.
@@ -562,7 +765,8 @@ Proof.
   split; simpl.
   intro b.
   
-  assert (PR2 : forall (a : ob A) (h : iso ((pr1 H) a) b) (a' : ob A) (h' : iso ((pr1 H) a') b)
+  assert (PR2 : forall (a : ob A) (h : iso ((pr1 H) a) b) (a' : ob A) 
+          (h' : iso ((pr1 H) a') b)
     (l : a --> a'),
   #(pr1 H) l;; h' == h;; precategory_identity b ->
   #(pr1 F) l;; k b a' h' == k b a h;; precategory_identity (Go b)).
@@ -597,7 +801,7 @@ Proof.
   (** composition *)
 
   intros b b' b'' f f'.
-  Check pr1 (pr1 (Y_iscontr b b'' (f;; f'))).
+
   assert (HHHH : isaprop (pr1 (pr1 (Y_iscontr b b'' (f;; f'))) ==
                         pr1 (pr1 (Y_iscontr b b' f));; pr1 (pr1 (Y_iscontr b' b'' f')))).
   apply (pr2 (Go b --> Go b'')).
@@ -652,7 +856,8 @@ Proof.
   repeat rewrite precategory_assoc; apply idpath.
   
   
-  assert (PR2 : forall (a : ob A) (h : iso ((pr1 H) a) b)(a' : ob A)(h' : iso ((pr1 H) a') b')
+  assert (PR2 : forall (a : ob A) (h : iso ((pr1 H) a) b)(a' : ob A)
+          (h' : iso ((pr1 H) a') b')
             (l : a --> a'),
            #(pr1 H) l;; h' == h;; f ->
            #(pr1 F) l;; k b' a' h' ==
@@ -732,7 +937,6 @@ Proof.
   apply iso_inv_on_right.
   rewrite precategory_assoc.
   apply iso_inv_on_left.
-  Check l0 ;; m'.
   apply (equal_transport_along_weq _ _ (weq_from_fully_faithful _ _ _ Hff a0 a' )).
   apply pathsinv0.
   apply sssss.
@@ -911,7 +1115,8 @@ Proof.
   assert (HGf' : G f' == inv_from_iso (k b' a0' h0') ;; #(pr1 F) l0' ;; k b'' a0'' h0''). 
   
   set (Gbrtilde :=
-       tpair _ (inv_from_iso (k b' a0' h0') ;; #(pr1 F) l0' ;; k b'' a0'' h0'') PR2 : Y b' b'' f').
+       tpair _ (inv_from_iso (k b' a0' h0') ;; #(pr1 F) l0' ;; k b'' a0'' h0'') PR2 : 
+                      Y b' b'' f').
   
   set (H' := pr2 (Y_iscontr b' b'' f') Gbrtilde).
   set (H'' := base_paths _ _ H').
@@ -1083,151 +1288,65 @@ Proof.
 
 Qed.
 
+Definition GG : ob [B, C] := tpair _ G_precategory_ob_mor_fun is_precategory_fun.
 
 
+Lemma bla : GG O H == F.
+Proof.
+  apply (precategory_fun_eq _ _ (GG O H) F).
+  assert (HH : pr1 (pr1 (GG O H)) == pr1 (pr1 F)).
+  simpl.
+  apply funextsec; intro a0.
+  set (kFa := fun (a : ob A) (h : iso (pr1 H a) (pr1 H a0)) =>
+                precategory_fun_on_iso A C F _ _ 
+                  (iso_from_fully_faithful_reflection _ _ H Hff _ _ h)).
 
-  assert (HGf : G f == inv_from_iso (k b a0 h0) ;; #(pr1 F) l0 ;; k b' a0' h0'). 
-  
-  set (Gbrtilde :=
-           tpair _ (inv_from_iso (k b a0 h0) ;; #(pr1 F) l0 ;; k b' a0' h0') PR2 : Y b b' f).
-  
-  set (H' := pr2 (Y_iscontr b b' f) Gbrtilde).
-  set (H'' := base_paths _ _ H').
-  simpl in H'.
-  rewrite <- H'.
-  apply idpath.
-  
-  clear PR2.intros a h a' h' l.
-  intro alpha.
-  set (m := iso_from_fully_faithful_reflection _ _ H Hff _ _ 
-                  (iso_comp h0 (iso_inv_from_iso h))).
-  set (m' := iso_from_fully_faithful_reflection _ _ H Hff _ _ 
-                  (iso_comp h0' (iso_inv_from_iso h'))).
-  
-  assert (sss : iso_comp (precategory_fun_on_iso _ _ F _ _  m) (k b a h) == 
-                   k b a0 h0).
-  set (qb := q b ). simpl in qb.
-  set (qb' := qb (tpair _ a0 h0) (tpair _ a h) m).
-  simpl in qb'.
-  apply eq_iso_precat; simpl.
-  apply qb'. clear qb' qb. 
-  set (H3 := homotweqinvweq (weq_from_fully_faithful _ _ _ Hff a0 a)).
-  simpl in H3.
-  unfold fully_faithful_inv_hom. simpl.
-  rewrite H3.
-  rewrite <- precategory_assoc.
-  rewrite iso_after_iso_inv.
-  apply precategory_id_right.
-  
-  assert (ssss : iso_comp (precategory_fun_on_iso _ _ F _ _  m') (k b' a' h') == 
-                   k b' a0' h0').
-  set (qb' := q b' (tpair _ a0' h0') (tpair _ a' h') m').
-  simpl in qb'.
-  apply eq_iso_precat; simpl.
-  apply qb'. clear qb'. 
-  set (H3 := homotweqinvweq (weq_from_fully_faithful _ _ _ Hff a0' a')).
-  simpl in H3.
-  unfold fully_faithful_inv_hom. simpl.
-  rewrite H3.
-  rewrite <- precategory_assoc.
-  rewrite iso_after_iso_inv.
-  apply precategory_id_right.
-  
-  assert (sssss : #(pr1 H) (l0 ;; m') == #(pr1 H) (m ;; l)).
-  rewrite (precategory_fun_comp _ _ H).
-  unfold m'. simpl.
-  set (H3 := homotweqinvweq (weq_from_fully_faithful _ _ _ Hff a0' a')).
-  simpl in H3.
-  unfold fully_faithful_inv_hom. simpl.
-  rewrite H3. clear H3.
-  unfold l0.
-  set (H3 := homotweqinvweq (weq_from_fully_faithful _ _ _ Hff a0 a0')).
-  simpl in H3.
-  unfold fully_faithful_inv_hom. simpl.
-  rewrite H3. clear H3.
-  
-(*  unfold hfh.*)
-  
-  pathvia (h0 ;; f ;; (inv_from_iso h0' ;; h0') ;; inv_from_iso h').
-  repeat rewrite precategory_assoc; apply idpath.
-  
-  rewrite iso_after_iso_inv. rewrite precategory_id_right.
-  
-  rewrite (precategory_fun_comp _ _ H).
-  set (H3 := homotweqinvweq (weq_from_fully_faithful _ _ _ Hff a0 a)).
-  simpl in H3.
-  unfold fully_faithful_inv_hom. simpl.
-  rewrite H3. clear H3.
-  repeat rewrite <- precategory_assoc.
+  assert (HYpr2 : forall (t t' : total2 (fun a : ob A => iso ((pr1 H) a) ((pr1 H) a0)))
+         (f : pr1 t --> pr1 t'),
+              #(pr1 H) f;; pr2 t' == pr2 t ->
+     #(pr1 F) f;; #(pr1 F) (fully_faithful_inv_hom A B H Hff (pr1 t') a0 (pr2 t')) ==
+         #(pr1 F) (fully_faithful_inv_hom A B H Hff (pr1 t) a0 (pr2 t))).
+
+(*  
+*)
+  simpl.
+  intros [a h] [a' h'] f L.
+  simpl in L; simpl.
+  rewrite <- (precategory_fun_comp A C F).
   apply maponpaths.
-  apply pathsinv0.
-  apply iso_inv_on_right.
-  rewrite precategory_assoc.
-  apply iso_inv_on_left.
-  apply pathsinv0.
-  apply alpha.
-
-  assert (star5 : inv_from_iso m ;; l0 == l ;; inv_from_iso m').
-  apply iso_inv_on_right.
-  rewrite precategory_assoc.
-  apply iso_inv_on_left.
-
-  apply (equal_transport_along_weq _ _ (weq_from_fully_faithful _ _ _ Hff a0 a' )).
-  apply pathsinv0.
-  apply sssss.
-  
-(*  unfold g0. *)
-  set (sss':= base_paths _ _ sss); simpl in sss'.
-  
-  assert (sss'' : k b a h ;; inv_from_iso (k b a0 h0) == 
-             inv_from_iso (precategory_fun_on_iso _ _ F _ _  m)).
-  apply pathsinv0.
-  apply iso_inv_on_left.
-  apply pathsinv0.
-  apply iso_inv_on_right.
-  unfold m; simpl.
-  apply pathsinv0.
-  apply sss'.
-  
-  repeat rewrite precategory_assoc.
-  rewrite sss''. clear sss'' sss' sss.
-  
-  rewrite <- precategory_fun_on_inv_from_iso.
-  rewrite <- (precategory_fun_comp _ _ F).
-  rewrite star5. clear star5 sssss.
-  
+  set (hhh':=equal_transport_along_weq _ _ (weq_from_fully_faithful A B H Hff a a0)
+                 (f;; fully_faithful_inv_hom A B H Hff a' a0 h')                      
+                 (fully_faithful_inv_hom A B H Hff a a0 h)  ).
+  simpl in *.
+  apply hhh'. clear hhh'.
+  set (HFFaa := homotweqinvweq (weq_from_fully_faithful _ _ H Hff a a0)).
+  unfold fully_faithful_inv_hom.
+  simpl in *.
+  rewrite HFFaa. clear HFFaa.
   rewrite precategory_fun_comp.
-  rewrite precategory_fun_on_inv_from_iso.
+  set (HFFaa := homotweqinvweq (weq_from_fully_faithful _ _ H Hff a' a0)).
+  unfold fully_faithful_inv_hom.
+  simpl in *.
+  rewrite HFFaa. clear HFFaa.
+  apply L.
   
-  assert (star4 : 
-        inv_from_iso (precategory_fun_on_iso A C F a0' a' m');; k b' a0' h0'
-           == k b' a' h' ).
-  apply iso_inv_on_right.
-  set (ssss' := base_paths _ _ ssss).
+  set (HY := tpair _ (tpair _ (pr1 F a0) kFa) HYpr2 : X (pr1 H a0)).
+  
+  set (hula := pr2 (lemma64_claim1 (pr1 H a0)) HY ).
+  set (hulapr2 := base_paths _ _ (base_paths _ _ hula)).
+  simpl in hulapr2.
   apply pathsinv0.
-  simpl in ssss'. simpl.
-  apply ssss'.
-  rewrite <- precategory_assoc.
-  rewrite star4.
-  apply idpath.
+  apply hulapr2.
   
-  assert (HGf : G f == inv_from_iso (k b a0 h0) ;; #(pr1 F) l0 ;; k b' a0' h0'). 
+  apply (total2_paths HH).
+  induction HH.
   
-  set (Gbrtilde :=
-           tpair _ (inv_from_iso (k b a0 h0) ;; #(pr1 F) l0 ;; k b' a0' h0') PR2 : Y b b' f).
   
-  set (H' := pr2 (Y_iscontr b b' f) Gbrtilde).
-  set (H'' := base_paths _ _ H').
-  simpl in H'.
-  rewrite <- H'.
-  apply idpath.
   
-  clear PR2.
+  rewrite precategory_fun_id; apply idpath.
+  
+  
 
-
-
-  assert (Test : Y b b'' (f;;f')).
-  exists (inv_from_iso (k b a0 h0) ;; #(pr1 F) l0'' ;; k b'' a0'' h0'').
   
 End preimage.
 
