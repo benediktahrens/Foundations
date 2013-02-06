@@ -144,7 +144,7 @@ Proof.
   clear H3.
   rewrite <- star.
   apply idpath.
-Defined.
+Qed.
 
 
 Definition center_of_contr (b : precategory_objects B) 
@@ -294,7 +294,7 @@ Proof.
   apply impred; intro f.
   apply impred; intro g.
   apply (pr2 (((pr1 F) (pr1 t0)) --> (pr1 (pr1 t)))).
-Defined.
+Qed.
 
 (*
 Lemma lemma64_claim1 : forall b : precategory_objects B,
@@ -402,7 +402,7 @@ Proof.
   intro t.
   exists (center_of_contr b (pr1 t) (pr2 t)).
   apply (claim1_contr_eq b (pr1 t) (pr2 t)).
-Defined.
+Qed.
 
 
 
@@ -1290,24 +1290,22 @@ Qed.
 
 Definition GG : ob [B, C] := tpair _ G_precategory_ob_mor_fun is_precategory_fun.
 
-Lemma pr1pr1functor : pr1 (pr1 (GG O H)) == pr1 (pr1 F).
+Lemma santas_little_helper (a0 : ob A) :
+  forall (t t' : total2 (fun a : ob A => iso ((pr1 H) a) ((pr1 H) a0)))
+    (f : pr1 t --> pr1 t'),
+  #(pr1 H) f;; pr2 t' == pr2 t ->
+  #(pr1 F) f;; #(pr1 F) (fully_faithful_inv_hom A B H Hff (pr1 t') a0 (pr2 t')) ==
+  #(pr1 F) (fully_faithful_inv_hom A B H Hff (pr1 t) a0 (pr2 t)).
 Proof.
-  apply funextsec; intro a0.
-  set (kFa := fun (a : ob A) (h : iso (pr1 H a) (pr1 H a0)) =>
-                precategory_fun_on_iso A C F _ _ 
-                  (iso_from_fully_faithful_reflection _ _ H Hff _ _ h)).
-
-  assert (HYpr2 : forall (t t' : total2 (fun a : ob A => iso ((pr1 H) a) ((pr1 H) a0)))
-         (f : pr1 t --> pr1 t'),
-              #(pr1 H) f;; pr2 t' == pr2 t ->
-     #(pr1 F) f;; #(pr1 F) (fully_faithful_inv_hom A B H Hff (pr1 t') a0 (pr2 t')) ==
-         #(pr1 F) (fully_faithful_inv_hom A B H Hff (pr1 t) a0 (pr2 t))).
-
-(*  
-*)
   simpl.
   intros [a h] [a' h'] f L.
   simpl in L; simpl.
+(*
+  set (HHH := precategory_fun_comp A C F _ _ _ f (fully_faithful_inv_hom A B H Hff a' a0 h')).
+  simpl in HHH.
+  rewrite <- HHH.
+  elim HHH.
+*)
   rewrite <- (precategory_fun_comp A C F).
   apply maponpaths.
   set (hhh':=equal_transport_along_weq _ _ (weq_from_fully_faithful A B H Hff a a0)
@@ -1325,16 +1323,77 @@ Proof.
   simpl in *.
   rewrite HFFaa. clear HFFaa.
   apply L.
-  
-  set (HY := tpair _ (tpair _ (pr1 F a0) kFa) HYpr2 : X (pr1 H a0)).
+Qed.
+
+
+Lemma pr1pr1functor : pr1 (pr1 (GG O H)) == pr1 (pr1 F).
+Proof.
+  apply funextsec; intro a0.
+  set (kFa := fun (a : ob A) (h : iso (pr1 H a) (pr1 H a0)) =>
+                precategory_fun_on_iso A C F _ _ 
+                  (iso_from_fully_faithful_reflection _ _ H Hff _ _ h)).
+(*
+  assert (HYpr2 : forall (t t' : total2 (fun a : ob A => iso ((pr1 H) a) ((pr1 H) a0)))
+         (f : pr1 t --> pr1 t'),
+              #(pr1 H) f;; pr2 t' == pr2 t ->
+     #(pr1 F) f;; #(pr1 F) (fully_faithful_inv_hom A B H Hff (pr1 t') a0 (pr2 t')) ==
+         #(pr1 F) (fully_faithful_inv_hom A B H Hff (pr1 t) a0 (pr2 t))).
+  clear kFa.
+(*  
+*)
+  simpl.
+  intros [a h] [a' h'] f L.
+  simpl in L; simpl.
+(*
+  set (HHH := precategory_fun_comp A C F _ _ _ f (fully_faithful_inv_hom A B H Hff a' a0 h')).
+  simpl in HHH.
+  rewrite <- HHH.
+  elim HHH.
+*)
+  rewrite <- (precategory_fun_comp A C F).
+  apply maponpaths.
+  set (hhh':=equal_transport_along_weq _ _ (weq_from_fully_faithful A B H Hff a a0)
+                 (f;; fully_faithful_inv_hom A B H Hff a' a0 h')                      
+                 (fully_faithful_inv_hom A B H Hff a a0 h)  ).
+  simpl in *.
+  apply hhh'. clear hhh'.
+  set (HFFaa := homotweqinvweq (weq_from_fully_faithful _ _ H Hff a a0)).
+  unfold fully_faithful_inv_hom.
+  simpl in *.
+  rewrite HFFaa. clear HFFaa.
+  rewrite precategory_fun_comp.
+  set (HFFaa := homotweqinvweq (weq_from_fully_faithful _ _ H Hff a' a0)).
+  unfold fully_faithful_inv_hom.
+  simpl in *.
+  rewrite HFFaa. clear HFFaa.
+  apply L.
+*) 
+  set (HYpr1 :=  (tpair (fun c : precategory_objects C =>
+                forall a : precategory_objects A,
+                     iso_precat (pr1 H a) (pr1 H a0) -> iso_precat (pr1 F a) c) (pr1 F a0) kFa)).
+                     Check tpair.
+  set (HY := tpair (fun ck : 
+  total2 (fun c : precategory_objects C =>
+                forall a : precategory_objects A,
+                     iso_precat (pr1 H a) (pr1 H a0) -> iso_precat (pr1 F a) c) =>
+    forall t t' : total2 (fun a : precategory_objects A => iso_precat (pr1 H a) (pr1 H a0)),
+          forall f : pr1 t --> pr1 t',
+             (#(pr1 H) f ;; pr2 t' == pr2 t -> 
+                    #(pr1 F) f ;; pr2 ck (pr1 t') (pr2 t') == pr2 ck (pr1 t) (pr2 t)))  
+       (HYpr1) (santas_little_helper a0) : X (pr1 H a0)).
   
   set (hula := pr2 (lemma64_claim1 (pr1 H a0)) HY ).
   set (hulapr2 := base_paths _ _ (base_paths _ _ hula)).
   simpl in hulapr2.
-  apply pathsinv0.
-  simpl in hulapr2.
+(*  apply pathsinv0. *)
+
   change (pr1 (pr1 F) a0) with (pr1 F a0).
-  rewrite hulapr2.
+  clearbody hulapr2.
+  set (h5 := ! hulapr2).
+  clearbody h5.
+  induction h5.
+  
+(*  induction (! hulapr2). *)
   apply idpath.
 Defined.
 
@@ -1347,7 +1406,82 @@ Proof.
   apply funextsec. intro f.
   
   rewrite weird_lemma.
+  unfold pr1pr1functor.
+  rewrite toforallpaths_funextsec.
   simpl.
+  
+  generalize ((identity_rect (pr1 (pr1 (pr1 (lemma64_claim1 ((pr1 H) b)))))
+     (fun (y : ob C) (_ : pr1 (pr1 (pr1 (lemma64_claim1 ((pr1 H) b)))) == y) =>
+      y == pr1 (pr1 (pr1 (lemma64_claim1 ((pr1 H) b)))) -> Go (pr1 H b) == y)
+     (fun
+        _ : pr1 (pr1 (pr1 (lemma64_claim1 ((pr1 H) b)))) ==
+            pr1 (pr1 (pr1 (lemma64_claim1 ((pr1 H) b)))) =>
+      idpath (pr1 (pr1 (pr1 (lemma64_claim1 ((pr1 H) b)))))) ((pr1 F) b)
+     (!base_paths
+         {|
+         pr1 := (pr1 F) b;
+         pr2 := fun (a0 : A) (h : iso ((pr1 H) a0) ((pr1 H) b)) =>
+                precategory_fun_on_iso A C F a0 b
+                  (iso_from_fully_faithful_reflection A B H Hff a0 b h) |}
+         (pr1 (pr1 (lemma64_claim1 ((pr1 H) b))))
+         (base_paths
+            {|
+            pr1 := {|
+                   pr1 := (pr1 F) b;
+                   pr2 := fun (a0 : A) (h : iso ((pr1 H) a0) ((pr1 H) b)) =>
+                          precategory_fun_on_iso A C F a0 b
+                            (iso_from_fully_faithful_reflection A B H Hff a0
+                               b h) |};
+            pr2 := santas_little_helper b |}
+            (pr1 (lemma64_claim1 ((pr1 H) b)))
+            (pr2 (lemma64_claim1 ((pr1 H) b))
+               {|
+               pr1 := {|
+                      pr1 := (pr1 F) b;
+                      pr2 := fun (a0 : A) (h : iso ((pr1 H) a0) ((pr1 H) b)) =>
+                             precategory_fun_on_iso A C F a0 b
+                               (iso_from_fully_faithful_reflection A B H Hff
+                                  a0 b h) |};
+               pr2 := santas_little_helper b |})))
+     (base_paths
+        {|
+        pr1 := (pr1 F) b;
+        pr2 := fun (a0 : A) (h : iso ((pr1 H) a0) ((pr1 H) b)) =>
+               precategory_fun_on_iso A C F a0 b
+                 (iso_from_fully_faithful_reflection A B H Hff a0 b h) |}
+        (pr1 (pr1 (lemma64_claim1 ((pr1 H) b))))
+        (base_paths
+           {|
+           pr1 := {|
+                  pr1 := (pr1 F) b;
+                  pr2 := fun (a0 : A) (h : iso ((pr1 H) a0) ((pr1 H) b)) =>
+                         precategory_fun_on_iso A C F a0 b
+                           (iso_from_fully_faithful_reflection A B H Hff a0 b
+                              h) |};
+           pr2 := santas_little_helper b |}
+           (pr1 (lemma64_claim1 ((pr1 H) b)))
+           (pr2 (lemma64_claim1 ((pr1 H) b))
+              {|
+              pr1 := {|
+                     pr1 := (pr1 F) b;
+                     pr2 := fun (a0 : A) (h : iso ((pr1 H) a0) ((pr1 H) b)) =>
+                            precategory_fun_on_iso A C F a0 b
+                              (iso_from_fully_faithful_reflection A B H Hff
+                                 a0 b h) |};
+              pr2 := santas_little_helper b |}))))).
+  
+  Print identity_rect.
+  simpl.
+  
+  rewrite toforallpaths_funextsec.
+  generalize ((toforallpaths (fun _ : ob A => ob C) (pr1 (pr1 (GG O H))) (pr1 (pr1 F))
+        pr1pr1functor a)).
+  generalize (toforallpaths (fun _ : ob A => ob C) (pr1 (pr1 (GG O H))) (pr1 (pr1 F))
+     pr1pr1functor b).
+        intros i i0.
+        elim i.
+        elim i0.
+  simpl
   unfold pr1pr1functor.
   simpl.
   generalize (pr1pr1functor).
