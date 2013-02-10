@@ -1175,7 +1175,7 @@ Proof.
   apply funextsec. intro f.
   
   
-  rewrite weird_lemma.
+  rewrite transport_of_functor_map_is_pointwise.
   unfold extphi.
   rewrite toforallpaths_funextsec.
   rewrite <- idtoiso_postcompose.

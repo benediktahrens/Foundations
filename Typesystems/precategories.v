@@ -10,11 +10,67 @@ january 2013
 (************************************************************
 
 Contents :  Definition of 
-		precategories, 
-	        categories (saturated precategories)         	
-		functors
-		natural transformations
-		functor (pre)category			
+		Precategories, 
+	        Categories (saturated precategories)         	
+                Setcategories
+                
+                Isomorphisms
+                  various lemmas:
+                    uniqueness of inverse, composition etc.
+                    stability under composition
+                
+                Categories have groupoid as objects
+                
+                Subcategories, Full subcats
+                
+
+		Functors
+                  preserve isos, inverses
+                                    
+                  fully faithful functors
+                    preserve isos, inverses, composition 
+                            backwards
+                    
+                  essentially surjective
+                  faithful
+                  full
+                  fully faithful == full and faithful
+                  
+                  Image of a functor, full subcat specified
+                                       by a functor
+                  
+                  Subcategories, back to
+                    Inclusion functor
+                    Full image of a functor
+                    Factorization of a functor via its
+                       full image
+                    This factorization is fully faithful
+                       if the functor is
+                       [precategory_fun_full_img_fully_faithful_if_fun_is]
+                                           
+                    Isos in full subcategory are equiv
+                      to isos in the precategory
+
+                    Full subcategory of a category is 
+                      a category
+                      [is_saturated_full_subcat]
+                      
+                      
+		Natural transformations
+                  Equality is pointwise equality.
+                  
+                  
+		Functor (pre)category			
+                  Isomorphisms in functor category are pointwise
+                         isomorphisms
+                         
+                Isomorphic Functors are equal
+                   if target precategory is saturated
+                   [functor_eq_from_functor_iso]
+                  
+                Functor precategory is saturated if
+                   target precategory is
+                   [is_saturated_functor_category]
 		
 		
 	
@@ -1126,6 +1182,7 @@ Proof.
 Defined.
 
 
+
 (** * Sub-precategories *)
 
 (** A sub-precategory is specified through a predicate on objects 
@@ -2072,7 +2129,7 @@ Defined.
 
 
 
-Lemma weird_lemma (C D : precategory) 
+Lemma transport_of_functor_map_is_pointwise (C D : precategory) 
       (F0 G0 : precategory_objects C -> precategory_objects D)
     (F1 : forall a b : precategory_objects C, a --> b -> F0 a --> F0 b)
    (gamma : F0  == G0 ) 
@@ -2116,7 +2173,7 @@ Proof.
   intro b.
   apply funextsec.
   intro f.
-  rewrite weird_lemma.
+  rewrite transport_of_functor_map_is_pointwise.
   rewrite toforallpaths_funextsec.
   set (H':= double_transport_idtoiso D _ _ _ _  
          (isotoid D H (precategory_fun_iso_pointwise_if_iso C D F G A (pr2 A) a))

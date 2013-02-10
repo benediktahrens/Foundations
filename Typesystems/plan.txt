@@ -48,11 +48,10 @@ nothing to do
 9. We have the induced map Y : C ---> S(C). This map is full and faithful
 by the Yoneda Lemma and it is essentially surjective by construction.
 
-have in Coq the induced map;
-what is missing is that
-INCL o Y = y
-(need eta reduction for that)
-but do we need this equality?
+have in Coq:
+  precategory_fun_full_img_fully_faithful_if_fun_is
+	precategories.v
+  (saying that if F : C -> D is ff, then so is F':C -> Im(F)   )
 
 10. If F : C ---> D is an equivalence of precategories, then the following
 type is inhabited: Id(C, D).
