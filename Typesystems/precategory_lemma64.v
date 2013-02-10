@@ -404,19 +404,67 @@ Proof.
   apply (claim1_contr_eq b (pr1 t) (pr2 t)).
 Qed.
 
-
-
-Let k (b : ob B) : 
-       (forall a : ob A, iso ((pr1 H) a) b -> iso ((pr1 F) a) 
-         (pr1 (pr1 (pr1 (lemma64_claim1 b))))) := pr2 (pr1 (pr1 (lemma64_claim1 b))).
-
-Let q (b : ob B) := pr2 (pr1 (lemma64_claim1 b)).
-
 Definition Go : precategory_objects B -> precategory_objects C :=
    fun b : precategory_objects B =>
       pr1 (pr1 (pr1 (lemma64_claim1 b))).
 
+Let k (b : ob B) : 
+     forall a : ob A, iso ((pr1 H) a) b -> iso ((pr1 F) a) (Go b) := 
+              pr2 (pr1 (pr1 (lemma64_claim1 b))).
 
+Let q (b : ob B) := pr2 (pr1 (lemma64_claim1 b)).
+
+Check p.
+
+Lemma k_transport (b : ob B) (t : X b) (c : ob C)
+   (p' : pr1 (pr1 t) == c) (a : ob A) (h : iso (pr1 H a) b) :
+  transportf _ p' (pr2 (pr1 t)) a h == 
+         iso_comp (pr2 (pr1 t) a h) (idtoiso p').
+Proof.
+  destruct t as [[c1 k1] q1]; simpl in *.
+  induction p'.
+  rewrite transportf_idpath.
+  simpl.
+  apply eq_iso_precat.
+  simpl.
+  rewrite precategory_id_right.
+  apply idpath.
+Qed.
+
+
+Lemma k_transport_idtoiso (b : ob B) (t1 t2 : X b) 
+   (p' : pr1 (pr1 t1) == pr1 (pr1 t2)) (a : ob A) (h : iso (pr1 H a) b) :
+  iso_comp (pr2 (pr1 t1) a h) (idtoiso p') == pr2 (pr1 t2) a h.
+Proof.
+  Check proofirrelevance.
+  set (e := proofirrelevancecontr (*X b*) (lemma64_claim1 b) t1 t2).
+  destruct t1 as [c1k1 q1]; 
+  destruct t2 as [c2k2 q2]; simpl in *.
+
+  set (p1 := base_paths _ _ e).
+  simpl in p1.
+  set (p1 := fiber_path_fibr p' p1).
+  simpl in p1.
+  clearbody p1.
+  clear e q1 q2.
+  induction p'.
+  rewrite transportf_idpath.
+  simpl.
+  apply eq_iso_precat.
+  simpl.
+  rewrite precategory_id_right.
+  apply idpath.
+Qed.
+
+
+
+(*
+Lemma k_transport (b : ob B) (*t : X b*) (c : ob C) 
+   (p : pr1 (pr1 t) == c) (a : ob A) (h : iso (pr1 H a) b):
+transportf (fun c' : ob C => forall a : ob A, iso (pr1 H a) b -> 
+                          iso ((pr1 F) a) c')
+   p (k) a h == (k b) b a h ;; idtoiso p .
+*)
 
 
 Let Y {b b' : precategory_objects B} (f : b --> b') :=
@@ -1370,7 +1418,8 @@ Proof.
 *) 
   set (HYpr1 :=  (tpair (fun c : precategory_objects C =>
                 forall a : precategory_objects A,
-                     iso_precat (pr1 H a) (pr1 H a0) -> iso_precat (pr1 F a) c) (pr1 F a0) kFa)).
+                     iso_precat (pr1 H a) (pr1 H a0) -> 
+      iso_precat (pr1 F a) c) (pr1 F a0) kFa)).
                      Check tpair.
   set (HY := tpair (fun ck : 
   total2 (fun c : precategory_objects C =>
