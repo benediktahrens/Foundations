@@ -53,6 +53,10 @@ Let X (b : precategory_objects B) := total2 (
           forall f : pr1 t --> pr1 t',
              (#(pr1 H) f ;; pr2 t' == pr2 t -> 
                     #(pr1 F) f ;; pr2 ck (pr1 t') (pr2 t') == pr2 ck (pr1 t) (pr2 t))).
+
+
+Definition kX {b : ob B} (t : X b) := (pr2 (pr1 t)).
+
 (*
 Let X (b : precategory_objects B) := 
   total2 (fun c : precategory_objects C =>
@@ -466,6 +470,42 @@ Proof.
   apply precategory_id_right.
 Qed.
  
+Definition Xphi (b : ob B) (t : X b) : pr1 (pr1 t) == Go b.
+Proof.
+  set (p1 := pr2 (lemma64_claim1 b) t).
+  exact (base_paths _ _ (base_paths _ _ p1)).
+Defined.
+
+
+Definition Xkphi_transp (b : ob B) (t : X b) : 
+     forall a : ob A, forall h : iso ((pr1 H) a) b, (* -> iso ((pr1 F) a) (Go b) *)
+  transportf _ (Xphi b t) (kX t) a h ==  k b a h.
+Proof.
+  set (p1 := base_paths _ _ (pr2 (lemma64_claim1 b) t)).
+  set (p2 := fiber_path_fibr p1).
+  simpl in p2.
+  unfold k.
+  rewrite <- p2.
+  intros a h.
+  apply maponpaths.
+  apply idpath.
+Qed.
+
+Definition Xkphi_idtoiso (b : ob B) (t : X b) :
+    forall a : ob A, forall h : iso (pr1 H a) b,
+   k b a h ;; idtoiso (!Xphi b t) == kX t a h.
+Proof.
+  intros a h.
+  rewrite <- (Xkphi_transp _ t).
+  generalize (Xphi b t).
+  intro i.
+  induction i.
+  rewrite transportf_idpath.
+  simpl.
+  apply precategory_id_right.
+Qed.
+  
+  
 
 
 
@@ -1349,7 +1389,10 @@ Qed.
 
 Definition GG : ob [B, C] := tpair _ G_precategory_ob_mor_fun is_precategory_fun.
 
-Lemma santas_little_helper (a0 : ob A) :
+
+
+
+Lemma qF (a0 : ob A) :
   forall (t t' : total2 (fun a : ob A => iso ((pr1 H) a) ((pr1 H) a0)))
     (f : pr1 t --> pr1 t'),
   #(pr1 H) f;; pr2 t' == pr2 t ->
@@ -1384,6 +1427,26 @@ Proof.
   apply L.
 Qed.
 
+
+Definition kFa (a0 : ob A) : forall a : ob A, 
+  iso ((pr1 H) a) ((pr1 H) a0) -> iso (pr1 F a) (pr1 F a0) := 
+ fun (a : ob A) (h : iso ((pr1 H) a) ((pr1 H) a0)) =>
+       precategory_fun_on_iso A C F a a0
+         (iso_from_fully_faithful_reflection A B H Hff a a0 h).
+
+Definition XtripleF (a0 : ob A) : X (pr1 H a0) :=
+   tpair _ (tpair _ (pr1 F a0) (kFa a0)) (qF a0).
+
+
+Lemma phi (a0 : ob A) : pr1 (pr1 (GG O H)) a0 == pr1 (pr1 F) a0.
+Proof.
+  set (hula := pr2 (lemma64_claim1 (pr1 H a0)) (XtripleF a0) ).
+  set (hulapr2 := base_paths _ _ (base_paths _ _ hula)).
+  apply (!hulapr2).
+Defined.
+Print phi.
+
+(*
 Lemma phi (a0 : ob A) : pr1 (pr1 (GG O H)) a0 == pr1 (pr1 F) a0.
 Proof.
  set (kFa := fun (a : ob A) (h : iso (pr1 H a) (pr1 H a0)) =>
@@ -1453,14 +1516,15 @@ Proof.
 (*  induction (! hulapr2). *)
   apply idpath.
 *)
-Qed.
-
+Defined.
+*)
 
 Lemma extphi : pr1 (pr1 (GG O H)) == pr1 (pr1 F).
 Proof.
   apply funextsec.
   apply phi.
 Defined.
+
 (*
   set (kFa := fun (a : ob A) (h : iso (pr1 H a) (pr1 H a0)) =>
                 precategory_fun_on_iso A C F _ _ 
@@ -1554,6 +1618,47 @@ Proof.
   rewrite <- idtoiso_precompose.
   
   rewrite idtoiso_inv.
+  
+  rewrite <- precategory_assoc.
+  
+
+  
+  
+  
+(*  
+  assert (YFf : Y _ _  (#(pr1 H) f)).
+  exists (idtoiso (phi a0) ;; # (pr1 F) f ;; inv_from_iso (idtoiso (phi a0'))).
+*)  
+
+  assert (PSIf : forall (a : ob A) (h : iso ((pr1 H) a) ((pr1 H) a0)) (a' : ob A)
+  (h' : iso ((pr1 H) a') ((pr1 H) a0')) (l : a --> a'),
+         #(pr1 H) l;; h' == h;; #(pr1 H) f ->
+         #(pr1 F) l;; k ((pr1 H) a0') a' h' ==
+         k ((pr1 H) a0) a h;;
+         ((idtoiso (phi a0);; #(pr1 F) f);; inv_from_iso (idtoiso (phi a0')))).
+  intros a h a' h' l alpha.
+  rewrite precategory_assoc.
+  apply iso_inv_on_left.
+  
+  set (Xa0 := XtripleF a0).
+  set (Xca0 := pr2 (lemma64_claim1 (pr1 H a0)) Xa0).
+  set (Xea0 := base_paths _ _ Xca0).
+  set (Xtra0 := fiber_path_fibr Xea0).
+  simpl in *.
+  rewrite <- idtoiso_postcompose in Xtra0.
+         
+  intros a h a' h' l alpha.
+  rewrite precategory_assoc.
+  apply iso_inv_on_left.
+  
+
+
+  simpl.
+  
+  
+  change (iso_inv_from_iso (idtoiso (phi a0))) with
+         (inv_from_iso (idtoiso (phi a0))).
+  apply iso_inv_on_right.
   
   
   (* ***** STOPPED HERE   *)
