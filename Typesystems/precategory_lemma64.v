@@ -1876,6 +1876,18 @@ End preimage.
 
 End essentially_surjective.
 
+Lemma pre_whisker_essentially_surjective : 
+       essentially_surjective (pre_whisker_functor A B C H).
+Proof.
+  intro F.
+  intro p'.
+  intro f.
+  apply f.
+  exists (GG F).
+  apply idtoiso.
+  apply bla.
+Qed.
+
 End lemma64.
 
 
