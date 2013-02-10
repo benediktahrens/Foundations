@@ -1,3 +1,23 @@
+(************************************************************
+
+Benedikt Ahrens and Chris Kapulkin
+january 2013
+
+
+************************************************************)
+
+
+(************************************************************
+
+Contents : Prewhiskering with respect to a functor
+	
+           Prewhiskering with an essentially surjective 
+	   functor yields a faithful functor
+
+************************************************************)
+
+
+
 Add Rec LoadPath "../Generalities".
 Add Rec LoadPath "../hlevel1".
 Add Rec LoadPath "../hlevel2".
@@ -24,6 +44,7 @@ Local Notation "f ;; g" := (precategory_compose f g)(at level 50).
 Notation "[ C , D ]" := (precategory_fun_precategory C D).
 Local Notation "# F" := (precategory_ob_mor_fun_morphisms F)(at level 3).
 
+
 Definition functor_composite (A B C : precategory) (F : precategory_objects [A, B])
       (G : precategory_objects [B , C]) : precategory_objects [A , C] := 
    precategory_fun_composite _ _ _ F G.
@@ -31,6 +52,8 @@ Definition functor_composite (A B C : precategory) (F : precategory_objects [A, 
 Notation "G 'O' F" := (functor_composite _ _ _ F G) (at level 25).
 
 (** * Whiskering: Composition of a natural transformation with a functor *)
+
+(** Prewhiskering *)
 
 Lemma is_precat_fun_fun_pre_whisker (A B C : precategory) (F : precategory_objects [A, B])
    (G H : precategory_objects [B, C]) (gamma : G --> H) : 
@@ -53,8 +76,7 @@ Proof.
   apply is_precat_fun_fun_pre_whisker.
 Defined.
 
-
-
+(** Postwhiskering *)
 
 Lemma is_precat_fun_fun_post_whisker (B C D : precategory) 
    (G H : precategory_objects [B, C]) (gamma : G --> H) 
@@ -79,7 +101,8 @@ Proof.
   apply is_precat_fun_fun_post_whisker.
 Defined.
 
-
+(** Prewhiskering is functorial *)
+(** Postwhiskering is, too, but that's not of our concern for now. *)
 
 Definition pre_whisker_precategory_ob_mor_fun (A B C : precategory)
       (H : precategory_objects [A, B]) : precategory_ob_mor_fun [B,C] [A,C].
@@ -110,6 +133,9 @@ Proof.
   apply pre_whisker_is_precategory_fun.
 Defined.
 
+
+(** ** Prewhiskering with an essentially surjective functor is faithful. *)
+
 Lemma pre_whisker_with_ess_surj_is_faithful (A B C : precategory) 
       (H : precategory_objects [A, B]) (p : essentially_surjective H) : 
            faithful (pre_whisker_functor A B C H).
@@ -119,7 +145,7 @@ Proof.
   apply precategory_fun_fun_eq.
   intro b.
 
-  assert (Heq : isaprop (gamma b == delta b)). Check (gamma b).
+  assert (Heq : isaprop (gamma b == delta b)). 
     apply (F b --> G b).
 
   set (pb := p b (tpair (fun x => isaprop x) (gamma b == delta b) Heq)).
@@ -128,8 +154,6 @@ Proof.
   clear pb. clear Heq.
   intro af.
   destruct af as [a f].
-  Check gamma b.
-  Check (precategory_fun_on_iso _  _ F _ _ f).
   set (P := pre_comp_with_iso_is_inj C (pr1 F (pr1 H a)) (pr1 F b) (pr1 G b) (# F f)
          (precategory_fun_on_iso_is_iso _ _ _ _ _ f)).
   apply P.
