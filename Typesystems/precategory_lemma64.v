@@ -1,3 +1,22 @@
+
+(************************************************************
+
+Benedikt Ahrens and Chris Kapulkin
+january 2013
+
+
+************************************************************)
+
+
+(************************************************************
+
+Contents : Prewhiskering with a fully faithful and  
+           essentially surjective functor yields
+           an essentially surjective functor
+
+************************************************************)
+
+
 Add Rec LoadPath "../Generalities".
 Add Rec LoadPath "../hlevel1".
 Add Rec LoadPath "../hlevel2".
@@ -31,18 +50,30 @@ Notation iso := iso_precat.
 
 Section lemma64.
 
+(** ** Section variables *)
+
 Variables A B C : precategory.
 Hypothesis Csat : is_saturated C.
 Variable H : precategory_objects [A, B].
 Hypothesis p : essentially_surjective H.
 Hypothesis Hff : fully_faithful H.
 
+(**  We prove that prewhiskering with a [H] yields an essentially surjective functor *)
+
 Section essentially_surjective.
+
+
+(** ** Preimage of a functor [F] *)
+
+(** Given a functor [F] from [A] to [C], we construct [G] such that
+       [F == G O H] *)
 
 Variable F : precategory_objects [A, C].
 
 Section preimage.
 
+(** The type [X b] will be contractible, and [G] is defined as 
+     the first component of its center. *)
 
 Let X (b : precategory_objects B) := total2 (
  fun ck : 
@@ -57,7 +88,7 @@ Let X (b : precategory_objects B) := total2 (
 
 Definition kX {b : ob B} (t : X b) := (pr2 (pr1 t)).
 
-
+(** The following is the third component of the center of [X b] *)
 
 Lemma center_of_contr_proof (b : ob B) (anot : ob A) (hnot : iso ((pr1 H) anot) b) :
   forall (t t' : total2 (fun a : ob A => iso ((pr1 H) a) b))
@@ -95,6 +126,7 @@ Proof.
   apply idpath.
 Qed.
 
+(** The center of [X b] *)
 
 Definition center_of_contr (b : precategory_objects B) 
     (anot : precategory_objects A)(hnot : iso_precat (pr1 H anot) b) : X b.
@@ -111,7 +143,7 @@ Proof.
   apply center_of_contr_proof.
 Defined.
 
-
+(** Any inhabitant of [X b] is equal to the center of [X b]. *)
 
 Lemma claim1_contr_eq (b : ob B) (anot : ob A) (hnot : iso (pr1 H anot) b) : 
    forall t : X b, t == center_of_contr b anot hnot.
@@ -186,6 +218,8 @@ Proof.
 Qed.
 
 
+(** Putting everything together: [X b] is contractible. *)
+
 Definition lemma64_claim1 : forall b : precategory_objects B, iscontr (X b).
 Proof.
   intro b.
@@ -198,6 +232,9 @@ Proof.
   exists (center_of_contr b (pr1 t) (pr2 t)).
   apply (claim1_contr_eq b (pr1 t) (pr2 t)).
 Qed.
+
+(** The object part of [G], [Go b], is defined as the first component of 
+    the center of [X b]. *)
 
 Definition Go : precategory_objects B -> precategory_objects C :=
    fun b : precategory_objects B =>
@@ -266,12 +303,17 @@ Proof.
 Qed.
 *)
  
+
+(** Given any inhabitant of [X b], its first component is equal to [Go b]. *)
+
 Definition Xphi (b : ob B) (t : X b) : pr1 (pr1 t) == Go b.
 Proof.
   set (p1 := pr2 (lemma64_claim1 b) t).
   exact (base_paths _ _ (base_paths _ _ p1)).
 Defined.
 
+(** Given any inhabitant [t : X b], its second component is equal to [k b],
+       modulo transport along [Xphi b t]. *)
 
 Definition Xkphi_transp (b : ob B) (t : X b) : 
      forall a : ob A, forall h : iso ((pr1 H) a) b, (* -> iso ((pr1 F) a) (Go b) *)
@@ -287,6 +329,8 @@ Proof.
   apply idpath.
 Qed.
 
+(** Similarly to the lemma before, the second component of [t] is the same 
+    as [k b], modulo postcomposition with an isomorphism. *)
 
 Definition Xkphi_idtoiso (b : ob B) (t : X b) :
     forall a : ob A, forall h : iso (pr1 H a) b,
@@ -314,6 +358,11 @@ transportf (fun c' : ob C => forall a : ob A, iso (pr1 H a) b ->
    p (k) a h == (k b) b a h ;; idtoiso p .
 *)
 
+
+(** ** [G] on morphisms *)
+
+(** [G f] will be defined as the first component of the center of
+     contraction of [Y f]. *)
 
 Let Y {b b' : precategory_objects B} (f : b --> b') :=
   total2 (fun g : Go b --> Go b' =>
@@ -451,7 +500,7 @@ Proof.
   apply idpath.
 Qed.
 
-
+(** The center of [Y b b' f]. *)
 
 Definition Y_inhab (b b' : ob B) (f : b --> b')
       (a0 : ob A) (h0 : iso (pr1 H a0) b) (a0' : ob A) (h0' : iso (pr1 H a0') b') : Y b b' f.
@@ -463,6 +512,7 @@ Proof.
   apply Y_inhab_proof.
 Defined.
 
+(** Any inhabitant of [Y b b' f] is equal to the center. *)
 
 Lemma Y_contr_eq (b b' : ob B) (f : b --> b')
      (a0 : ob A) (h0 : iso (pr1 H a0) b)
@@ -499,6 +549,8 @@ Proof.
   apply (pr2 ((pr1 F) a --> Go b')).
 Qed.
 
+(** The type [Y b b' f] is contractible. *)
+
 Definition Y_iscontr  (b b' : ob B) (f : b --> b') : 
    iscontr (Y b b' f).
 Proof.
@@ -519,6 +571,8 @@ Proof.
 Qed.
 
 
+(** We now have the data necessary to define the functor [G]. *)
+
 Definition G_precategory_ob_mor_fun : precategory_ob_mor_fun B C.
 Proof.
   exists Go.
@@ -529,6 +583,7 @@ Defined.
 
 Notation "'G' f" := (pr1 (pr1 (Y_iscontr _ _ f))) (at level 3).
 
+(** The above data is indeed functorial. *)
 
 Lemma is_precategory_fun : is_precategory_fun G_precategory_ob_mor_fun.
 Proof.
@@ -1045,10 +1100,16 @@ Proof.
 
 Qed.
 
+
+(** We call the functor [GG] ... *)
+
 Definition GG : ob [B, C] := tpair _ G_precategory_ob_mor_fun is_precategory_fun.
 
+(** ** [GG] is the preimage of [F] under [ _ O H] *)
 
-
+(** Given any [a : A], we produce an element in [X (H a)], whose
+     first component is [F a]. 
+   This allows to prove [G (H a) == F a]. *)
 
 Lemma qF (a0 : ob A) :
   forall (t t' : total2 (fun a : ob A => iso ((pr1 H) a) ((pr1 H) a0)))
@@ -1102,7 +1163,8 @@ Proof.
   apply phi.
 Defined.
 
-
+(** Now for the functor as a whole. It remains to prove 
+    equality on morphisms, modulo transport. *)
 
 Lemma is_preimage_for_pre_whiskering : GG O H == F.
 Proof.
@@ -1111,12 +1173,6 @@ Proof.
   apply funextsec. intro a0.
   apply funextsec. intro a0'.
   apply funextsec. intro f.
-  
-(*
-  apply (transport_to_the_right _ (fun x : ob A -> ob C => 
-               forall a b : ob A, a --> b -> x a --> x b)).
-  *)           
-  
   
   
   rewrite weird_lemma.
@@ -1130,9 +1186,6 @@ Proof.
   rewrite <- precategory_assoc.
   
 
-  
-  
-  
 (*  
   assert (YFf : Y _ _  (#(pr1 H) f)).
   exists (idtoiso (phi a0) ;; # (pr1 F) f ;; inv_from_iso (idtoiso (phi a0'))).
@@ -1206,6 +1259,11 @@ Qed.
 End preimage.
 
 End essentially_surjective.
+
+
+(** ** The main result *)
+(** Abstracting from [F] by closing the previous section,
+    we can prove essential surjectivity of [_ O H]. *)
 
 Lemma pre_whisker_essentially_surjective : 
        essentially_surjective (pre_whisker_functor A B C H).
