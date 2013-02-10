@@ -1,3 +1,26 @@
+(************************************************************
+
+Benedikt Ahrens and Chris Kapulkin
+january 2013
+
+
+************************************************************)
+
+
+(************************************************************
+
+Contents :  Definition of adjunction
+	
+	    Definition of equivalence of precategories
+	
+	    Equivalence of categories yields weak equivalence
+            of object types
+           
+************************************************************)
+
+
+
+
 Add Rec LoadPath "../Generalities".
 Add Rec LoadPath "../hlevel1".
 Add Rec LoadPath "../hlevel2".
@@ -30,57 +53,8 @@ Definition functor_composite (A B C : precategory) (F : precategory_objects [A, 
 
 Notation "G 'O' F" := (functor_composite _ _ _ F G) (at level 25).
 
-(** * Whiskering: Composition of a natural transformation with a functor *)
+(** * Adjunction *)
 
-(** moved to precategory_whiskering
-
-Lemma is_precat_fun_fun_pre_whisker (A B C : precategory) (F : precategory_objects [A, B])
-   (G H : precategory_objects [B, C]) (gamma : G --> H) : 
-  is_precategory_fun_fun (precategory_fun_composite _ _ _ F G ) 
-                         (precategory_fun_composite _ _ _ F H) 
-     (fun a : precategory_objects A => pr1 gamma ((pr1 F) a)).
-Proof.
-  unfold is_precategory_fun_fun.
-  simpl.
-  intros x x' f.
-  rewrite  (precategory_fun_fun_ax _ _ gamma).
-  apply idpath.
-Qed.
-
-Definition pre_whisker (A B C : precategory) (F : precategory_objects [A, B])
-   (G H : precategory_objects [B, C]) (gamma : G --> H) : 
-       G O F --> H O F.
-Proof.
-  exists (fun a => pr1 gamma (pr1 F a)).
-  apply is_precat_fun_fun_pre_whisker.
-Defined.
-
-
-
-
-Lemma is_precat_fun_fun_post_whisker (B C D : precategory) 
-   (G H : precategory_objects [B, C]) (gamma : G --> H) 
-        (K : precategory_objects [C, D]): 
-  is_precategory_fun_fun (precategory_fun_composite _ _ _ G K) 
-                         (precategory_fun_composite _ _ _ H K) 
-     (fun a : precategory_objects B => # (pr1 K) (pr1 gamma  a)).
-Proof.
-  unfold is_precategory_fun_fun.
-  simpl in *.
-  intros x x' f.
-  repeat rewrite <- precategory_fun_comp.
-  rewrite  (precategory_fun_fun_ax _ _ gamma).
-  apply idpath.
-Qed.
-
-Definition post_whisker (B C D : precategory) 
-   (G H : precategory_objects [B, C]) (gamma : G --> H) 
-        (K : precategory_objects [C, D]) : K O G --> K O H.
-Proof.
-  exists (fun a : precategory_objects B => # (pr1 K) (pr1 gamma  a)).
-  apply is_precat_fun_fun_post_whisker.
-Defined.
-*)
 
 Definition form_adjunction (A B : precategory) (F : precategory_objects [A, B])
        (G : precategory_objects [B, A]) 
@@ -131,6 +105,7 @@ Definition triangle_id_right_ad (A B : precategory) (F : precategory_objects [A,
         precategory_identity ((pr1 (pr1 H)) b)
    := pr2 (pr2 (pr2 H)).
 
+(** * Equivalence of (pre)categories *)
 
 Definition equivalence_of_precats (A B : precategory)(F : precategory_objects [A, B]) : UU :=
    total2 (fun H : is_left_adjoint _ _ F =>
@@ -140,7 +115,7 @@ Definition equivalence_of_precats (A B : precategory)(F : precategory_objects [A
                     (eps_from_left_adjoint A B F H b))
              ).
 
-Print iso_precat.
+
 Definition eta_iso_from_equivalence_of_precats (A B : precategory)
   (F : precategory_objects [A, B]) (HF : equivalence_of_precats _ _ F) : 
        iso_precat (C:=[A, A]) (precategory_fun_identity A) 
@@ -160,6 +135,10 @@ Proof.
   apply precategory_fun_iso_if_pointwise_iso.
   apply (pr2 (pr2 HF)).
 Defined.
+
+
+(** * Equivalence of categories yields equivalence of object types *)
+(**  Fundamentally needed that both source and target are saturated *)
 
 Lemma equiv_of_cats_is_weq_of_objects (A B : precategory)
    (HA : is_saturated A) (HB : is_saturated B) (F : precategory_objects [A, B])
@@ -192,92 +171,10 @@ Proof.
   apply equiv_of_cats_is_weq_of_objects; assumption.
 Defined.
 
+   
+(** If [F] is fully faithful, then being essentially surjective 
+     is a proposition *)
 
-
-Lemma bla  (A B : precategory) (F : precategory_objects [A, B]) 
-          (a : precategory_objects A) :
-inv_from_iso (precategory_fun_on_iso A B F a a (identity_iso_precat a))
-  == precategory_identity _ .
-Proof.
-  assert (H' : precategory_fun_on_iso A B F a a (identity_iso_precat a) == 
-           identity_iso_precat _ ).
-  apply eq_iso_precat.
-  simpl.
-  apply precategory_fun_id.
-  rewrite H'.
-  apply idpath.
-Qed.
-
-  
-    
-
-
-Lemma isaprop_pi_sigma_iso (A B : precategory) (HA : is_saturated A)
-     (F : precategory_objects [A, B]) (HF : fully_faithful F) :
-  isaprop (forall b : precategory_objects B, 
-             total2 (fun a : precategory_objects A => iso_precat (pr1 F a) b)).
-Proof.
-  apply impred.
-  intro b.
-  apply invproofirrelevance.
-  intros x x'.
-  destruct x as [a f].
-  destruct x' as [a' f'].
-  set (fminusf := iso_comp f (iso_inv_from_iso f')).
-  set (g := iso_from_fully_faithful_reflection _ _ _ HF _ _ fminusf).
-  set (p := isotoid _ HA g).
-  Print total2_paths2.
-  apply (total2_paths2 (B:=fun a' => iso_precat ((pr1 F) a') b) (isotoid _ HA g)).
-  pathvia (iso_comp (iso_inv_from_iso 
-    (precategory_fun_on_iso _ _ F _ _ (idtoiso (isotoid _ HA g)))) f).
-  generalize (isotoid _ HA g).
-  intro p0.
-  induction p0.
-  simpl.
-  
-  apply eq_iso_precat.
-  simpl. 
-  rewrite transportf_idpath.
-  rewrite bla.
-  rewrite precategory_id_left.
-  apply idpath.
-  
-  rewrite idtoiso_isotoid.
-  unfold g.
-  unfold fminusf.
-  simpl.
-  clear p.
-  clear g.
-  clear fminusf.
-  assert (HFg : precategory_fun_on_iso A B F a a'
-        (iso_from_fully_faithful_reflection A B F HF a a'
-           (iso_comp f (iso_inv_from_iso f'))) == 
-           iso_comp f (iso_inv_from_iso f')).
-  generalize (iso_comp f (iso_inv_from_iso f')).
-  intro h.
-  set (HH := weq_from_fully_faithful _ _ _ HF a a').
-  apply eq_iso_precat.
-  simpl.
-  set (H3 := homotweqinvweq (weq_from_fully_faithful _ _ _ HF a a')).
-  simpl in H3.
-  set (H' := HF a a').
-  unfold fully_faithful_inv_hom.
-  unfold invweq.
-  simpl.
-  rewrite H3.
-  apply idpath.
-  
-  rewrite HFg.
-  rewrite iso_inv_of_iso_comp.
-  apply eq_iso_precat.
-  simpl.
-  repeat rewrite <- precategory_assoc.
-  rewrite iso_after_iso_inv.
-  rewrite precategory_id_right.
-  set (H := iso_inv_iso_inv _ _ _ f').
-  set (h':= base_paths _ _ H).
-  assumption.
-Qed.
 
 Lemma isaprop_sigma_iso (A B : precategory) (HA : is_saturated A)
      (F : precategory_objects [A, B]) (HF : fully_faithful F) :
@@ -292,7 +189,7 @@ Proof.
   set (fminusf := iso_comp f (iso_inv_from_iso f')).
   set (g := iso_from_fully_faithful_reflection _ _ _ HF _ _ fminusf).
   set (p := isotoid _ HA g).
-  Print total2_paths2.
+
   apply (total2_paths2 (B:=fun a' => iso_precat ((pr1 F) a') b) (isotoid _ HA g)).
   pathvia (iso_comp (iso_inv_from_iso 
     (precategory_fun_on_iso _ _ F _ _ (idtoiso (isotoid _ HA g)))) f).
@@ -301,13 +198,16 @@ Proof.
   induction p0.
   simpl.
   
+  rewrite <- precategory_fun_on_iso_inv.
+  rewrite iso_inv_of_iso_id.
   apply eq_iso_precat.
   simpl. 
   rewrite transportf_idpath.
-  rewrite bla.
+  rewrite precategory_fun_id.
   rewrite precategory_id_left.
   apply idpath.
   
+ 
   rewrite idtoiso_isotoid.
   unfold g.
   unfold fminusf.
@@ -344,8 +244,25 @@ Proof.
   set (h':= base_paths _ _ H).
   assumption.
 Qed.
-  
 
+
+Lemma isaprop_pi_sigma_iso (A B : precategory) (HA : is_saturated A)
+     (F : precategory_objects [A, B]) (HF : fully_faithful F) :
+  isaprop (forall b : precategory_objects B, 
+             total2 (fun a : precategory_objects A => iso_precat (pr1 F a) b)).
+Proof.
+  apply impred.
+  intro b.
+  apply isaprop_sigma_iso; assumption.
+Qed.
+   
+
+(** * From full faithfullness and ess surj to equivalence *)
+
+(** A fully faithful and ess. surjective functor induces an 
+   equivalence of precategories, is the source category is 
+    saturated. 
+*)
 
 Section from_fully_faithful_and_ess_surj_to_equivalence.
 
@@ -355,6 +272,8 @@ Variable F : precategory_objects [A, B].
 Hypothesis HF : fully_faithful F.
 Hypothesis HS : essentially_surjective F.
 
+(** Definition of a functor which will later be the right adjoint. *)
+
 Definition rad_ob : precategory_objects B -> precategory_objects A.
 Proof.
   intro b.
@@ -362,11 +281,15 @@ Proof.
                (isaprop_sigma_iso A B HA F HF b)) (fun x => x))).
 Defined.
 
+(** Definition of the epsilon transformation *)
+
 Definition rad_eps (b : precategory_objects B) : iso_precat (pr1 F (rad_ob b)) b.
 Proof.
   apply (pr2 (HS b (tpair (fun x => isaprop x) _ 
                (isaprop_sigma_iso A B HA F HF b)) (fun x => x))).
 Defined.
+
+(** The right adjoint on morphisms *)
 
 Definition rad_mor (b b' : precategory_objects B) (g : b --> b') : rad_ob b --> rad_ob b'.
 Proof.
@@ -376,11 +299,15 @@ Proof.
   exact Gg.
 Defined.
 
+(** Definition of the eta transformation *)
+
 Definition rad_eta (a : precategory_objects A) : a --> rad_ob (pr1 F a).
 Proof.
   set (epsFa := inv_from_iso (rad_eps (pr1 F a))).
   exact (fully_faithful_inv_hom  _ _ _ HF _ _ epsFa).
 Defined.
+
+(** Above data specifies a functor *)
 
 Definition rad_precategory_ob_mor_fun : precategory_ob_mor_fun B A.
 Proof.
@@ -417,6 +344,9 @@ Proof.
   apply rad_is_precategory_fun.
 Defined.
 
+
+(** Epsilon is natural *)
+
 Lemma rad_eps_is_precategory_fun_fun : is_precategory_fun_fun 
     (pr1 (F O rad)) (precategory_fun_identity B)
        (fun b => rad_eps b).
@@ -438,6 +368,8 @@ Qed.
 
 Definition rad_eps_trans : precategory_fun_fun _ _ :=
    tpair _ _ rad_eps_is_precategory_fun_fun.
+
+(** Eta is natural *)
 
 Lemma rad_eta_is_precategory_fun_fun : is_precategory_fun_fun 
          (precategory_fun_identity A) (pr1 (rad O F)) 
@@ -461,9 +393,6 @@ Proof.
   clear h'.
   clear HHH.
 
-  (* do the series of lemmas for fully faithful functors on morphisms 
-     also for isomorphisms 
-  *)
 
   set (H3 := homotweqinvweq (weq_from_fully_faithful _ _ _ HF a' (rad_ob ((pr1 F) a')))).
   simpl in H3.
@@ -492,6 +421,9 @@ Qed.
 
 Definition rad_eta_trans : precategory_fun_fun _ _ :=
    tpair _ _ rad_eta_is_precategory_fun_fun.
+
+
+(** The data [rad], [eta], [eps] forms an adjunction *)
 
 Lemma rad_form_adjunction : form_adjunction A B F rad rad_eta_trans rad_eps_trans.
 Proof.
@@ -549,6 +481,11 @@ Proof.
   exists rad.
   apply rad_are_adjoints.
 Defined.
+
+(** Get an equivalence of precategories:
+
+    remains to show that [eta], [eps] are isos
+*)
 
 Lemma rad_equivalence_of_precats : equivalence_of_precats _ _ F.
 Proof.
