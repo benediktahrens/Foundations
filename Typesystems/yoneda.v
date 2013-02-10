@@ -10,7 +10,9 @@ january 2013
 
 (************************************************************
 
-Contents : Definition of the Yoneda functor 
+Contents : Definition of opposite category
+ 	
+	   Definition of the Yoneda functor 
            [yoneda(C) : [C, [C^op, HSET]]]
 	
            Proof that [yoneda(C)] is fully faithful  
@@ -88,6 +90,10 @@ Definition opp_precat (C : precategory) : precategory :=
 Notation "C '^op'" := (opp_precat C) (at level 3).
 
 
+(** * Yoneda functor *)
+
+(** ** On objects *)
+
 Definition yoneda_objects_ob (C : precategory) (c : precategory_objects C)
           (d : precategory_objects C) := hom C d c.
 
@@ -121,9 +127,11 @@ Proof.
 Qed.
 
 Definition yoneda_objects (C : precategory) (c : precategory_objects C) : 
-(*           precategory_objects [C^op, HSET] := *)
              precategory_fun C^op HSET :=
     tpair _ _ (is_functor_yoneda_precategory_ob_mor_fun C c).
+
+
+(** ** On morphisms *)
 
 Definition yoneda_morphisms_data (C : precategory)(c c' : precategory_objects C) 
     (f : hom C c c') : forall a : precategory_objects C^op, 
@@ -159,6 +167,8 @@ Definition yoneda_precategory_ob_mor_fun (C : precategory):
    tpair _ (yoneda_objects C) (yoneda_morphisms C).
 
 
+(** ** Functorial properties of the yoneda assignments *)
+
 Lemma is_precategory_fun_yoneda (C : precategory) :
   is_precategory_fun (yoneda_precategory_ob_mor_fun C).
 Proof.
@@ -189,21 +199,16 @@ Definition yoneda (C : precategory) : precategory_fun C [C^op, HSET] :=
 
 Notation "'ob' F" := (precategory_ob_mor_fun_objects F)(at level 4).
 
-(** ** Yoneda lemma *)
+(** ** Yoneda lemma: natural transformations from [yoneda C c] to [F]
+         are isomorphic to [F c] *)
+
 
 Definition yoneda_map_1 (C : precategory)(c : precategory_objects C)
    (F : precategory_fun C^op HSET) :
        hom _ (ob (yoneda C) c) F -> pr1(F c) := 
    fun h => pr1 h c (precategory_identity c).
-(*
-Proof.
-  intro h.
-  set (ha := pr1 h c).
-  simpl in *.
-  exact (ha (precategory_identity c)).
-*)
 
-Print is_precategory_fun_fun.
+
 
 Lemma yoneda_map_2_ax (C : precategory)(c : precategory_objects C)
        (F : precategory_fun C^op HSET) (x : pr1 (F c)) :
@@ -211,9 +216,6 @@ Lemma yoneda_map_2_ax (C : precategory)(c : precategory_objects C)
          (fun (d : precategory_objects C) (f : hom (C ^op) c d) => #F f x).
 Proof.
  intros a b f.
-  (*
-  set (H:= @precategory_fun_comp _ _ F  _ _ _ g).
-*)
   simpl in *.
   apply funextsec.
   unf. simpl.
@@ -296,11 +298,7 @@ Proof.
 Qed.
 
 
-(*    moved to precategories.v
-Definition fully_faithful {C D : precategory} (F : precategory_fun C D) := 
-  forall a b : precategory_objects C, 
-    isweq (precategory_ob_mor_fun_morphisms F (a:=a) (b:=b)).
-*)
+(** ** The Yoneda embedding is fully faithful *)
 
 Lemma yoneda_fully_faithful (C : precategory) : fully_faithful (yoneda C).
 Proof.
