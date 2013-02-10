@@ -508,6 +508,28 @@ Proof.
   apply idpath.
 Qed.
 
+Lemma idtoiso_postcompose_iso (C : precategory) (a b b' : precategory_objects C)
+  (p : b == b') (f : iso_precat a b) : 
+    iso_comp f (idtoiso p) == transportf (fun b => iso_precat a b) p f.
+Proof.
+  induction p.
+  apply eq_iso_precat.
+  simpl.
+  rewrite transportf_idpath.
+  apply precategory_id_right.
+Qed.
+
+
+Lemma idtoiso_precompose (C : precategory) (a a' b : precategory_objects C)
+  (p : a == a') (f : a --> b) : 
+      (idtoiso (!p)) ;; f == transportf (fun a => a --> b) p f.
+Proof.
+  induction p.
+  simpl.
+  rewrite transportf_idpath.
+  apply precategory_id_left.
+Qed.
+
 Lemma double_transport_idtoiso (C : precategory) (a a' b b' : precategory_objects C) 
   (p : a == a') (q : b == b')  (f : a --> b) : 
   double_transport p q f == inv_from_iso (idtoiso p) ;; f ;; idtoiso q.
@@ -1442,7 +1464,8 @@ Proof.
   apply idpath.
 Qed.
 
-Definition weq_hom_in_subcat_from_hom_in_precat (C : precategory) (C' : hsubtypes (precategory_objects C))
+Definition weq_hom_in_subcat_from_hom_in_precat (C : precategory) 
+     (C' : hsubtypes (precategory_objects C))
     (a b : precategory_objects (full_sub_precategory C')): weq (pr1 a --> pr1 b) (a-->b) :=
   tpair _ _ (isweq_hom_in_subcat_from_hom_in_precat C C' a b).
 
@@ -1802,7 +1825,7 @@ Definition is_precategory_fun_fun {C C' : precategory_data}
 
 
 Lemma isaprop_is_precategory_fun_fun {C C' : precategory_data}
-  (F F' : precategory_ob_mor_fun C C') (t : forall x : precategory_objects C, F x -->  F' x) :
+  (F F' : precategory_ob_mor_fun C C') (t : forall x : precategory_objects C, F x -->  F' x):
   isaprop (is_precategory_fun_fun F F' t).
 Proof.
   apply impred; intro x.
@@ -2227,7 +2250,7 @@ Proof.
 (*  
   pathvia (isotoid D H
        
-    (idtoiso (     toforallpaths (fun _ : precategory_objects C => D) (pr1 (pr1 F)) (pr1 (pr1 G))
+(idtoiso (     toforallpaths (fun _ : precategory_objects C => D) (pr1 (pr1 F)) (pr1 (pr1 G))
   (base_paths (pr1 F) (pr1 G) (base_paths F G p)) a))
 
 ).

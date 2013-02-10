@@ -432,29 +432,40 @@ Proof.
 Qed.
 
 
-Lemma k_transport_idtoiso (b : ob B) (t1 t2 : X b) 
-   (p' : pr1 (pr1 t1) == pr1 (pr1 t2)) (a : ob A) (h : iso (pr1 H a) b) :
-  iso_comp (pr2 (pr1 t1) a h) (idtoiso p') == pr2 (pr1 t2) a h.
+Definition X_contr_base_paths (b : ob B) (t1 t2 : X b) : 
+   pr1 (pr1 t1) == pr1 (pr1 t2).
 Proof.
-  Check proofirrelevance.
-  set (e := proofirrelevancecontr (*X b*) (lemma64_claim1 b) t1 t2).
-  destruct t1 as [c1k1 q1]; 
-  destruct t2 as [c2k2 q2]; simpl in *.
+  set (e := proofirrelevancecontr (lemma64_claim1 b) t1 t2).
+  exact (base_paths _ _ (base_paths _ _ e)).
+Defined.
 
-  set (p1 := base_paths _ _ e).
-  simpl in p1.
-  set (p1 := fiber_path_fibr p' p1).
-  simpl in p1.
-  clearbody p1.
-  clear e q1 q2.
-  induction p'.
-  rewrite transportf_idpath.
+Lemma k_transport_idtoiso (b : ob B) (t1 t2 : X b) 
+    (a : ob A) (h : iso (pr1 H a) b) :
+  iso_comp (pr2 (pr1 t1) a h) (idtoiso (X_contr_base_paths b t1 t2)) == pr2 (pr1 t2) a h.
+Proof.
+(*  apply eq_iso_precat. *)
   simpl.
+  
+  set (e := proofirrelevancecontr (lemma64_claim1 b) t1 t2).
+  set (p4 := base_paths _ _ e).
+  set (p5 := fiber_path_fibr p4).
+  simpl in *.
+  rewrite <- p5.
+  unfold X_contr_base_paths.
+  simpl.
+  unfold p4.
+  simpl.
+  unfold e.
+  generalize (base_paths (pr1 t1) (pr1 t2)
+        (base_paths t1 t2 (proofirrelevancecontr (lemma64_claim1 b) t1 t2))).
+        intro i.
+  induction i.
+  rewrite transportf_idpath.
   apply eq_iso_precat.
   simpl.
-  rewrite precategory_id_right.
-  apply idpath.
+  apply precategory_id_right.
 Qed.
+ 
 
 
 
@@ -1373,10 +1384,84 @@ Proof.
   apply L.
 Qed.
 
-
-Lemma pr1pr1functor : pr1 (pr1 (GG O H)) == pr1 (pr1 F).
+Lemma phi (a0 : ob A) : pr1 (pr1 (GG O H)) a0 == pr1 (pr1 F) a0.
 Proof.
-  apply funextsec; intro a0.
+ set (kFa := fun (a : ob A) (h : iso (pr1 H a) (pr1 H a0)) =>
+                precategory_fun_on_iso A C F _ _ 
+                  (iso_from_fully_faithful_reflection _ _ H Hff _ _ h)).
+(*
+  assert (HYpr2 : forall (t t' : total2 (fun a : ob A => iso ((pr1 H) a) ((pr1 H) a0)))
+         (f : pr1 t --> pr1 t'),
+              #(pr1 H) f;; pr2 t' == pr2 t ->
+     #(pr1 F) f;; #(pr1 F) (fully_faithful_inv_hom A B H Hff (pr1 t') a0 (pr2 t')) ==
+         #(pr1 F) (fully_faithful_inv_hom A B H Hff (pr1 t) a0 (pr2 t))).
+  clear kFa.
+(*  
+*)
+  simpl.
+  intros [a h] [a' h'] f L.
+  simpl in L; simpl.
+(*
+  set (HHH := precategory_fun_comp A C F _ _ _ f (fully_faithful_inv_hom A B H Hff a' a0 h')).
+  simpl in HHH.
+  rewrite <- HHH.
+  elim HHH.
+*)
+  rewrite <- (precategory_fun_comp A C F).
+  apply maponpaths.
+  set (hhh':=equal_transport_along_weq _ _ (weq_from_fully_faithful A B H Hff a a0)
+                 (f;; fully_faithful_inv_hom A B H Hff a' a0 h')                      
+                 (fully_faithful_inv_hom A B H Hff a a0 h)  ).
+  simpl in *.
+  apply hhh'. clear hhh'.
+  set (HFFaa := homotweqinvweq (weq_from_fully_faithful _ _ H Hff a a0)).
+  unfold fully_faithful_inv_hom.
+  simpl in *.
+  rewrite HFFaa. clear HFFaa.
+  rewrite precategory_fun_comp.
+  set (HFFaa := homotweqinvweq (weq_from_fully_faithful _ _ H Hff a' a0)).
+  unfold fully_faithful_inv_hom.
+  simpl in *.
+  rewrite HFFaa. clear HFFaa.
+  apply L.
+*) 
+  set (HYpr1 :=  (tpair (fun c : precategory_objects C =>
+                forall a : precategory_objects A,
+                     iso_precat (pr1 H a) (pr1 H a0) -> 
+      iso_precat (pr1 F a) c) (pr1 F a0) kFa)).
+  set (HY := tpair (fun ck : 
+  total2 (fun c : precategory_objects C =>
+                forall a : precategory_objects A,
+                     iso_precat (pr1 H a) (pr1 H a0) -> iso_precat (pr1 F a) c) =>
+    forall t t' : total2 (fun a : precategory_objects A => iso_precat (pr1 H a) (pr1 H a0)),
+          forall f : pr1 t --> pr1 t',
+             (#(pr1 H) f ;; pr2 t' == pr2 t -> 
+                    #(pr1 F) f ;; pr2 ck (pr1 t') (pr2 t') == pr2 ck (pr1 t) (pr2 t)))  
+       (HYpr1) (santas_little_helper a0) : X (pr1 H a0)).
+  
+  set (hula := pr2 (lemma64_claim1 (pr1 H a0)) HY ).
+  set (hulapr2 := base_paths _ _ (base_paths _ _ hula)).
+  simpl in hulapr2.
+(*  apply pathsinv0. *)
+  apply (!hulapr2).
+(*  change (pr1 (pr1 F) a0) with (pr1 F a0).
+  clearbody hulapr2.
+  set (h5 := ! hulapr2).
+  clearbody h5.
+  induction h5.
+  
+(*  induction (! hulapr2). *)
+  apply idpath.
+*)
+Qed.
+
+
+Lemma extphi : pr1 (pr1 (GG O H)) == pr1 (pr1 F).
+Proof.
+  apply funextsec.
+  apply phi.
+Defined.
+(*
   set (kFa := fun (a : ob A) (h : iso (pr1 H a) (pr1 H a0)) =>
                 precategory_fun_on_iso A C F _ _ 
                   (iso_from_fully_faithful_reflection _ _ H Hff _ _ h)).
@@ -1445,16 +1530,34 @@ Proof.
 (*  induction (! hulapr2). *)
   apply idpath.
 Defined.
+*)
 
 Lemma bla : GG O H == F.
 Proof.
   apply (precategory_fun_eq _ _ (GG O H) F).
-  apply (total2_paths pr1pr1functor).
-  apply funextsec. intro a.
-  apply funextsec. intro b.
+  apply (total2_paths extphi).
+  apply funextsec. intro a0.
+  apply funextsec. intro a0'.
   apply funextsec. intro f.
   
+(*
+  apply (transport_to_the_right _ (fun x : ob A -> ob C => 
+               forall a b : ob A, a --> b -> x a --> x b)).
+  *)           
+  
+  
+  
   rewrite weird_lemma.
+  unfold extphi.
+  rewrite toforallpaths_funextsec.
+  rewrite <- idtoiso_postcompose.
+  rewrite <- idtoiso_precompose.
+  
+  rewrite idtoiso_inv.
+  
+  
+  (* ***** STOPPED HERE   *)
+  
   unfold pr1pr1functor.
   rewrite toforallpaths_funextsec.
   simpl.
