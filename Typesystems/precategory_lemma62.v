@@ -1,3 +1,27 @@
+
+(************************************************************
+
+Benedikt Ahrens and Chris Kapulkin
+january 2013
+
+
+************************************************************)
+
+
+(************************************************************
+
+Contents : Prewhiskering with a fully faithful and  
+           essentially surjective functor yields
+           a full and faithful, i.e. a fully faithful, 
+           functor
+	
+	   Faithfulness is already proved before, 
+           in this file we prove fullness and 
+ 	   full faithfullness
+
+************************************************************)
+
+
 Add Rec LoadPath "../Generalities".
 Add Rec LoadPath "../hlevel1".
 Add Rec LoadPath "../hlevel2".
@@ -28,17 +52,26 @@ Local Notation "# F" := (precategory_ob_mor_fun_morphisms F)(at level 3).
 
 Section lemma62.
 
+(** ** Section variables *)
+
 Variables A B C : precategory.
 Variable H : precategory_objects [A, B].
 Hypothesis p : essentially_surjective H.
 Hypothesis Hff : fully_faithful H.
 
+
+(** We prove that [_ O H] yields a full functor. *)
+
 Section full.
 
 Variables F G : precategory_objects [B, C].
 
+(** We have to show that for [F] and [G], the map 
+     [(_ O H) (F,G) : (F --> G) -> (F O H --> G O H)]  is full. *)
 
 Section preimage.
+
+(** Fixing a [gamma], we produce its preimage. *)
 
 Variable gamma : F O H --> G O H.
 
@@ -114,80 +147,10 @@ Proof.
   apply proofirrelevance.
   apply impred. intro a.
   apply impred. intro a'.
-  Check (pr1 gamma a).
   apply (pr2 (pr1 (F O H) a --> pr1 (G O H) a)).
 Qed.
   
 
-(*
-
-inv_from_iso_precateory_fun_on_iso.
-  apply bla.
-                                           
-
-     simpl.
-
-    
-  simpl.
-
-Definition claim1_center (F G : precategory_objects [B, C]) (gamma : F O H --> G O H) 
-        (b : precategory_objects B) : 
-   total2 (fun g : pr1 F b --> pr1 G b => 
-      forall a : precategory_objects A, forall f : iso_precat (pr1 H a) b,
-           pr1 gamma a == #(pr1 F) f ;; g ;; #(pr1 G) (inv_from_iso f)  ).
-Proof.
-  set (X := isapropiscontr (total2
-     (fun g : (pr1 F) b --> (pr1 G) b =>
-      forall (a : precategory_objects A) (f : iso_precat ((pr1 H) a) b),
-      pr1 gamma a == (#(pr1 F) f;; g);; #(pr1 G) (inv_from_iso f)))).
-  set (pbX := p b (tpair (fun x => isaprop x) _ X)).
-  simpl.
-  apply pbX. clear pbX. simpl. clear X.
-  intro anoth.
-  destruct anoth as [anot h].
-  simpl in *.
-  set (g := #F (inv_from_iso h) ;; gamma anot ;; #G h).
-
-  assert (gp : forall (a : precategory_objects A) 
-                     (f : iso_precat (H a) b),
-                 gamma a == #F f ;; g ;; #G (inv_from_iso f)).
-  intros a f.
-  set (k := iso_from_fully_faithful_reflection _ _ _ Hff _ _ 
-             (iso_comp f (iso_inv_from_iso h))).
-  set (GHk := precategory_fun_on_iso _ _ G _ _ 
-                (precategory_fun_on_iso _ _ H _ _ k)).
-  pathvia (#F (#H k) ;; gamma anot ;; iso_inv_from_iso GHk).
-  
-  set (P := post_comp_with_iso_is_inj _ _ _ GHk (pr2 GHk)).
-  apply P.
-  rewrite <- precategory_assoc.
-  change (iso_inv_from_iso GHk ;; GHk) with (inv_from_iso GHk ;; GHk).
-  rewrite iso_after_iso_inv. rewrite precategory_id_right.
-  set (Hgamma := precategory_fun_fun_ax _ _ gamma).
-  simpl in Hgamma.
-  rewrite Hgamma. apply idpath.
-  unfold GHk.
-  rewrite <- precategory_fun_on_iso_inv.
-  unfold k. simpl.
-  rewrite precategory_fun_on_iso_iso_from_fully_faithful_reflection.
-  set (Hr := iso_inv_of_iso_comp _ _ _ _ f (iso_inv_from_iso h)).
-  simpl in Hr. 
-  set (Hrp := base_paths _ _ Hr). simpl in Hrp.
-  rewrite Hrp.
-  rewrite precategory_fun_comp.
-  set (H3 := homotweqinvweq (weq_from_fully_faithful _ _ _ Hff a anot)).
-  simpl in H3. unfold fully_faithful_inv_hom.
-  simpl. rewrite H3. clear H3.
-  set (H4 := base_paths _ _ (iso_inv_iso_inv _ _ _ h)).
-  simpl in H4. rewrite H4.
-  rewrite precategory_fun_comp.
-  unfold g.
-  repeat rewrite precategory_assoc.
-  apply idpath.
-  
-  exists g.
-
-*)
 
 Lemma claim1 (*F G : precategory_objects [B, C]) (gamma : F O H --> G O H) *)
         (b : precategory_objects B) : 
@@ -195,7 +158,6 @@ Lemma claim1 (*F G : precategory_objects [B, C]) (gamma : F O H --> G O H) *)
       forall a : precategory_objects A, forall f : iso_precat (pr1 H a) b,
            pr1 gamma a == #(pr1 F) f ;; g ;; #(pr1 G) (inv_from_iso f)  )).
 Proof.
-  Check isapropiscontr.
   set (X := isapropiscontr (total2
      (fun g : (pr1 F) b --> (pr1 G) b =>
       forall (a : precategory_objects A) (f : iso_precat ((pr1 H) a) b),
@@ -244,7 +206,6 @@ Proof.
   unfold g.
   repeat rewrite precategory_assoc.
   apply idpath.
-  Search  ( _ -> iscontr _ ).
   apply iscontraprop1.
   apply claim1_isinhabited.
   
@@ -255,14 +216,12 @@ Qed.
  
 Definition pdelta : forall b : precategory_objects B, pr1 F b --> pr1 G b :=
          fun b => pr1 (pr1 (claim1 b)).
-(*
-Notation delta := preimage_pre_whisker.
-*)
+
 Lemma is_precategory_fun_fun_pdelta : 
      is_precategory_fun_fun (pr1 F) (pr1 G) pdelta.
 Proof.
   intros b b' f.
-  apply pathsinv0. Check (#(pr1 F) f;; pdelta b').
+  apply pathsinv0. 
   set (pb1 := p b (tpair (fun x => isaprop x) 
                        (pdelta b;; #(pr1 G) f == 
                          #(pr1 F) f;; pdelta b')
@@ -284,8 +243,6 @@ Proof.
   set (gq := pr1 (claim1 b)). 
   set (g := pr1 gq).
   set (q := pr2 gq). simpl in *. unfold gq in *.
-  (*destruct gq as [g q].
-(*  unfold pdelta. *)*)
   
   set (HH := (q a h)). simpl in *.
   
