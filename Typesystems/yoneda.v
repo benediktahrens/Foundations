@@ -252,8 +252,6 @@ Proof.
   intro f.
   unfold yoneda_map_1.
   simpl.
-  Check #F f.
-  Check alpha c.
   pathvia ((alpha c ;; #F f) (precategory_identity c)).
   apply idpath.
   set (H':= precategory_fun_fun_ax _ _ alpha  c a' f). simpl in H'.

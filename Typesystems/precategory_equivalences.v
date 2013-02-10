@@ -383,7 +383,6 @@ Proof.
   simpl.
   intros a a' f.
   unfold rad_mor. simpl.
-  Check f ;; rad_eta a'.
   set (h' := equal_transport_along_weq _ _ 
           (weq_from_fully_faithful _ _ _ HF a (rad_ob ((pr1 F) a')))).
   apply h'.
