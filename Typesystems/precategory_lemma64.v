@@ -1440,11 +1440,9 @@ Definition XtripleF (a0 : ob A) : X (pr1 H a0) :=
 
 Lemma phi (a0 : ob A) : pr1 (pr1 (GG O H)) a0 == pr1 (pr1 F) a0.
 Proof.
-  set (hula := pr2 (lemma64_claim1 (pr1 H a0)) (XtripleF a0) ).
-  set (hulapr2 := base_paths _ _ (base_paths _ _ hula)).
-  apply (!hulapr2).
+  exact (!Xphi _ (XtripleF a0)).
 Defined.
-Print phi.
+
 
 (*
 Lemma phi (a0 : ob A) : pr1 (pr1 (GG O H)) a0 == pr1 (pr1 F) a0.
@@ -1639,7 +1637,81 @@ Proof.
   intros a h a' h' l alpha.
   rewrite precategory_assoc.
   apply iso_inv_on_left.
+  unfold phi.
+  repeat rewrite precategory_assoc.
+  set (HHHH := Xkphi_idtoiso (pr1 H a0) (XtripleF a0)).
+  rewrite HHHH. clear HHHH.
+  repeat rewrite <- precategory_assoc.
+  set (HHHH := Xkphi_idtoiso (pr1 H a0') (XtripleF a0')).
+  rewrite HHHH; clear HHHH.
   
+  simpl.
+  
+  
+  assert (HH4 : fully_faithful_inv_hom A B H Hff a a0 h ;; f ==
+                     l ;; fully_faithful_inv_hom A B H Hff a' a0' h').
+                     Check l;; fully_faithful_inv_hom A B H Hff a' a0' h'.
+  set (hhh':=equal_transport_along_weq _ _ (weq_from_fully_faithful A B H Hff a a0')).
+  apply hhh'.
+  simpl.
+  repeat rewrite precategory_fun_comp.
+  set (HFFaa := homotweqinvweq (weq_from_fully_faithful _ _ H Hff a a0)).
+  unfold fully_faithful_inv_hom.
+  simpl in *.
+  rewrite HFFaa. clear HFFaa.
+  set (HFFaa := homotweqinvweq (weq_from_fully_faithful _ _ H Hff a' a0')).
+  unfold fully_faithful_inv_hom.
+  simpl in *.
+  rewrite HFFaa. clear HFFaa.
+  apply pathsinv0.
+  apply alpha.
+  
+  pathvia (#(pr1 F) (fully_faithful_inv_hom A B H Hff a a0 h;; f)).
+  rewrite (precategory_fun_comp _ _ (F)).
+  apply idpath.
+  rewrite HH4.
+
+  rewrite (precategory_fun_comp _ _ F).
+  apply idpath.
+  
+  
+  set (Ybla := tpair _ (idtoiso (phi a0) ;; # (pr1 F) f ;; inv_from_iso (idtoiso (phi a0')))
+                    PSIf : Y _ _ (#(pr1 H) f)).
+  
+  set (Ycontr := pr2 (Y_iscontr _ _ (#(pr1 H) f)) Ybla).
+  set (Ycontr2 := base_paths _ _ Ycontr); simpl in *.
+  
+  change (G (#H f)) with (G (#(pr1 H) f)).
+  rewrite <- Ycontr2.
+  repeat rewrite precategory_assoc.
+  rewrite iso_after_iso_inv. rewrite precategory_id_left.
+  repeat rewrite <- precategory_assoc.
+  rewrite iso_after_iso_inv. rewrite precategory_id_right.
+  apply idpath.
+Qed.
+  
+(*  
+  apply iso_inv_on_right.
+  
+  
+  rewrite precategory_assoc.
+  
+  set (isContr := pr2 (
+
+  
+  set (HH5 := maponpaths 
+
+  rewrite 
+  
+  
+  simpl in F. simpl.
+  change (#(pr1 F) f) with (# F f).
+  set (HHH := (precategory_fun_comp _ _ F  _ _ _ 
+                  (fully_faithful_inv_hom A B H Hff a a0 h) f)).
+  simpl in *.
+  rewrite <- HHH.
+  
+  rewrite Xkphi_idtoiso.
   set (Xa0 := XtripleF a0).
   set (Xca0 := pr2 (lemma64_claim1 (pr1 H a0)) Xa0).
   set (Xea0 := base_paths _ _ Xca0).
@@ -1796,7 +1868,7 @@ Proof.
   
   
   rewrite precategory_fun_id; apply idpath.
-  
+ *) 
   
 
   
