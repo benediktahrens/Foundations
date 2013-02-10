@@ -1522,7 +1522,8 @@ Definition weq_hom_in_subcat_from_hom_in_precat (C : precategory)
   tpair _ _ (isweq_hom_in_subcat_from_hom_in_precat C C' a b).
 
 
-Lemma trivial (C D : precategory) (F : precategory_fun C D) (a : precategory_objects C):
+Lemma image_is_in_image (C D : precategory) (F : precategory_fun C D) 
+     (a : precategory_objects C):
     is_in_img_precategory_fun F (F a).
 Proof.
   apply hinhpr.
@@ -1544,9 +1545,9 @@ Proof.
       exists (F a).
         simpl. apply hinhpr. exists a. apply idpath. *)
   set (Fa := tpair (fun a : precategory_objects D => is_in_img_precategory_fun F a) 
-        (F a) (trivial _ _ F a)).
+        (F a) (image_is_in_image _ _ F a)).
   set (Fb := tpair (fun a : precategory_objects D => is_in_img_precategory_fun F a) 
-        (F b) (trivial _ _ F b)).
+        (F b) (image_is_in_image _ _ F b)).
   set (H3 := (H'' Fa Fb)).
   assert (H2 : precategory_ob_mor_fun_morphisms (precategory_fun_full_img F) (a:=a) (b:=b) == 
                   funcomp (precategory_ob_mor_fun_morphisms F (a:=a) (b:=b))
