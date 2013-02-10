@@ -15,6 +15,10 @@ Contents :  Definition of adjunction
 	
 	    Equivalence of categories yields weak equivalence
             of object types
+            
+            A fully faithful and ess. surjective functor induces
+            equivalence of precategories, if the source category 
+            is saturated. 
            
 ************************************************************)
 
@@ -260,7 +264,7 @@ Qed.
 (** * From full faithfullness and ess surj to equivalence *)
 
 (** A fully faithful and ess. surjective functor induces an 
-   equivalence of precategories, is the source category is 
+   equivalence of precategories, if the source category is 
     saturated. 
 *)
 
