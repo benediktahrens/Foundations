@@ -1,3 +1,24 @@
+
+(************************************************************
+
+Benedikt Ahrens and Chris Kapulkin
+january 2013
+
+
+************************************************************)
+
+
+(************************************************************
+
+Contents : Definition of the Yoneda functor 
+           [yoneda(C) : [C, [C^op, HSET]]]
+	
+           Proof that [yoneda(C)] is fully faithful  
+           
+************************************************************)
+
+
+
 Add Rec LoadPath "../Generalities".
 Add Rec LoadPath "../hlevel1".
 Add Rec LoadPath "../hlevel2".

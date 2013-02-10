@@ -10,7 +10,9 @@ have in Coq:
 
 2. If D is saturated, then so is Fun(C, D).
 
-proved by M. Shulman in 10.2.5
+have in Coq:
+  precategories.v  
+	is_saturated_functor_category
 
 3. As a corollary: Fun(C^op, h-Set) is a saturated category.
 
@@ -19,7 +21,9 @@ have when have 2
 4. Define the Yoneda embedding y: C ---> Fun(C^op, h-Set) by y(c) =
 Hom(-, c) and prove that it is full and faithful.
 
-proved by M. Shulman
+have in Coq:
+  yoneda.v
+	yoneda_fully_faithful
 
 5. A full subcategory of a saturated category is again saturated.
 
@@ -53,64 +57,10 @@ but do we need this equality?
 10. If F : C ---> D is an equivalence of precategories, then the following
 type is inhabited: Id(C, D).
 
-Shulman
 
-11. Combining 9. and 10. we get an inhabitant of Id(C, S(C)).I fill in what is to be found where:
-
-Shulman
-
-=====
-
-1. h-Set is a saturated category.
-
-have in Coq
-
-2. If D is saturated, then so is Fun(C, D).
-
-proved by M. Shulman
-
-3. As a corollary: Fun(C^op, h-Set) is a saturated category.
-
-have when have 2
-
-4. Define the Yoneda embedding y: C ---> Fun(C^op, h-Set) by y(c) =
-Hom(-, c) and prove that it is full and faithful.
-
-proved by M. Shulman
-
-5. A full subcategory of a saturated category is again saturated.
-
-have in Coq
-
-6. Define a predicate on objects of Fun(C^op, h-Set): is_representable(F)
-:= isinhab(exists c : ob(C), Iso(y(c), F)).
-
-all necessary defs already in Coq
-
-7. Define a full subcategory S(C) of Fun(C^op, h-Set) given by the
-predicate is_representable.
-
-all necessary defs already in Coq
-
-8. By 5. we get that S(C) is saturated.
-
-nothing to do
-
-9. We have the induced map Y : C ---> S(C). This map is full and faithful
-by the Yoneda Lemma and it is essentially surjective by construction.
-
-have in Coq the induced map;
-what is missing is that
-INCL o Y = y
-(need eta reduction for that)
-but do we need this equality?
-
-10. If F : C ---> D is an equivalence of precategories, then the following
-type is inhabited: Id(C, D).
-
-M. Shulman
 
 11. Combining 9. and 10. we get an inhabitant of Id(C, S(C)).
 
-nth to do
+
+
 
