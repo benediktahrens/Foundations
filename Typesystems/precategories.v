@@ -20,61 +20,7 @@ Contents :  Definition of
                     stability under composition
                 
                 Categories have groupoid as objects
-                
-                Subcategories, Full subcats
-                
-
-		Functors
-                  preserve isos, inverses
-                                    
-                  fully faithful functors
-                    preserve isos, inverses, composition 
-                            backwards
-                    
-                  essentially surjective
-                  faithful
-                  full
-                  fully faithful == full and faithful
-                  
-                  Image of a functor, full subcat specified
-                                       by a functor
-                  
-                  Subcategories, back to
-                    Inclusion functor
-                    Full image of a functor
-                    Factorization of a functor via its
-                       full image
-                    This factorization is fully faithful
-                       if the functor is
-                       [precategory_fun_full_img_fully_faithful_if_fun_is]
-                                           
-                    Isos in full subcategory are equiv
-                      to isos in the precategory
-
-                    Full subcategory of a category is 
-                      a category
-                      [is_saturated_full_subcat]
-                      
-                      
-		Natural transformations
-                  Equality is pointwise equality.
-                  
-                  
-		Functor (pre)category			
-                  Isomorphisms in functor category are pointwise
-                         isomorphisms
-                         
-                Isomorphic Functors are equal
-                   if target precategory is saturated
-                   [functor_eq_from_functor_iso]
-                  
-                Functor precategory is saturated if
-                   target precategory is
-                   [is_saturated_functor_category]
-		
-		
-	
-	   
+                	
            
 ************************************************************)
 

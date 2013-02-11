@@ -9,20 +9,7 @@ january 2013
 
 (************************************************************
 
-Contents :  Definition of 
-		Precategories, 
-	        Categories (saturated precategories)         	
-                Setcategories
-                
-                Isomorphisms
-                  various lemmas:
-                    uniqueness of inverse, composition etc.
-                    stability under composition
-                
-                Categories have groupoid as objects
-                
-                Subcategories, Full subcats
-                
+Contents :  
 
 		Functors
                   preserve isos, inverses
@@ -38,22 +25,7 @@ Contents :  Definition of
                   
                   Image of a functor, full subcat specified
                                        by a functor
-                  
-                  Subcategories, back to
-                    Inclusion functor
-                    Full image of a functor
-                    Factorization of a functor via its
-                       full image
-                    This factorization is fully faithful
-                       if the functor is
-                       [precategory_fun_full_img_fully_faithful_if_fun_is]
-                                           
-                    Isos in full subcategory are equiv
-                      to isos in the precategory
-
-                    Full subcategory of a category is 
-                      a category
-                      [is_saturated_full_subcat]
+                 
                       
                       
 		Natural transformations
