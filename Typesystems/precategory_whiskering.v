@@ -135,38 +135,7 @@ Proof.
 Defined.
 
 
-(** ** Prewhiskering with an essentially surjective functor is faithful. *)
 
-Lemma pre_whisker_with_ess_surj_is_faithful (A B C : precategory) 
-      (H : precategory_objects [A, B]) (p : essentially_surjective H) : 
-           faithful (pre_whisker_functor A B C H).
-Proof.
-  intros F G gamma delta ex.
-  simpl in *.
-  apply precategory_fun_fun_eq.
-  intro b.
-
-  assert (Heq : isaprop (gamma b == delta b)). 
-    apply (F b --> G b).
-
-  set (pb := p b (tpair (fun x => isaprop x) (gamma b == delta b) Heq)).
-  
-  apply pb. simpl in *.
-  clear pb. clear Heq.
-  intro af.
-  destruct af as [a f].
-  set (P := pre_comp_with_iso_is_inj C (pr1 F (pr1 H a)) (pr1 F b) (pr1 G b) (# F f)
-         (precategory_fun_on_iso_is_iso _ _ _ _ _ f)).
-  apply P.
-  rewrite precategory_fun_fun_ax.
-  set (EX := precategory_fun_fun_eq_pointwise _ _ _ _ _ _ ex a).
-  simpl in EX.
-  rewrite precategory_fun_fun_ax.
-  change (gamma (H a)) with (pr1 gamma ((pr1 H) a)).
-  rewrite EX.
-  apply idpath.
-Qed.
-  
   
 
 
