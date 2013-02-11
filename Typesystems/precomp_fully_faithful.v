@@ -36,7 +36,7 @@ Require Import AXIOM_dep_funext.
 
 Require Import precategories.
 Require Import functors_transformations.
-Require Import precategory_whiskering.
+Require Import whiskering.
 
 Notation "a == b" := (paths a b) (at level 70, no associativity).
 Notation "! p " := (pathsinv0 p) (at level 50).

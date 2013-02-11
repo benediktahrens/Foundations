@@ -34,7 +34,7 @@ Require Import hSet.
 Require Import AXIOM_dep_funext.
 
 Require Import precategories.
-Require Import precategory_of_hsets.
+Require Import category_hset.
 Require Import functors_transformations.
 
 Notation "a == b" := (paths a b) (at level 70, no associativity).

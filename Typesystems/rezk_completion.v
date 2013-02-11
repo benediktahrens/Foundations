@@ -29,11 +29,11 @@ Require Import AXIOM_dep_funext.
 
 Require Import precategories.
 Require Import functors_transformations.
-Require Import precategory_of_hsets.
+Require Import category_hset.
 Require Import yoneda.
 Require Import sub_precategories.
-Require Import precategory_equivalences.
-Require Import precategory_whiskering.
+Require Import equivalences.
+Require Import whiskering.
 Require Import precomp_fully_faithful.
 Require Import precomp_ess_surj.
 
