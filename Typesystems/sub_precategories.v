@@ -30,7 +30,7 @@ Contents :
 
                     Full subcategory of a category is 
                       a category
-                      [is_saturated_full_subcat]
+                      [is_category_full_subcat]
                       
                       	   
            
@@ -351,7 +351,7 @@ Definition precategory_fun_full_img {C D: precategory}
 
 (** *** Small exercise: Morphisms in the full subcategory are equivalent to 
         morphisms in the precategory *)
-(** does of course not need the saturation hypothesis *)
+(** does of course not need the category hypothesis *)
 
 Definition hom_in_subcat_from_hom_in_precat (C : precategory) 
  (C' : hsubtypes (precategory_objects C))
@@ -507,13 +507,13 @@ Proof.
 *)
 
 
-(** ** Any full subcategory of a saturated category is saturated. *)
+(** ** Any full subprecategory of a category is a category. *)
 
 
-Section full_sub_sat.
+Section full_sub_cat.
 
 Variable C : precategory.
-Hypothesis H : is_saturated C.
+Hypothesis H : is_category C.
 
 Variable C' : hsubtypes (precategory_objects C).
 
@@ -657,14 +657,14 @@ Qed.
 
 (** ** Proof of the targeted theorem: full subcats of cats are cats *)
 
-Lemma is_saturated_full_subcat: is_saturated (full_sub_precategory C').
+Lemma is_category_full_subcat: is_category (full_sub_precategory C').
 Proof.
-  unfold is_saturated.
+  unfold is_category.
   apply isweq_sub_precat_paths_to_iso.
 Qed.
 
 
-End full_sub_sat.
+End full_sub_cat.
 
 
 Lemma precategory_fun_full_img_essentially_surjective (A B : precategory)

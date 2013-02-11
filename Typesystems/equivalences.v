@@ -17,8 +17,8 @@ Contents :  Definition of adjunction
             of object types
             
             A fully faithful and ess. surjective functor induces
-            equivalence of precategories, if the source category 
-            is saturated. 
+            equivalence of precategories, if the source 
+            is a category. 
            
 ************************************************************)
 
@@ -143,18 +143,18 @@ Defined.
 
 
 (** * Equivalence of categories yields equivalence of object types *)
-(**  Fundamentally needed that both source and target are saturated *)
+(**  Fundamentally needed that both source and target are categories *)
 
 Lemma equiv_of_cats_is_weq_of_objects (A B : precategory)
-   (HA : is_saturated A) (HB : is_saturated B) (F : precategory_objects [A, B])
+   (HA : is_category A) (HB : is_category B) (F : precategory_objects [A, B])
    (HF : equivalence_of_precats A B F) : 
      isweq (pr1 (pr1 F)).
 Proof.
   set (G := right_adjoint _ _ _ (pr1 HF)).
   set (et := eta_iso_from_equivalence_of_precats _ _ _ HF).
   set (ep := eps_iso_from_equivalence_of_precats _ _ _ HF).
-  set (AAsat := is_saturated_functor_category A _ HA).
-  set (BBsat := is_saturated_functor_category B _ HB).
+  set (AAsat := is_category_functor_category A _ HA).
+  set (BBsat := is_category_functor_category B _ HB).
   set (Et := isotoid _ AAsat et).
   set (Ep := isotoid _ BBsat ep).
   apply (gradth _ (fun b => pr1 (right_adjoint A B F (pr1 HF)) b)).
@@ -168,7 +168,7 @@ Proof.
 Qed.
 
 Definition weq_on_objects_from_equiv_of_cats (A B : precategory)
-   (HA : is_saturated A) (HB : is_saturated B) (F : precategory_objects [A, B])
+   (HA : is_category A) (HB : is_category B) (F : precategory_objects [A, B])
    (HF : equivalence_of_precats A B F) : weq 
           (precategory_objects A) (precategory_objects B).
 Proof.
@@ -181,7 +181,7 @@ Defined.
      is a proposition *)
 
 
-Lemma isaprop_sigma_iso (A B : precategory) (HA : is_saturated A)
+Lemma isaprop_sigma_iso (A B : precategory) (HA : is_category A)
      (F : precategory_objects [A, B]) (HF : fully_faithful F) :
       forall b : precategory_objects B,
   isaprop (total2 (fun a : precategory_objects A => iso_precat (pr1 F a) b)).
@@ -251,7 +251,7 @@ Proof.
 Qed.
 
 
-Lemma isaprop_pi_sigma_iso (A B : precategory) (HA : is_saturated A)
+Lemma isaprop_pi_sigma_iso (A B : precategory) (HA : is_category A)
      (F : precategory_objects [A, B]) (HF : fully_faithful F) :
   isaprop (forall b : precategory_objects B, 
              total2 (fun a : precategory_objects A => iso_precat (pr1 F a) b)).
@@ -265,14 +265,14 @@ Qed.
 (** * From full faithfullness and ess surj to equivalence *)
 
 (** A fully faithful and ess. surjective functor induces an 
-   equivalence of precategories, if the source category is 
-    saturated. 
+   equivalence of precategories, if the source is a
+    category. 
 *)
 
 Section from_fully_faithful_and_ess_surj_to_equivalence.
 
 Variables A B : precategory.
-Hypothesis HA : is_saturated A.
+Hypothesis HA : is_category A.
 Variable F : precategory_objects [A, B].
 Hypothesis HF : fully_faithful F.
 Hypothesis HS : essentially_surjective F.

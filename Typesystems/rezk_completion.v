@@ -47,12 +47,12 @@ Section rezk.
 
 Variable A : precategory.
 
-Definition Rezk_completion : sat_precat.
+Definition Rezk_completion : category.
 Proof.
   exists (full_img_sub_precategory (yoneda A)).
-  apply is_saturated_full_subcat.
-  apply is_saturated_functor_category.
-  apply is_saturated_HSET.
+  apply is_category_full_subcat.
+  apply is_category_functor_category.
+  apply is_category_HSET.
 Defined.
 
 Definition Rezk_eta : precategory_fun A Rezk_completion.
@@ -77,7 +77,7 @@ End rezk.
 Section rezk_universal_property.
 
 Variables A C : precategory.
-Hypothesis Csat : is_saturated C.
+Hypothesis Ccat : is_category C.
 
 Lemma pre_comp_rezk_eta_is_fully_faithful :
     fully_faithful (pre_whisker_functor A (Rezk_completion A) C (Rezk_eta A)).
@@ -100,13 +100,13 @@ Theorem Rezk_eta_Universal_Property :
   isweq (pre_whisker_functor A (Rezk_completion A) C (Rezk_eta A)).
 Proof.
   apply equiv_of_cats_is_weq_of_objects.
-  apply is_saturated_functor_category; 
+  apply is_category_functor_category; 
   assumption.
-  apply is_saturated_functor_category; 
+  apply is_category_functor_category; 
   assumption.
   
   apply rad_equivalence_of_precats.
-  apply is_saturated_functor_category; 
+  apply is_category_functor_category; 
   assumption.
   apply pre_comp_rezk_eta_is_fully_faithful.
   apply pre_comp_rezk_eta_is_ess_surj.

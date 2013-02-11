@@ -11,7 +11,7 @@ january 2013
 
 Contents :  Definition of 
 		Precategories, 
-	        Categories (saturated precategories)         	
+	        Categories (aka saturated precategories)         	
                 Setcategories
                 
                 Isomorphisms
@@ -462,10 +462,10 @@ Defined.
       
 Notation idtoiso := (precat_paths_to_iso _ _ ).
 
-Definition is_saturated (C : precategory) := forall (a b : precategory_objects C),
+Definition is_category (C : precategory) := forall (a b : precategory_objects C),
     isweq (precat_paths_to_iso a b).
 
-Lemma isaprop_is_saturated (C : precategory) : isaprop (is_saturated C).
+Lemma isaprop_is_category (C : precategory) : isaprop (is_category C).
 Proof.
   apply impred.
   intro a.
@@ -474,12 +474,12 @@ Proof.
   apply isapropisweq.
 Qed.
 
-Definition sat_precat := total2 (fun C : precategory => is_saturated C).
+Definition category := total2 (fun C : precategory => is_category C).
 
-Definition precat_from_sat_precat (C : sat_precat) : precategory := pr1 C.
-Coercion precat_from_sat_precat : sat_precat >-> precategory.
+Definition precat_from_cat (C : category) : precategory := pr1 C.
+Coercion precat_from_cat : category >-> precategory.
 
-Lemma satcat_has_groupoid_ob (C : sat_precat) : 
+Lemma category_has_groupoid_ob (C : category) : 
   isofhlevel 3 (precategory_objects C).
 Proof.
   apply isofhlevelonestep.
@@ -488,10 +488,10 @@ Proof.
   apply isaset_iso_precat.
 Qed.
   
-Definition isotoid (C : precategory) (H : is_saturated C) {a b : precategory_objects C}:
+Definition isotoid (C : precategory) (H : is_category C) {a b : precategory_objects C}:
       iso_precat a b -> a == b := invmap (weqpair _ (H a b)).
 
-Lemma idtoiso_isotoid (C : precategory) (H : is_saturated C) (a b : precategory_objects C)
+Lemma idtoiso_isotoid (C : precategory) (H : is_category C) (a b : precategory_objects C)
     (f : iso_precat a b) : idtoiso (isotoid _ H f) == f.
 Proof.
   unfold isotoid.
@@ -501,7 +501,7 @@ Proof.
   apply idpath.
 Qed.
 
-Lemma isotoid_idtoiso (C : precategory) (H : is_saturated C) (a b : precategory_objects C)
+Lemma isotoid_idtoiso (C : precategory) (H : is_category C) (a b : precategory_objects C)
     (p : a == b) : isotoid _ H (idtoiso p) == p.
 Proof.
   unfold isotoid.
@@ -597,7 +597,7 @@ Proof.
 Qed.
 
 
-Lemma idtoiso_inj (C : precategory) (H : is_saturated C) (a a' : precategory_objects C)
+Lemma idtoiso_inj (C : precategory) (H : is_category C) (a a' : precategory_objects C)
    (p p' : a == a') : idtoiso p == idtoiso p' -> p == p'.
 Proof.
   intro H'.
@@ -606,7 +606,7 @@ Proof.
   assumption.
 Qed.
 
-Lemma isotoid_inj (C : precategory) (H : is_saturated C) (a a' : precategory_objects C)
+Lemma isotoid_inj (C : precategory) (H : is_category C) (a a' : precategory_objects C)
    (f f' : iso_precat a a') : isotoid _ H f == isotoid _ H f' -> f == f'.
 Proof.
   intro H'.
@@ -616,7 +616,7 @@ Proof.
 Qed.
 
 
-Lemma isotoid_comp (C : precategory) (H : is_saturated C) (a b c : precategory_objects C)
+Lemma isotoid_comp (C : precategory) (H : is_category C) (a b c : precategory_objects C)
   (e : iso_precat a b) (f : iso_precat b c) :
   isotoid _ H (iso_comp e f) == isotoid _ H e @ isotoid _ H f.
 Proof.

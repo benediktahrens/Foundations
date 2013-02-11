@@ -54,7 +54,7 @@ Section lemma64.
 (** ** Section variables *)
 
 Variables A B C : precategory.
-Hypothesis Csat : is_saturated C.
+Hypothesis Ccat : is_category C.
 Variable H : precategory_objects [A, B].
 Hypothesis p : essentially_surjective H.
 Hypothesis Hff : fully_faithful H.
@@ -152,7 +152,7 @@ Proof.
   intro t.
   simpl in X.
   assert (Hpr1 : pr1 (center_of_contr b anot hnot) == pr1 t).
-  set (w := isotoid _ Csat ((pr2 (pr1 t)) anot hnot) : 
+  set (w := isotoid _ Ccat ((pr2 (pr1 t)) anot hnot) : 
           pr1 (pr1 (center_of_contr b anot hnot)) == pr1 (pr1 t)).
   
   apply (total2_paths w).

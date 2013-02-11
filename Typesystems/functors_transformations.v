@@ -37,12 +37,12 @@ Contents :
                          isomorphisms
                          
                 Isomorphic Functors are equal
-                   if target precategory is saturated
+                   if target precategory is category
                    [functor_eq_from_functor_iso]
                   
-                Functor precategory is saturated if
+                Functor precategory is category if
                    target precategory is
-                   [is_saturated_functor_category]
+                   [is_category_functor_category]
 		
 		
 	
@@ -907,7 +907,7 @@ Lemma precategory_fun_iso_pointwise_if_iso_on_idtoiso (C C' : precategory)
   *)  
 
 Definition pr1_pr1_functor_eq_from_functor_iso (C D : precategory)
-    (H : is_saturated D) (F G : precategory_objects [C , D]) :
+    (H : is_category D) (F G : precategory_objects [C , D]) :
    iso_precat F G -> pr1 (pr1 F) == pr1 (pr1 G).
 Proof.
   intro A.
@@ -952,7 +952,7 @@ Qed.
 
 
 Definition pr1_functor_eq_from_functor_iso (C D : precategory)
-    (H : is_saturated D) (F G : precategory_objects [C , D]) :
+    (H : is_category D) (F G : precategory_objects [C , D]) :
    iso_precat F G -> pr1 F == pr1 G.
 Proof.
   intro A.
@@ -1009,7 +1009,7 @@ Proof.
 Defined.
 
 Definition functor_eq_from_functor_iso {C D : precategory}
-    (H : is_saturated D) (F G : precategory_objects [C , D]) 
+    (H : is_category D) (F G : precategory_objects [C , D]) 
     (H' : iso_precat F G) : F == G.
 Proof.
   apply (precategory_fun_eq _ _ F G).
@@ -1032,7 +1032,7 @@ Qed.
 
 
 Lemma functor_eq_from_functor_iso_idtoiso (C D : precategory)
-    (H : is_saturated D)
+    (H : is_category D)
     (F G : precategory_objects [C, D]) (p : F == G) :
   functor_eq_from_functor_iso H F G (idtoiso p) == p.
 Proof.
@@ -1060,7 +1060,7 @@ Proof.
 Qed.
 
 Lemma idtoiso_functor_eq_from_functor_iso (C D : precategory)
-    (H : is_saturated D)
+    (H : is_category D)
     (F G : precategory_objects [C, D]) (gamma : iso_precat F G) :
         idtoiso  (functor_eq_from_functor_iso H F G gamma) == gamma.
 Proof.
@@ -1096,7 +1096,7 @@ Proof.
   apply idpath.
 Qed.
 
-Lemma isweq_idtoiso_functorcat (C D : precategory) (H : is_saturated D) 
+Lemma isweq_idtoiso_functorcat (C D : precategory) (H : is_category D) 
     (F G : precategory_objects [C, D]) :
    isweq (precat_paths_to_iso F G).
 Proof.
@@ -1105,8 +1105,8 @@ Proof.
   apply idtoiso_functor_eq_from_functor_iso.
 Qed.
 
-Lemma is_saturated_functor_category (C D : precategory) (H : is_saturated D) :
-   is_saturated [C, D].
+Lemma is_category_functor_category (C D : precategory) (H : is_category D) :
+   is_category [C, D].
 Proof.
   intros F G.
   apply isweq_idtoiso_functorcat.

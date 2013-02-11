@@ -245,9 +245,9 @@ Proof.
   apply (hset_id_iso_weq A B).
 Qed.
 
-Lemma is_saturated_HSET : is_saturated HSET.
+Lemma is_category_HSET : is_category HSET.
 Proof.
-  unfold is_saturated.
+  unfold is_category.
   apply is_weq_precat_paths_to_iso_hset.
 Qed.
 
