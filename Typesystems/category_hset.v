@@ -20,7 +20,7 @@ Local Notation "a --> b" := (precategory_morphisms a b)(at level 50).
 
 
 
-(** * Preategory of hSets *)
+(** * Precategory of hSets *)
 
 Lemma isaset_set_fun_space (A B : hSet) : isaset (A -> B).
 Proof.
@@ -62,7 +62,7 @@ Notation HSET := hset_precategory.
 *)
 
 
-(** * The precategory of hSets is saturated. *)
+(** * The precategory of hSets is a category. *)
 
 (** ** Equivalence between isomorphisms and weak equivalences 
        of two hsets. 
@@ -72,8 +72,8 @@ Notation HSET := hset_precategory.
    This is basically unpacking and packing again.
 *)
 
-Lemma hset_iso_is_equiv (A B : precategory_objects HSET) 
-   (f : iso_precat A B) : isweq (pr1 f).
+Lemma hset_iso_is_equiv (A B : ob HSET) 
+   (f : iso A B) : isweq (pr1 f).
 Proof.
   destruct f as [f fax]; simpl in *.
   apply (gradth _ (pr1 fax)).
@@ -90,8 +90,7 @@ Proof.
 Qed.
   
 
-Lemma hset_iso_equiv (A B : precategory_objects HSET) :
-  iso_precat A B -> weq (pr1 A) (pr1 B).
+Lemma hset_iso_equiv (A B : ob HSET) : iso A B -> weq (pr1 A) (pr1 B).
 Proof.
   intro f.
   exists (pr1 f).
@@ -119,8 +118,7 @@ Proof.
   apply H.
 Qed.
 
-Lemma hset_equiv_iso (A B : precategory_objects HSET) :
-    weq (pr1 A) (pr1 B) -> iso_precat A B.
+Lemma hset_equiv_iso (A B : ob HSET) : weq (pr1 A) (pr1 B) -> iso A B.
 Proof.
   intro f.
   simpl in *.
@@ -137,8 +135,7 @@ Defined.
       from equivalences to isos.
 *)
 
-Lemma hset_iso_equiv_is_equiv (A B : precategory_objects HSET) :
-      isweq (hset_iso_equiv A B).
+Lemma hset_iso_equiv_is_equiv (A B : ob HSET) : isweq (hset_iso_equiv A B).
 Proof.
   apply (gradth _ (hset_equiv_iso A B)).
   intro f.
@@ -159,15 +156,13 @@ Proof.
   apply isapropisweq.
 Qed.
 
-Definition hset_iso_equiv_weq (A B : precategory_objects HSET) :
-  weq (iso_precat A B) (weq (pr1 A) (pr1 B)).
+Definition hset_iso_equiv_weq (A B : ob HSET) : weq (iso A B) (weq (pr1 A) (pr1 B)).
 Proof.
   exists (hset_iso_equiv A B).
   apply hset_iso_equiv_is_equiv.
 Defined.
 
-Lemma hset_equiv_iso_is_equiv (A B : precategory_objects HSET) :
-      isweq (hset_equiv_iso A B).
+Lemma hset_equiv_iso_is_equiv (A B : ob HSET) : isweq (hset_equiv_iso A B).
 Proof.
   apply (gradth _ (hset_iso_equiv A B)).
   intro f.
@@ -188,20 +183,20 @@ Proof.
   apply isaprop_is_precat_isomorphism.
 Qed.
 
-Definition hset_equiv_iso_weq (A B : precategory_objects HSET) :
-  weq (weq (pr1 A) (pr1 B))(iso_precat A B).
+Definition hset_equiv_iso_weq (A B : ob HSET) :
+  weq (weq (pr1 A) (pr1 B))(iso A B).
 Proof.
   exists (hset_equiv_iso A B).
   apply hset_equiv_iso_is_equiv.
 Defined.
   
-(** ** HSET is saturated. *)
+(** ** HSET is a category. *)
 
 Definition univalenceweq (X X' : UU) : weq (X == X') (weq X X') :=
    tpair _ _ (univalenceaxiom X X').
 
-Definition hset_id_iso_weq (A B : precategory_objects HSET) :
-  weq (A == B) (iso_precat A B) :=
+Definition hset_id_iso_weq (A B : ob HSET) :
+  weq (A == B) (iso A B) :=
   weqcomp (UA_for_hSets A B) (hset_equiv_iso_weq A B).
 
 
@@ -213,14 +208,14 @@ Definition hset_id_iso_weq (A B : precategory_objects HSET) :
     is an equivalence.
 *)
 
-Lemma hset_id_iso_weq_is (A B : precategory_objects HSET):
+Lemma hset_id_iso_weq_is (A B : ob HSET):
     precat_paths_to_iso A B == pr1 (hset_id_iso_weq A B).
 Proof.
   apply funextfunax.
   intro p.
   elim p.
   simpl.
-  assert (H : pr1 (identity_iso_precat A) ==
+  assert (H : pr1 (identity_iso A) ==
               pr1 (hset_equiv_iso A A (pr1 (UA_for_hSets A A) (idpath A)))).
   
              simpl.
@@ -238,7 +233,7 @@ Proof.
 Defined.
 
 
-Lemma is_weq_precat_paths_to_iso_hset (A B : precategory_objects HSET):
+Lemma is_weq_precat_paths_to_iso_hset (A B : ob HSET):
    isweq (precat_paths_to_iso A B).
 Proof.
   rewrite hset_id_iso_weq_is.

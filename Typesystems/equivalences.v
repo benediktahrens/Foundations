@@ -1,4 +1,4 @@
-(************************************************************
+(** **********************************************************
 
 Benedikt Ahrens and Chris Kapulkin
 january 2013
@@ -52,8 +52,8 @@ Local Notation "f ;; g" := (precategory_compose f g)(at level 50).
 Notation "[ C , D ]" := (precategory_fun_precategory C D).
 Local Notation "# F" := (precategory_ob_mor_fun_morphisms F)(at level 3).
 
-Definition functor_composite (A B C : precategory) (F : precategory_objects [A, B])
-      (G : precategory_objects [B , C]) : precategory_objects [A , C] := 
+Definition functor_composite (A B C : precategory) (F : ob [A, B])
+      (G : ob [B , C]) : ob [A , C] := 
    precategory_fun_composite _ _ _ F G.
 
 Notation "G 'O' F" := (functor_composite _ _ _ F G) (at level 25).
@@ -61,50 +61,50 @@ Notation "G 'O' F" := (functor_composite _ _ _ F G) (at level 25).
 (** * Adjunction *)
 
 
-Definition form_adjunction (A B : precategory) (F : precategory_objects [A, B])
-       (G : precategory_objects [B, A]) 
+Definition form_adjunction (A B : precategory) (F : ob [A, B])
+       (G : ob [B, A]) 
        (eta : precategory_fun_fun (precategory_fun_identity A) (pr1 (G O F)))  
        (eps : precategory_fun_fun (pr1 (F O G)) (precategory_fun_identity B)) : UU :=
 dirprod 
-  (forall a : precategory_objects A,
+  (forall a : ob A,
        # (pr1 F) (pr1 eta a) ;;   pr1 eps (pr1 F a) == precategory_identity (pr1 F a))
-  (forall b : precategory_objects B,
+  (forall b : ob B,
        pr1 eta (pr1 G b) ;; # (pr1 G) (pr1 eps b) == precategory_identity (pr1 G b)).
 
-Definition are_adjoints (A B : precategory) (F : precategory_objects [A, B])
-    (G : precategory_objects [B, A]) : UU :=
+Definition are_adjoints (A B : precategory) (F : ob [A, B])
+    (G : ob [B, A]) : UU :=
   total2 (fun etaeps : dirprod 
             (precategory_fun_fun (precategory_fun_identity A) (pr1 (G O F)))
             (precategory_fun_fun (pr1 (F O G)) (precategory_fun_identity B)) =>
       form_adjunction A B F G (pr1 etaeps) (pr2 etaeps)).
 
-Definition is_left_adjoint (A B : precategory) (F : precategory_objects [A, B]) : UU :=
-   total2 (fun G : precategory_objects [B, A] => are_adjoints A B F G).
+Definition is_left_adjoint (A B : precategory) (F : ob [A, B]) : UU :=
+   total2 (fun G : ob [B, A] => are_adjoints A B F G).
 
-Definition right_adjoint (A B : precategory) (F : precategory_objects [A, B]) 
-      (H : is_left_adjoint _ _ F) : precategory_objects [B, A] := pr1 H.
+Definition right_adjoint (A B : precategory) (F : ob [A, B]) 
+      (H : is_left_adjoint _ _ F) : ob [B, A] := pr1 H.
 
-Definition eta_from_left_adjoint (A B : precategory) (F : precategory_objects [A, B]) 
+Definition eta_from_left_adjoint (A B : precategory) (F : ob [A, B]) 
       (H : is_left_adjoint _ _ F) : 
   precategory_fun_fun (precategory_fun_identity A) (pr1 (pr1 H O F)) := pr1 (pr1 (pr2 H)).
 
 
-Definition eps_from_left_adjoint (A B : precategory) (F : precategory_objects [A, B]) 
+Definition eps_from_left_adjoint (A B : precategory) (F : ob [A, B]) 
       (H : is_left_adjoint _ _ F)  : 
  precategory_fun_fun (pr1 (F O pr1 H)) (precategory_fun_identity B)
    := pr2 (pr1 (pr2 H)).
 
 
-Definition triangle_id_left_ad (A B : precategory) (F : precategory_objects [A, B]) 
+Definition triangle_id_left_ad (A B : precategory) (F : ob [A, B]) 
       (H : is_left_adjoint _ _ F) :
-  forall (a : precategory_objects A),
+  forall (a : ob A),
        #(pr1 F) (pr1 (pr1 (pr1 (pr2 H))) a);;
        pr1 (pr2 (pr1 (pr2 H))) ((pr1 F) a) ==
        precategory_identity ((pr1 F) a) := pr1 (pr2 (pr2 H)).
 
-Definition triangle_id_right_ad (A B : precategory) (F : precategory_objects [A, B]) 
+Definition triangle_id_right_ad (A B : precategory) (F : ob [A, B]) 
       (H : is_left_adjoint _ _ F) :
-  forall b : precategory_objects B,
+  forall b : ob B,
         pr1 (pr1 (pr1 (pr2 H))) ((pr1 (pr1 H)) b);;
         #(pr1 (pr1 H)) (pr1 (pr2 (pr1 (pr2 H))) b) ==
         precategory_identity ((pr1 (pr1 H)) b)
@@ -112,7 +112,7 @@ Definition triangle_id_right_ad (A B : precategory) (F : precategory_objects [A,
 
 (** * Equivalence of (pre)categories *)
 
-Definition equivalence_of_precats (A B : precategory)(F : precategory_objects [A, B]) : UU :=
+Definition equivalence_of_precats (A B : precategory)(F : ob [A, B]) : UU :=
    total2 (fun H : is_left_adjoint _ _ F =>
      dirprod (forall a, is_precat_isomorphism 
                     (eta_from_left_adjoint A B F H a))
@@ -122,8 +122,8 @@ Definition equivalence_of_precats (A B : precategory)(F : precategory_objects [A
 
 
 Definition eta_iso_from_equivalence_of_precats (A B : precategory)
-  (F : precategory_objects [A, B]) (HF : equivalence_of_precats _ _ F) : 
-       iso_precat (C:=[A, A]) (precategory_fun_identity A) 
+  (F : ob [A, B]) (HF : equivalence_of_precats _ _ F) : 
+       iso (C:=[A, A]) (precategory_fun_identity A) 
                               (right_adjoint _ _ _ (pr1 HF) O F).
 Proof.
   exists (eta_from_left_adjoint _ _ _ (pr1 HF)).
@@ -132,8 +132,8 @@ Proof.
 Defined.
 
 Definition eps_iso_from_equivalence_of_precats (A B : precategory)
-  (F : precategory_objects [A, B]) (HF : equivalence_of_precats _ _ F) : 
-       iso_precat (C:=[B, B]) (F O right_adjoint _ _ _ (pr1 HF))
+  (F : ob [A, B]) (HF : equivalence_of_precats _ _ F) : 
+       iso (C:=[B, B]) (F O right_adjoint _ _ _ (pr1 HF))
                 (precategory_fun_identity B).
 Proof.
   exists (eps_from_left_adjoint _ _ _ (pr1 HF)).
@@ -146,17 +146,17 @@ Defined.
 (**  Fundamentally needed that both source and target are categories *)
 
 Lemma equiv_of_cats_is_weq_of_objects (A B : precategory)
-   (HA : is_category A) (HB : is_category B) (F : precategory_objects [A, B])
+   (HA : is_category A) (HB : is_category B) (F : ob [A, B])
    (HF : equivalence_of_precats A B F) : 
      isweq (pr1 (pr1 F)).
 Proof.
   set (G := right_adjoint _ _ _ (pr1 HF)).
   set (et := eta_iso_from_equivalence_of_precats _ _ _ HF).
   set (ep := eps_iso_from_equivalence_of_precats _ _ _ HF).
-  set (AAsat := is_category_functor_category A _ HA).
-  set (BBsat := is_category_functor_category B _ HB).
-  set (Et := isotoid _ AAsat et).
-  set (Ep := isotoid _ BBsat ep).
+  set (AAcat := is_category_functor_category A _ HA).
+  set (BBcat := is_category_functor_category B _ HB).
+  set (Et := isotoid _ AAcat et).
+  set (Ep := isotoid _ BBcat ep).
   apply (gradth _ (fun b => pr1 (right_adjoint A B F (pr1 HF)) b)).
   intro a.
   set (ou := toforallpaths _ _ _ (base_paths _ _ (base_paths _ _ Et)) a).
@@ -168,9 +168,9 @@ Proof.
 Qed.
 
 Definition weq_on_objects_from_equiv_of_cats (A B : precategory)
-   (HA : is_category A) (HB : is_category B) (F : precategory_objects [A, B])
+   (HA : is_category A) (HB : is_category B) (F : ob [A, B])
    (HF : equivalence_of_precats A B F) : weq 
-          (precategory_objects A) (precategory_objects B).
+          (ob A) (ob B).
 Proof.
   exists (pr1 (pr1 F)).
   apply equiv_of_cats_is_weq_of_objects; assumption.
@@ -182,9 +182,9 @@ Defined.
 
 
 Lemma isaprop_sigma_iso (A B : precategory) (HA : is_category A)
-     (F : precategory_objects [A, B]) (HF : fully_faithful F) :
-      forall b : precategory_objects B,
-  isaprop (total2 (fun a : precategory_objects A => iso_precat (pr1 F a) b)).
+     (F : ob [A, B]) (HF : fully_faithful F) :
+      forall b : ob B,
+  isaprop (total2 (fun a : ob A => iso (pr1 F a) b)).
 Proof.
   intro b.
   apply invproofirrelevance.
@@ -195,7 +195,7 @@ Proof.
   set (g := iso_from_fully_faithful_reflection _ _ _ HF _ _ fminusf).
   set (p := isotoid _ HA g).
 
-  apply (total2_paths2 (B:=fun a' => iso_precat ((pr1 F) a') b) (isotoid _ HA g)).
+  apply (total2_paths2 (B:=fun a' => iso ((pr1 F) a') b) (isotoid _ HA g)).
   pathvia (iso_comp (iso_inv_from_iso 
     (precategory_fun_on_iso _ _ F _ _ (idtoiso (isotoid _ HA g)))) f).
   generalize (isotoid _ HA g).
@@ -205,7 +205,7 @@ Proof.
   
   rewrite <- precategory_fun_on_iso_inv.
   rewrite iso_inv_of_iso_id.
-  apply eq_iso_precat.
+  apply eq_iso.
   simpl. 
   rewrite transportf_idpath.
   rewrite precategory_fun_id.
@@ -227,7 +227,7 @@ Proof.
   generalize (iso_comp f (iso_inv_from_iso f')).
   intro h.
   set (HH := weq_from_fully_faithful _ _ _ HF a a').
-  apply eq_iso_precat.
+  apply eq_iso.
   simpl.
   set (H3 := homotweqinvweq (weq_from_fully_faithful _ _ _ HF a a')).
   simpl in H3.
@@ -240,7 +240,7 @@ Proof.
   
   rewrite HFg.
   rewrite iso_inv_of_iso_comp.
-  apply eq_iso_precat.
+  apply eq_iso.
   simpl.
   repeat rewrite <- precategory_assoc.
   rewrite iso_after_iso_inv.
@@ -252,9 +252,9 @@ Qed.
 
 
 Lemma isaprop_pi_sigma_iso (A B : precategory) (HA : is_category A)
-     (F : precategory_objects [A, B]) (HF : fully_faithful F) :
-  isaprop (forall b : precategory_objects B, 
-             total2 (fun a : precategory_objects A => iso_precat (pr1 F a) b)).
+     (F : ob [A, B]) (HF : fully_faithful F) :
+  isaprop (forall b : ob B, 
+             total2 (fun a : ob A => iso (pr1 F a) b)).
 Proof.
   apply impred.
   intro b.
@@ -273,13 +273,13 @@ Section from_fully_faithful_and_ess_surj_to_equivalence.
 
 Variables A B : precategory.
 Hypothesis HA : is_category A.
-Variable F : precategory_objects [A, B].
+Variable F : ob [A, B].
 Hypothesis HF : fully_faithful F.
 Hypothesis HS : essentially_surjective F.
 
 (** Definition of a functor which will later be the right adjoint. *)
 
-Definition rad_ob : precategory_objects B -> precategory_objects A.
+Definition rad_ob : ob B -> ob A.
 Proof.
   intro b.
   apply (pr1 (HS b (tpair (fun x => isaprop x) _ 
@@ -288,7 +288,7 @@ Defined.
 
 (** Definition of the epsilon transformation *)
 
-Definition rad_eps (b : precategory_objects B) : iso_precat (pr1 F (rad_ob b)) b.
+Definition rad_eps (b : ob B) : iso (pr1 F (rad_ob b)) b.
 Proof.
   apply (pr2 (HS b (tpair (fun x => isaprop x) _ 
                (isaprop_sigma_iso A B HA F HF b)) (fun x => x))).
@@ -296,7 +296,7 @@ Defined.
 
 (** The right adjoint on morphisms *)
 
-Definition rad_mor (b b' : precategory_objects B) (g : b --> b') : rad_ob b --> rad_ob b'.
+Definition rad_mor (b b' : ob B) (g : b --> b') : rad_ob b --> rad_ob b'.
 Proof.
   
   set (epsgebs' := rad_eps b ;; g ;; iso_inv_from_iso (rad_eps b')).
@@ -306,7 +306,7 @@ Defined.
 
 (** Definition of the eta transformation *)
 
-Definition rad_eta (a : precategory_objects A) : a --> rad_ob (pr1 F a).
+Definition rad_eta (a : ob A) : a --> rad_ob (pr1 F a).
 Proof.
   set (epsFa := inv_from_iso (rad_eps (pr1 F a))).
   exact (fully_faithful_inv_hom  _ _ _ HF _ _ epsFa).
@@ -343,7 +343,7 @@ Proof.
   apply idpath.
 Qed.
 
-Definition rad : precategory_objects [B, A].
+Definition rad : ob [B, A].
 Proof.
   exists rad_precategory_ob_mor_fun.
   apply rad_is_precategory_fun.

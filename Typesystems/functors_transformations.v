@@ -81,17 +81,17 @@ Ltac pathvia b := (apply (@pathscomp0 _ _ b _ )).
 
 
 Definition precategory_ob_mor_fun (C C' : precategory_ob_mor) := total2 (
-    fun F : precategory_objects C -> precategory_objects C' => 
-             forall a b : precategory_objects C, a --> b -> F a --> F b).
+    fun F : ob C -> ob C' => 
+             forall a b : ob C, a --> b -> F a --> F b).
 
 Definition precategory_ob_mor_fun_objects {C C' : precategory_ob_mor}
      (F : precategory_ob_mor_fun C C') : 
-   precategory_objects C -> precategory_objects C' := pr1 F.
+   ob C -> ob C' := pr1 F.
 Coercion precategory_ob_mor_fun_objects : precategory_ob_mor_fun >-> Funclass.
 
 
 Definition precategory_ob_mor_fun_morphisms {C C' : precategory_ob_mor}
-     (F : precategory_ob_mor_fun C C') { a b : precategory_objects C} : 
+     (F : precategory_ob_mor_fun C C') { a b : ob C} : 
        a --> b -> F a --> F b := pr2 F a b.
 
 Local Notation "# F" := (precategory_ob_mor_fun_morphisms F)(at level 3).
@@ -99,9 +99,9 @@ Local Notation "# F" := (precategory_ob_mor_fun_morphisms F)(at level 3).
 
 Definition is_precategory_fun {C C' : precategory_data} 
          (F : precategory_ob_mor_fun C C') :=
-     dirprod (forall a : precategory_objects C, 
+     dirprod (forall a : ob C, 
                  #F (precategory_identity a) == precategory_identity (F a))
-             (forall a b c : precategory_objects C, forall f : a --> b,
+             (forall a b c : ob C, forall f : a --> b,
                  forall g : b --> c, 
                 #F (f ;; g) == #F f ;; #F g).
 
@@ -152,9 +152,9 @@ Proof.
   simpl. 
   apply (@total2_paths2 _ (fun p : pr1 (pr1 F) == pr1 (pr1 G) =>
           transportf
-            (fun x : precategory_objects C -> precategory_objects C' =>
-            (fun x0 : precategory_objects C -> precategory_objects C' => 
-            forall a b : precategory_objects C, a --> b -> x0 a --> x0 b) x)
+            (fun x : ob C -> ob C' =>
+            (fun x0 : ob C -> ob C' => 
+            forall a b : ob C, a --> b -> x0 a --> x0 b) x)
             p (pr2 (pr1 F)) == pr2 (pr1 G)) _ 
    (fiber_path_fibr (base_paths F G p)) _ (fiber_path_fibr (base_paths F G q))  H).
    apply uip.
@@ -193,20 +193,20 @@ Proof.
   
 
 Definition precategory_fun_id (C C' : precategory_data)(F : precategory_fun C C'):
-       forall a : precategory_objects C, 
+       forall a : ob C, 
                  #F (precategory_identity a) == precategory_identity (F a) :=
      pr1 (pr2 F).
 
 Definition precategory_fun_comp (C C' : precategory_data)
       (F : precategory_fun C C'):
-       forall a b c : precategory_objects C, forall f : a --> b,
+       forall a b c : ob C, forall f : a --> b,
                  forall g : b --> c, 
                 #F (f ;; g) == #F f ;; #F g := pr2 (pr2 F).
 
 (** *** Functors preserve isomorphisms *)
 
 Lemma precategory_fun_on_iso_is_iso (C C' : precategory) (F : precategory_fun C C')
-    (a b : precategory_objects C)(f : iso_precat a b) :
+    (a b : ob C)(f : iso a b) :
        is_precat_isomorphism (#F f).
 Proof.
   exists (#F (inv_from_iso f)).
@@ -222,14 +222,14 @@ Qed.
 
 
 Definition precategory_fun_on_iso (C C' : precategory) (F : precategory_fun C C')
-    (a b : precategory_objects C)(f : iso_precat a b) : iso_precat (F a) (F b).
+    (a b : ob C)(f : iso a b) : iso (F a) (F b).
 Proof.
   exists (#F f).
   apply precategory_fun_on_iso_is_iso.
 Defined.
  
 Lemma precategory_fun_on_iso_inv (C C' : precategory) (F : precategory_fun C C')
-    (a b : precategory_objects C) (f : iso_precat a b) : 
+    (a b : ob C) (f : iso a b) : 
    precategory_fun_on_iso _ _ F _ _ (iso_inv_from_iso f) == 
        iso_inv_from_iso (precategory_fun_on_iso _ _ F _ _ f).
 Proof.
@@ -247,7 +247,7 @@ Qed.
 (** *** Functors preserve inverses *)
 
 Lemma precategory_fun_on_inv_from_iso (C C' : precategory) (F : precategory_fun C C')
-    (a b : precategory_objects C)(f : iso_precat a b) :
+    (a b : ob C)(f : iso a b) :
       #F (inv_from_iso f) == inv_from_iso (precategory_fun_on_iso _ _ F _ _ f) .
 Proof.
   set (H := precategory_fun_on_iso_inv _ _ F _ _ f).
@@ -259,7 +259,7 @@ Qed.
 (** *** Fully faithful functors *)
 
 Definition fully_faithful {C D : precategory} (F : precategory_fun C D) := 
-  forall a b : precategory_objects C, 
+  forall a b : ob C, 
     isweq (precategory_ob_mor_fun_morphisms F (a:=a) (b:=b)).
 
 Lemma isaprop_fully_faithful (C D : precategory) (F : precategory_fun C D) :
@@ -271,7 +271,7 @@ Proof.
 Qed.
 
 Definition weq_from_fully_faithful (C D : precategory) (F : precategory_fun C D) 
-      (HF : fully_faithful F) (a b : precategory_objects C) : 
+      (HF : fully_faithful F) (a b : ob C) : 
    weq (a --> b) (F a --> F b).
 Proof.
   exists (precategory_ob_mor_fun_morphisms F (a:=a) (b:=b)).
@@ -280,12 +280,12 @@ Defined.
 
 
 Definition fully_faithful_inv_hom (C D : precategory) (F : precategory_fun C D) 
-      (HF : fully_faithful F) (a b : precategory_objects C) :
+      (HF : fully_faithful F) (a b : ob C) :
       F a --> F b -> a --> b :=
  invweq (weq_from_fully_faithful C D F HF a b).
 
 Lemma fully_faithful_inv_identity (C D : precategory) (F : precategory_fun C D)
-      (HF : fully_faithful F) (a : precategory_objects C) : 
+      (HF : fully_faithful F) (a : ob C) : 
     fully_faithful_inv_hom _ _ _ HF _ _ (precategory_identity (F a)) ==
          precategory_identity _ .
 Proof.
@@ -301,7 +301,7 @@ Qed.
 
 
 Lemma fully_faithful_inv_comp (C D : precategory) (F : precategory_fun C D)
-      (HF : fully_faithful F) (a b c : precategory_objects C) 
+      (HF : fully_faithful F) (a b c : ob C) 
       (f : F a --> F b) (g : F b --> F c) : 
     fully_faithful_inv_hom _ _ _ HF _ _ (f ;; g) ==
        fully_faithful_inv_hom _ _ _ HF _ _ f ;; 
@@ -329,7 +329,7 @@ Qed.
 
 Lemma fully_faithful_reflects_iso_proof (C D : precategory)(F : precategory_fun C D) 
         (HF : fully_faithful F)
-    (a b : precategory_objects C) (f : iso_precat (F a) (F b)) : 
+    (a b : ob C) (f : iso (F a) (F b)) : 
      is_precat_isomorphism (fully_faithful_inv_hom C D F HF a b f).
 Proof.
   exists (fully_faithful_inv_hom C D F HF b a (inv_from_iso f)).
@@ -366,20 +366,20 @@ Qed.
 
 Definition  iso_from_fully_faithful_reflection (C D : precategory)(F : precategory_fun C D) 
         (HF : fully_faithful F)
-    (a b : precategory_objects C) (f : iso_precat (F a) (F b)) : 
-      iso_precat a b.
+    (a b : ob C) (f : iso (F a) (F b)) : 
+      iso a b.
 Proof.
   exists (fully_faithful_inv_hom C D F HF a b f).
   apply fully_faithful_reflects_iso_proof.
 Defined.
 
 Lemma precategory_fun_on_iso_iso_from_fully_faithful_reflection (C D : precategory)
-      (F : precategory_fun C D) (HF : fully_faithful F) (a b : precategory_objects C)
-   (f : iso_precat (F a) (F b)) :
+      (F : precategory_fun C D) (HF : fully_faithful F) (a b : ob C)
+   (f : iso (F a) (F b)) :
       precategory_fun_on_iso _ _  F a b
         (iso_from_fully_faithful_reflection _ _  F HF a b f) == f.
 Proof.
-  apply eq_iso_precat.
+  apply eq_iso.
   simpl.
   set (H3 := homotweqinvweq (weq_from_fully_faithful _ _ _ HF a b)).
   simpl in H3.
@@ -393,12 +393,12 @@ Qed.
 (** *** Essentially surjective functors *)
 
 Definition essentially_surjective {C D : precategory} (F : precategory_fun C D) :=
-  forall b, ishinh (total2 (fun a => iso_precat (F a) b)).
+  forall b, ishinh (total2 (fun a => iso (F a) b)).
    
 (** *** Faithful functors *)
 
 Definition faithful {C D : precategory} (F : precategory_fun C D) := 
-  forall a b : precategory_objects C, forall f g : a --> b,
+  forall a b : ob C, forall f g : a --> b,
        #F f == #F g -> f == g.
 
 Lemma isaprop_faithful (C D : precategory) (F : precategory_fun C D) : 
@@ -510,13 +510,13 @@ Definition weq_fully_faithful_full_and_faithful (C D : precategory) (F : precate
        defined by a functor [F : C -> D] *)
 
 Definition is_in_img_precategory_fun {C D : precategory} (F : precategory_fun C D) 
-      (d : precategory_objects D) :=
+      (d : ob D) :=
   ishinh (
-  total2 (fun c : precategory_objects C => iso_precat (F c) d)).
+  total2 (fun c : ob C => iso (F c) d)).
 
 Definition sub_img_precategory_fun {C D : precategory}(F : precategory_fun C D) :
-    hsubtypes (precategory_objects D) := 
-       fun d : precategory_objects D => is_in_img_precategory_fun F d.
+    hsubtypes (ob D) := 
+       fun d : ob D => is_in_img_precategory_fun F d.
 
 
 
@@ -526,10 +526,10 @@ Definition sub_img_precategory_fun {C D : precategory}(F : precategory_fun C D) 
 Lemma precategory_fun_composite_ob_mor {C C' C'' : precategory}
        (F : precategory_fun C C') (F' : precategory_fun C' C'') :
  is_precategory_fun  
-  (tpair (fun F : precategory_objects C -> precategory_objects C'' => 
-             forall a b : precategory_objects C, a --> b -> F a --> F b) 
+  (tpair (fun F : ob C -> ob C'' => 
+             forall a b : ob C, a --> b -> F a --> F b) 
     (fun a => F' (F a))
-               (fun (a b : precategory_objects C) f => #F' (#F f))).
+               (fun (a b : ob C) f => #F' (#F f))).
 Proof.
   split;
   simpl.
@@ -552,10 +552,10 @@ Definition precategory_fun_composite (C C' C'' : precategory)
 
 Lemma precategory_fun_identity_ob_mor (C : precategory) :
  is_precategory_fun  
-  (tpair (fun F : precategory_objects C -> precategory_objects C => 
-             forall a b : precategory_objects C, a --> b -> F a --> F b) 
+  (tpair (fun F : ob C -> ob C => 
+             forall a b : ob C, a --> b -> F a --> F b) 
     (fun a => a)
-               (fun (a b : precategory_objects C) f => f)).
+               (fun (a b : ob C) f => f)).
 Proof.
   split;
   simpl.
@@ -569,10 +569,10 @@ Qed.
 Definition precategory_fun_identity (C : precategory) :
      precategory_fun C  C.
 Proof.
-  exists (tpair (fun F : precategory_objects C -> precategory_objects C => 
-             forall a b : precategory_objects C, a --> b -> F a --> F b) 
+  exists (tpair (fun F : ob C -> ob C => 
+             forall a b : ob C, a --> b -> F a --> F b) 
     (fun a => a)
-               (fun (a b : precategory_objects C) f => f)).
+               (fun (a b : ob C) f => f)).
   apply  (precategory_fun_identity_ob_mor C).
 Defined.
 
@@ -584,7 +584,7 @@ Defined.
 *)
        
 Definition precategory_total_morphisms (C : precategory_ob_mor) := total2 (
-   fun ab : dirprod (precategory_objects C)(precategory_objects C) =>
+   fun ab : dirprod (ob C)(ob C) =>
         precategory_morphisms (pr1 ab) (pr2 ab)).
 
 Lemma isaset_setcategory_total_morphisms (C : setcategory) : 
@@ -601,15 +601,15 @@ Definition setcategory_total_morphisms_set (C : setcategory) : hSet :=
     hSetpair _ (isaset_setcategory_total_morphisms C).
 
 Definition precategory_source (C : precategory_ob_mor) : 
-     precategory_total_morphisms C -> precategory_objects C := 
+     precategory_total_morphisms C -> ob C := 
      fun abf => pr1 (pr1 abf).
 
 Definition precategory_target (C : precategory_ob_mor) : 
-     precategory_total_morphisms C -> precategory_objects C := 
+     precategory_total_morphisms C -> ob C := 
      fun abf => pr2 (pr1 abf).
 
 Definition precategory_total_id (C : precategory_data) : 
-      precategory_objects C -> precategory_total_morphisms C :=
+      ob C -> precategory_total_morphisms C :=
       fun c => tpair _ (dirprodpair c c) (precategory_identity c).
 
 Definition precategory_total_comp'' (C : precategory_data) : 
@@ -642,17 +642,17 @@ Definition precategory_total_comp (C : precategory_data) :
 (*
 Definition precategory_fun_fun_data {C C' : precategory_data}
   (F F' : precategory_ob_mor_fun C C') :=
-     forall x : precategory_objects C, F x --> F' x.
+     forall x : ob C, F x --> F' x.
 *)
 Definition is_precategory_fun_fun {C C' : precategory_data}
   (F F' : precategory_ob_mor_fun C C')
-  (t : forall x : precategory_objects C, F x -->  F' x) := 
-  forall (x x' : precategory_objects C)(f : x --> x'),
+  (t : forall x : ob C, F x -->  F' x) := 
+  forall (x x' : ob C)(f : x --> x'),
     #F f ;; t x' == t x ;; #F' f.
 
 
 Lemma isaprop_is_precategory_fun_fun {C C' : precategory_data}
-  (F F' : precategory_ob_mor_fun C C') (t : forall x : precategory_objects C, F x -->  F' x):
+  (F F' : precategory_ob_mor_fun C C') (t : forall x : ob C, F x -->  F' x):
   isaprop (is_precategory_fun_fun F F' t).
 Proof.
   apply impred; intro x.
@@ -664,7 +664,7 @@ Qed.
 
 Definition precategory_fun_fun {C C' : precategory_data}
   (F F' : precategory_ob_mor_fun C C') := total2 (
-   fun t : forall x : precategory_objects C, F x -->  F' x => 
+   fun t : forall x : ob C, F x -->  F' x => 
          is_precategory_fun_fun F F' t).
 
 Lemma isaset_precategory_fun_fun {C C' : precategory_data}
@@ -682,12 +682,12 @@ Qed.
 
 Definition precategory_fun_fun_carrier (C C' : precategory_data)
  (F F' : precategory_ob_mor_fun C C')(a : precategory_fun_fun F F') :
-   forall x : precategory_objects C, F x --> F' x := pr1 a.
+   forall x : ob C, F x --> F' x := pr1 a.
 Coercion precategory_fun_fun_carrier : precategory_fun_fun >-> Funclass.
 
 Definition precategory_fun_fun_ax {C C' : precategory_data}
   (F F' : precategory_ob_mor_fun C C') (a : precategory_fun_fun F F') :
-  forall (x x' : precategory_objects C)(f : x --> x'),
+  forall (x x' : ob C)(f : x --> x'),
     #F f ;; a x' == a x ;; #F' f := pr2 a.
 
 (** Equality between two natural transformations *)
@@ -728,7 +728,7 @@ Definition precategory_fun_fun_precategory_ob_mor (C C' : precategory_data):
 
 Lemma is_precategory_fun_fun_id {C C' : precategory}
   (F : precategory_ob_mor_fun C C') : is_precategory_fun_fun F F
-     (fun c : precategory_objects C => precategory_identity (F c)).
+     (fun c : ob C => precategory_identity (F c)).
 Proof.
   intros c c' f.
   rewrite precategory_id_left.
@@ -746,7 +746,7 @@ Lemma is_precategory_fun_fun_comp {C C' : precategory}
   {F G H : precategory_ob_mor_fun C C'}
   (a : precategory_fun_fun F G)
   (b : precategory_fun_fun G H): is_precategory_fun_fun F H
-     (fun x : precategory_objects C => a x ;; b x).
+     (fun x : ob C => a x ;; b x).
 Proof.
   intros c c' f.
   rewrite precategory_assoc.
@@ -804,7 +804,7 @@ Definition precategory_fun_precategory (C C' : precategory): precategory :=
 Notation "[ C , D ]" := (precategory_fun_precategory C D).
 
 Lemma precategory_fun_fun_comp_pointwise (C C' : precategory)
-  (F G H : precategory_objects [C, C']) (A : F --> G) (A' : G --> H) 
+  (F G H : ob [C, C']) (A : F --> G) (A' : G --> H) 
    (B : F --> H) : A ;; A' == B -> 
         forall a, pr1 A a ;; pr1 A' a == pr1 B a.
 Proof.
@@ -821,10 +821,10 @@ Defined.
 (** Characterizing isomorphisms in the functor category *)
 
 Lemma is_precategory_fun_fun_inv_from_pointwise_inv (C D : precategory)
-  (F G : precategory_objects [C,D]) (A : F --> G) 
-  (H : forall a : precategory_objects C, is_precat_isomorphism (pr1 A a)) :
+  (F G : ob [C,D]) (A : F --> G) 
+  (H : forall a : ob C, is_precat_isomorphism (pr1 A a)) :
   is_precategory_fun_fun _ _ 
-     (fun a : precategory_objects C => inv_from_iso (tpair _ _ (H a))).
+     (fun a : ob C => inv_from_iso (tpair _ _ (H a))).
 Proof.
   unfold is_precategory_fun_fun.
   intros x x' f.
@@ -840,14 +840,14 @@ Proof.
 Qed.
 
 Definition precategory_fun_fun_inv_from_pointwise_inv (C D : precategory)
-  (F G : precategory_objects [C,D]) (A : F --> G) 
-  (H : forall a : precategory_objects C, is_precat_isomorphism (pr1 A a)) :
+  (F G : ob [C,D]) (A : F --> G) 
+  (H : forall a : ob C, is_precat_isomorphism (pr1 A a)) :
     G --> F := tpair _ _ (is_precategory_fun_fun_inv_from_pointwise_inv _ _ _ _ _ H).
 
 
 Lemma precategory_fun_iso_if_pointwise_iso (C C' : precategory)
- (F G : precategory_objects [C, C']) (A : F --> G) : 
-   (forall a : precategory_objects C, is_precat_isomorphism (pr1 A a)) ->  
+ (F G : ob [C, C']) (A : F --> G) : 
+   (forall a : ob C, is_precat_isomorphism (pr1 A a)) ->  
            is_precat_isomorphism A .
 Proof.
   intro H.
@@ -863,16 +863,16 @@ Proof.
 Qed.  
 
 Definition precategory_fun_iso_from_pointwise_iso (C C' : precategory)
- (F G : precategory_objects [C, C']) (A : F --> G) 
-   (H : forall a : precategory_objects C, is_precat_isomorphism (pr1 A a)) : 
-     iso_precat F G := 
+ (F G : ob [C, C']) (A : F --> G) 
+   (H : forall a : ob C, is_precat_isomorphism (pr1 A a)) : 
+     iso F G := 
  tpair _ _ (precategory_fun_iso_if_pointwise_iso _ _ _ _ _  H).
 
 
 Lemma is_precategory_fun_iso_pointwise_if_iso (C C' : precategory)
- (F G : precategory_objects [C, C']) (A : F --> G) : 
+ (F G : ob [C, C']) (A : F --> G) : 
   is_precat_isomorphism A -> 
-       forall a : precategory_objects C, is_precat_isomorphism (pr1 A a).  
+       forall a : ob C, is_precat_isomorphism (pr1 A a).  
 Proof.
   intros H a.
   simpl in *.
@@ -892,23 +892,23 @@ Defined.
 
 
 Definition precategory_fun_iso_pointwise_if_iso (C C' : precategory)
- (F G : precategory_objects [C, C']) (A : F --> G) 
+ (F G : ob [C, C']) (A : F --> G) 
   (H : is_precat_isomorphism A) : 
-     forall a : precategory_objects C, 
-       iso_precat (pr1 F a) (pr1 G a) := 
+     forall a : ob C, 
+       iso (pr1 F a) (pr1 G a) := 
   fun a => tpair _ _ (is_precategory_fun_iso_pointwise_if_iso C C' F G A H a).
  
 (*
 Lemma precategory_fun_iso_pointwise_if_iso_on_idtoiso (C C' : precategory)
-  (F G : precategory_objects [C, C']) (A : F == G) :
-    forall a : precategory_objects C,
+  (F G : ob [C, C']) (A : F == G) :
+    forall a : ob C,
    precategory_fun_iso_pointwise_if_iso C C' F G (idtoiso F) a
     ==  toforallpaths 
   *)  
 
 Definition pr1_pr1_functor_eq_from_functor_iso (C D : precategory)
-    (H : is_category D) (F G : precategory_objects [C , D]) :
-   iso_precat F G -> pr1 (pr1 F) == pr1 (pr1 G).
+    (H : is_category D) (F G : ob [C , D]) :
+   iso F G -> pr1 (pr1 F) == pr1 (pr1 G).
 Proof.
   intro A.
   apply funextsec.
@@ -923,17 +923,17 @@ Defined.
 
 
 Lemma transport_of_functor_map_is_pointwise (C D : precategory) 
-      (F0 G0 : precategory_objects C -> precategory_objects D)
-    (F1 : forall a b : precategory_objects C, a --> b -> F0 a --> F0 b)
+      (F0 G0 : ob C -> ob D)
+    (F1 : forall a b : ob C, a --> b -> F0 a --> F0 b)
    (gamma : F0  == G0 ) 
-    (a b : precategory_objects C) (f : a --> b) :
-transportf (fun x : precategory_objects C -> precategory_objects D => 
-            forall a0 b0 : precategory_objects  C, a0 --> b0 -> x a0 --> x b0)
+    (a b : ob C) (f : a --> b) :
+transportf (fun x : ob C -> ob D => 
+            forall a0 b0 : ob  C, a0 --> b0 -> x a0 --> x b0)
            gamma  F1 a b f == 
-transportf (fun TT : precategory_objects D => G0 a --> TT)
-  (toforallpaths (fun _ : precategory_objects C => D) F0 G0 gamma b)
-  (transportf (fun SS : precategory_objects D => SS --> F0 b)
-     (toforallpaths (fun _ : precategory_objects C => D) F0 G0 gamma a) (F1 a b f)).
+transportf (fun TT : ob D => G0 a --> TT)
+  (toforallpaths (fun _ : ob C => D) F0 G0 gamma b)
+  (transportf (fun SS : ob D => SS --> F0 b)
+     (toforallpaths (fun _ : ob C => D) F0 G0 gamma a) (F1 a b f)).
 Proof.
   induction gamma.
   apply idpath.
@@ -952,8 +952,8 @@ Qed.
 
 
 Definition pr1_functor_eq_from_functor_iso (C D : precategory)
-    (H : is_category D) (F G : precategory_objects [C , D]) :
-   iso_precat F G -> pr1 F == pr1 G.
+    (H : is_category D) (F G : ob [C , D]) :
+   iso F G -> pr1 F == pr1 G.
 Proof.
   intro A.
   apply (total2_paths (pr1_pr1_functor_eq_from_functor_iso C D H F G A)).
@@ -1009,8 +1009,8 @@ Proof.
 Defined.
 
 Definition functor_eq_from_functor_iso {C D : precategory}
-    (H : is_category D) (F G : precategory_objects [C , D]) 
-    (H' : iso_precat F G) : F == G.
+    (H : is_category D) (F G : ob [C , D]) 
+    (H' : iso F G) : F == G.
 Proof.
   apply (precategory_fun_eq _ _ F G).
   apply pr1_functor_eq_from_functor_iso;
@@ -1018,22 +1018,22 @@ Proof.
 Defined.
 
 
-Lemma idtoiso_compute_pointwise (C D : precategory) (F G : precategory_objects [C, D])
-     (p : F == G) (a : precategory_objects C) :
+Lemma idtoiso_compute_pointwise (C D : precategory) (F G : ob [C, D])
+     (p : F == G) (a : ob C) :
 precategory_fun_iso_pointwise_if_iso C D F G (idtoiso p) (pr2 (idtoiso p)) a ==
 idtoiso
-  (toforallpaths (fun _ : precategory_objects C => D) (pr1 (pr1 F)) (pr1 (pr1 G))
+  (toforallpaths (fun _ : ob C => D) (pr1 (pr1 F)) (pr1 (pr1 G))
      (base_paths (pr1 F) (pr1 G) (base_paths F G p)) a).
 Proof.
   induction p.
   simpl.
-  apply eq_iso_precat. simpl. apply idpath.
+  apply eq_iso. simpl. apply idpath.
 Qed.
 
 
 Lemma functor_eq_from_functor_iso_idtoiso (C D : precategory)
     (H : is_category D)
-    (F G : precategory_objects [C, D]) (p : F == G) :
+    (F G : ob [C, D]) (p : F == G) :
   functor_eq_from_functor_iso H F G (idtoiso p) == p.
 Proof.
   simpl.
@@ -1061,10 +1061,10 @@ Qed.
 
 Lemma idtoiso_functor_eq_from_functor_iso (C D : precategory)
     (H : is_category D)
-    (F G : precategory_objects [C, D]) (gamma : iso_precat F G) :
+    (F G : ob [C, D]) (gamma : iso F G) :
         idtoiso  (functor_eq_from_functor_iso H F G gamma) == gamma.
 Proof.
-  apply eq_iso_precat.
+  apply eq_iso.
   simpl.
   apply precategory_fun_fun_eq.
   intro a.
@@ -1074,7 +1074,7 @@ Proof.
   simpl in H2.
   pathvia (pr1
        (idtoiso
-          (toforallpaths (fun _ : precategory_objects C => D) (pr1 (pr1 F)) (pr1 (pr1 G))
+          (toforallpaths (fun _ : ob C => D) (pr1 (pr1 F)) (pr1 (pr1 G))
              (base_paths (pr1 F) (pr1 G)
                 (base_paths F G (functor_eq_from_functor_iso H F G gamma))) a))).
   apply H2. clear H2.
@@ -1097,7 +1097,7 @@ Proof.
 Qed.
 
 Lemma isweq_idtoiso_functorcat (C D : precategory) (H : is_category D) 
-    (F G : precategory_objects [C, D]) :
+    (F G : ob [C, D]) :
    isweq (precat_paths_to_iso F G).
 Proof.
   apply (gradth _ (functor_eq_from_functor_iso H F G)).

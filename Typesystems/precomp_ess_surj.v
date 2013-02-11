@@ -45,9 +45,6 @@ Local Notation "f ;; g" := (precategory_compose f g)(at level 50).
 Notation "[ C , D ]" := (precategory_fun_precategory C D).
 Local Notation "# F" := (precategory_ob_mor_fun_morphisms F)(at level 3).
 
-Notation ob := precategory_objects.
-Notation iso := iso_precat.
-
 
 Section lemma64.
 
@@ -55,7 +52,7 @@ Section lemma64.
 
 Variables A B C : precategory.
 Hypothesis Ccat : is_category C.
-Variable H : precategory_objects [A, B].
+Variable H : ob [A, B].
 Hypothesis p : essentially_surjective H.
 Hypothesis Hff : fully_faithful H.
 
@@ -69,19 +66,19 @@ Section essentially_surjective.
 (** Given a functor [F] from [A] to [C], we construct [G] such that
        [F == G O H] *)
 
-Variable F : precategory_objects [A, C].
+Variable F : ob [A, C].
 
 Section preimage.
 
 (** The type [X b] will be contractible, and [G] is defined as 
      the first component of its center. *)
 
-Let X (b : precategory_objects B) := total2 (
+Let X (b : ob B) := total2 (
  fun ck : 
-  total2 (fun c : precategory_objects C =>
-                forall a : precategory_objects A,
-                     iso_precat (pr1 H a) b -> iso_precat (pr1 F a) c) =>
-    forall t t' : total2 (fun a : precategory_objects A => iso_precat (pr1 H a) b),
+  total2 (fun c : ob C =>
+                forall a : ob A,
+                     iso (pr1 H a) b -> iso (pr1 F a) c) =>
+    forall t t' : total2 (fun a : ob A => iso (pr1 H a) b),
           forall f : pr1 t --> pr1 t',
              (#(pr1 H) f ;; pr2 t' == pr2 t -> 
                     #(pr1 F) f ;; pr2 ck (pr1 t') (pr2 t') == pr2 ck (pr1 t) (pr2 t))).
@@ -129,14 +126,14 @@ Qed.
 
 (** The center of [X b] *)
 
-Definition center_of_contr (b : precategory_objects B) 
-    (anot : precategory_objects A)(hnot : iso_precat (pr1 H anot) b) : X b.
+Definition center_of_contr (b : ob B) 
+    (anot : ob A)(hnot : iso (pr1 H anot) b) : X b.
 Proof.
   set (cnot := pr1 F anot).
-  set (g := fun (a : precategory_objects A)(h : iso_precat (pr1 H a) b) =>
+  set (g := fun (a : ob A)(h : iso (pr1 H a) b) =>
               (iso_from_fully_faithful_reflection _ _ H Hff _ _  
                   (iso_comp h (iso_inv_from_iso hnot)))).
-  set (knot := fun (a : precategory_objects A)(h : iso_precat (pr1 H a) b) =>
+  set (knot := fun (a : ob A)(h : iso (pr1 H a) b) =>
                     precategory_fun_on_iso _ _ F _ _  (g a h)).
   simpl in *.
   exists (tpair _ (pr1 F anot) knot).
@@ -164,7 +161,7 @@ Proof.
   apply funextsec.
   intro h.
   simpl in *.
-  set (g := fun (a : precategory_objects A)(h : iso_precat (pr1 H a) b) =>
+  set (g := fun (a : ob A)(h : iso (pr1 H a) b) =>
               (iso_from_fully_faithful_reflection _ _ H Hff _ _  
                   (iso_comp h (iso_inv_from_iso hnot)))).
 
@@ -187,7 +184,7 @@ Proof.
   simpl in *.
   
 
-(*  apply eq_iso_precat. *)
+(*  apply eq_iso. *)
   simpl.
   pathvia (iso_comp  (precategory_fun_on_iso A C F a anot
      (iso_from_fully_faithful_reflection A B H Hff a anot
@@ -197,11 +194,11 @@ Proof.
   induction w0.
   simpl.
   rewrite transportf_idpath.
-  apply eq_iso_precat. simpl.
+  apply eq_iso. simpl.
   rewrite precategory_id_right.
   apply idpath.
   
-  apply eq_iso_precat.
+  apply eq_iso.
   simpl.
   unfold w.
   rewrite idtoiso_isotoid.
@@ -221,7 +218,7 @@ Qed.
 
 (** Putting everything together: [X b] is contractible. *)
 
-Definition lemma64_claim1 : forall b : precategory_objects B, iscontr (X b).
+Definition lemma64_claim1 : forall b : ob B, iscontr (X b).
 Proof.
   intro b.
   assert (HH : isaprop (iscontr (X b))).
@@ -237,8 +234,8 @@ Qed.
 (** The object part of [G], [Go b], is defined as the first component of 
     the center of [X b]. *)
 
-Definition Go : precategory_objects B -> precategory_objects C :=
-   fun b : precategory_objects B =>
+Definition Go : ob B -> ob C :=
+   fun b : ob B =>
       pr1 (pr1 (pr1 (lemma64_claim1 b))).
 
 Let k (b : ob B) : 
@@ -257,7 +254,7 @@ Proof.
   induction p'.
   rewrite transportf_idpath.
   simpl.
-  apply eq_iso_precat.
+  apply eq_iso.
   simpl.
   rewrite precategory_id_right.
   apply idpath.
@@ -280,7 +277,7 @@ Lemma k_transport_idtoiso (b : ob B) (t1 t2 : X b)
     (a : ob A) (h : iso (pr1 H a) b) :
   iso_comp (pr2 (pr1 t1) a h) (idtoiso (X_contr_base_paths b t1 t2)) == pr2 (pr1 t2) a h.
 Proof.
-(*  apply eq_iso_precat. *)
+(*  apply eq_iso. *)
   simpl.
   
   set (e := proofirrelevancecontr (lemma64_claim1 b) t1 t2).
@@ -298,7 +295,7 @@ Proof.
         intro i.
   induction i.
   rewrite transportf_idpath.
-  apply eq_iso_precat.
+  apply eq_iso.
   simpl.
   apply precategory_id_right.
 Qed.
@@ -365,7 +362,7 @@ transportf (fun c' : ob C => forall a : ob A, iso (pr1 H a) b ->
 (** [G f] will be defined as the first component of the center of
      contraction of [Y f]. *)
 
-Let Y {b b' : precategory_objects B} (f : b --> b') :=
+Let Y {b b' : ob B} (f : b --> b') :=
   total2 (fun g : Go b --> Go b' =>
       forall a : ob A,
         forall h : iso (pr1 H a) b,
@@ -395,7 +392,7 @@ Proof.
   set (qb := q b ). simpl in qb.
   set (qb' := qb (tpair _ a0 h0) (tpair _ a h) m).
   simpl in qb'.
-  apply eq_iso_precat; simpl.
+  apply eq_iso; simpl.
   apply qb'. clear qb' qb. 
   set (H3 := homotweqinvweq (weq_from_fully_faithful _ _ _ Hff a0 a)).
   simpl in H3.
@@ -409,7 +406,7 @@ Proof.
                    k b' a0' h0').
   set (qb' := q b' (tpair _ a0' h0') (tpair _ a' h') m').
   simpl in qb'.
-  apply eq_iso_precat; simpl.
+  apply eq_iso; simpl.
   apply qb'. clear qb'. 
   set (H3 := homotweqinvweq (weq_from_fully_faithful _ _ _ Hff a0' a')).
   simpl in H3.
@@ -688,7 +685,7 @@ Proof.
   set (qb := q b ). simpl in qb.
   set (qb' := qb (tpair _ a0 h0) (tpair _ a h) m).
   simpl in qb'.
-  apply eq_iso_precat; simpl.
+  apply eq_iso; simpl.
   apply qb'. clear qb' qb. 
   set (H3 := homotweqinvweq (weq_from_fully_faithful _ _ _ Hff a0 a)).
   simpl in H3.
@@ -702,7 +699,7 @@ Proof.
                    k b' a0' h0').
   set (qb' := q b' (tpair _ a0' h0') (tpair _ a' h') m').
   simpl in qb'.
-  apply eq_iso_precat; simpl.
+  apply eq_iso; simpl.
   apply qb'. clear qb'. 
   set (H3 := homotweqinvweq (weq_from_fully_faithful _ _ _ Hff a0' a')).
   simpl in H3.
@@ -824,7 +821,7 @@ Proof.
   set (qb := q b' ). simpl in qb.
   set (qb' := qb (tpair _ a0' h0') (tpair _ a' h') m).
   simpl in qb'.
-  apply eq_iso_precat; simpl.
+  apply eq_iso; simpl.
   apply qb'. clear qb' qb. 
   set (H3 := homotweqinvweq (weq_from_fully_faithful _ _ _ Hff a0' a')).
   simpl in H3.
@@ -838,7 +835,7 @@ Proof.
                    k b'' a0'' h0'').
   set (qb' := q b'' (tpair _ a0'' h0'') (tpair _ a'' h'') m').
   simpl in qb'.
-  apply eq_iso_precat; simpl.
+  apply eq_iso; simpl.
   apply qb'. clear qb'. 
   set (H3 := homotweqinvweq (weq_from_fully_faithful _ _ _ Hff a0'' a'')).
   simpl in H3.
@@ -962,7 +959,7 @@ Proof.
   set (qb := q b ). simpl in qb.
   set (qb' := qb (tpair _ a0 h0) (tpair _ a h) m).
   simpl in qb'.
-  apply eq_iso_precat; simpl.
+  apply eq_iso; simpl.
   apply qb'. clear qb' qb. 
   set (H3 := homotweqinvweq (weq_from_fully_faithful _ _ _ Hff a0 a)).
   simpl in H3.
@@ -976,7 +973,7 @@ Proof.
                    k b'' a0'' h0'').
   set (qb' := q b'' (tpair _ a0'' h0'') (tpair _ a'' h'') m').
   simpl in qb'.
-  apply eq_iso_precat; simpl.
+  apply eq_iso; simpl.
   apply qb'. clear qb'. 
   set (H3 := homotweqinvweq (weq_from_fully_faithful _ _ _ Hff a0'' a'')).
   simpl in H3.
