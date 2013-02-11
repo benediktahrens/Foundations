@@ -34,8 +34,8 @@ Require Import yoneda.
 Require Import sub_precategories.
 Require Import precategory_equivalences.
 Require Import precategory_whiskering.
-Require Import precategory_lemma62.
-Require Import precategory_lemma64.
+Require Import precomp_fully_faithful.
+Require Import precomp_ess_surj.
 
 Notation "a == b" := (paths a b) (at level 70, no associativity).
 Notation "! p " := (pathsinv0 p) (at level 50).
