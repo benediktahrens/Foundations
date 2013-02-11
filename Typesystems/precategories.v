@@ -681,6 +681,7 @@ Proof.
   apply idpath.
 Qed.
 
+(*
 
 (** * Functors : Morphisms of precategories *)
 
@@ -1718,4 +1719,4 @@ Proof.
   apply H.
 Qed.
 
-
+*)

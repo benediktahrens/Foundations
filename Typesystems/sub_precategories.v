@@ -88,8 +88,11 @@ Require Import basic_lemmas_which_should_be_in_uu0.
 Require Import uu0.
 Require Import hProp.
 Require Import hSet.
-Require Import precategories.
+
 Require Import AXIOM_dep_funext.
+
+Require Import precategories.
+Require Import functors_transformations.
 
 Notation "a == b" := (paths a b) (at level 70, no associativity).
 Notation "! p " := (pathsinv0 p) (at level 50).
