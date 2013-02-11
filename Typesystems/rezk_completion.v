@@ -30,6 +30,7 @@ Require Import AXIOM_dep_funext.
 Require Import precategories.
 Require Import precategory_of_hsets.
 Require Import yoneda.
+Require Import precategory_equivalences.
 Require Import precategory_whiskering.
 Require Import precategory_lemma62.
 Require Import precategory_lemma64.
@@ -65,11 +66,54 @@ Qed.
 
 Lemma Rezk_eta_essentially_surjective : essentially_surjective Rezk_eta.
 Proof.
-  unfold Rezk_eta.
-  unfold essentially_surjective.
-  simpl.
-  intro b.
+  apply (precategory_fun_full_img_essentially_surjective _ _ (yoneda A)).
+Qed.
+
+End rezk.
+
+
+Section rezk_universal_property.
+
+Variables A C : precategory.
+Hypothesis Csat : is_saturated C.
+
+Lemma pre_comp_rezk_eta_is_fully_faithful :
+    fully_faithful (pre_whisker_functor A (Rezk_completion A) C (Rezk_eta A)).
+Proof.
+  apply pre_whisker_with_ess_surj_and_fully_faithful_is_fully_faithful.
+  apply Rezk_eta_essentially_surjective.
+  apply Rezk_eta_is_fully_faithful.
+Qed.
+
+Lemma pre_comp_rezk_eta_is_ess_surj :
+   essentially_surjective (pre_whisker_functor A (Rezk_completion A) C (Rezk_eta A)).
+Proof.
+  apply pre_whisker_essentially_surjective.
+  assumption.
+  apply Rezk_eta_essentially_surjective.
+  apply Rezk_eta_is_fully_faithful.
+Qed.
+
+Theorem Rezk_eta_Universal_Property : 
+  isweq (pre_whisker_functor A (Rezk_completion A) C (Rezk_eta A)).
+Proof.
+  apply equiv_of_cats_is_weq_of_objects.
+  apply is_saturated_functor_category; 
+  assumption.
+  apply is_saturated_functor_category; 
+  assumption.
   
+  apply rad_equivalence_of_precats.
+  apply is_saturated_functor_category; 
+  assumption.
+  apply pre_comp_rezk_eta_is_fully_faithful.
+  apply pre_comp_rezk_eta_is_ess_surj.
+Qed.
+
+End rezk_universal_property.
+  
+  
+
 
 
 
