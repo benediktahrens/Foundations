@@ -60,6 +60,43 @@ type is inhabited: Id(C, D).
 
 11. Combining 9. and 10. we get an inhabitant of Id(C, S(C)).
 
+=====  For the universal property
+
+
+
+4.7 
+isaprop_sigma_iso in precategory_equivalences.v
+
+4.5
+rad_equivalence_of_precats in precategory_equivalences.v
+
+4.14
+equiv_of_cats_is_weq_of_objects in precategory_equivalences.v
+
+6.1
+pre_whisker_with_ess_surj_is_faithful in precategory_whiskering.v
+
+6.2
+pre_whisker_with_ess_surj_and_fully_faithful_is_full in precategory_lemma62.v
+
+6.4
+pre_whisker_essentially_surjective in precategory_lemma64.v
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
