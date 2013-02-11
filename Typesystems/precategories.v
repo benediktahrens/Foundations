@@ -1117,7 +1117,7 @@ Definition weq_fully_faithful_full_and_faithful (C D : precategory) (F : precate
 Definition is_in_img_precategory_fun {C D : precategory} (F : precategory_fun C D) 
       (d : precategory_objects D) :=
   ishinh (
-  total2 (fun c : precategory_objects C => F c == d)).
+  total2 (fun c : precategory_objects C => iso_precat (F c) d)).
 
 Definition sub_img_precategory_fun {C D : precategory}(F : precategory_fun C D) :
     hsubtypes (precategory_objects D) := 
@@ -1430,7 +1430,7 @@ Proof.
   intros a b.
   apply b.
   exists c.
-  apply idpath.
+  apply identity_iso_precat.
 Defined.
 
 Definition full_img_functor_data {C D : precategory}(F : precategory_fun C D) :
@@ -1467,6 +1467,8 @@ Definition precategory_fun_full_img {C D: precategory}
        (F : precategory_fun C D) :
    precategory_fun C (full_img_sub_precategory F) :=
    tpair _ _ (is_precategory_fun_full_img C D F).
+
+
 
 
 (** *** Small exercise: Morphisms in the full subcategory are equivalent to 
@@ -1528,7 +1530,7 @@ Lemma image_is_in_image (C D : precategory) (F : precategory_fun C D)
 Proof.
   apply hinhpr.
   exists a.
-  exact (idpath _).
+  apply identity_iso_precat.
 Defined.
 
 
@@ -1711,6 +1713,8 @@ Proof.
 Qed.
 
 
+
+
 (** *** From Identity in the subcategory to isos in the category  *)
 (** This gives a weak equivalence *)
 
@@ -1782,9 +1786,27 @@ Proof.
 Qed.
 
 
-
-
 End full_sub_sat.
+
+
+Lemma precategory_fun_full_img_essentially_surjective (A B : precategory)
+     (F : precategory_fun A B) :
+  essentially_surjective (precategory_fun_full_img F).
+Proof.
+  unfold essentially_surjective.
+  unfold precategory_fun_full_img.
+  simpl.
+  intros [d p].
+  apply p.
+  intros [c h].  
+  intros q Hq.
+  apply Hq.
+  exists c.
+  set (bla := iso_in_sub_from_iso _ _ (full_img_functor_obj F c) {| pr1 := d; pr2 := p |} h).
+  exact bla.
+Qed.
+    
+
     
 (** ** Precategories in style of essentially algebraic cats *)
 (** Of course we later want SETS of objects, rather than types,
