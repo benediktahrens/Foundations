@@ -1,4 +1,4 @@
-(************************************************************
+(** **********************************************************
 
 Benedikt Ahrens and Chris Kapulkin
 january 2013
@@ -7,47 +7,44 @@ january 2013
 ************************************************************)
 
 
-(************************************************************
+(** **********************************************************
 
 Contents :  
 
-		Functors
-                  preserve isos, inverses
+		- Functors
+                  - preserve isos, inverses
                                     
-                  fully faithful functors
-                    preserve isos, inverses, composition 
+                  - fully faithful functors
+                    - preserve isos, inverses, composition 
                             backwards
                     
-                  essentially surjective
-                  faithful
-                  full
-                  fully faithful == full and faithful
+                  - essentially surjective
+                  - faithful
+                  - full
+                  - fully faithful is the same as full and faithful
                   
-                  Image of a functor, full subcat specified
+                  - Image of a functor, full subcat specified
                                        by a functor
                  
                       
                       
-		Natural transformations
-                  Equality is pointwise equality.
+		- Natural transformations
+                  - Equality is pointwise equality.
                   
                   
-		Functor (pre)category			
-                  Isomorphisms in functor category are pointwise
+		- Functor (pre)category			
+                  - Isomorphisms in functor category are pointwise
                          isomorphisms
                          
-                Isomorphic Functors are equal
+                - Isomorphic Functors are equal
                    if target precategory is category
                    [functor_eq_from_functor_iso]
                   
-                Functor precategory is category if
+                - Functor precategory is category if
                    target precategory is
                    [is_category_functor_category]
 		
-		
-	
-	   
-           
+		           
 ************************************************************)
 
 

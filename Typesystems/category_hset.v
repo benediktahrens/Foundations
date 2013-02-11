@@ -1,3 +1,24 @@
+(** **********************************************************
+
+Benedikt Ahrens and Chris Kapulkin
+january 2013
+
+
+************************************************************)
+
+
+(** **********************************************************
+
+Contents :  
+	    
+            Precategory HSET of hSets
+
+	    HSET is a category
+                	
+           
+************************************************************)
+
+
 Add Rec LoadPath "../Generalities".
 Add Rec LoadPath "../hlevel1".
 Add Rec LoadPath "../hlevel2".
@@ -127,13 +148,7 @@ Proof.
 Defined.
 
 (** Both maps defined above are weak equivalences. *)
-(** Once we have one, there is a more direct proof for the 
-     other, but it is simpler to prove the statement twice,
-    in view of what follows: it simply gives a less complex
-    statement.
-    Also, we actually only need one direction,
-      from equivalences to isos.
-*)
+
 
 Lemma hset_iso_equiv_is_equiv (A B : ob HSET) : isweq (hset_iso_equiv A B).
 Proof.

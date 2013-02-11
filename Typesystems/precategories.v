@@ -103,7 +103,7 @@ Definition precategory_compose { C : precategory_data }
 Local Notation "f ;; g" := (precategory_compose f g)(at level 50).
 
 
-(** *** Axioms of a precategory *)
+(** ** Axioms of a precategory *)
 (** 
         - identity is left and right neutral for composition 
         - composition is associative
@@ -155,7 +155,7 @@ Defined.
 
 
 
-(** ** Setcategories: Precategories whose objects form a set *)
+(** * Setcategories: Precategories whose objects form a set *)
 
 Definition setcategory := total2 (
    fun C : precategory => isaset (ob C)).
@@ -175,7 +175,9 @@ Proof.
   apply (maponpaths (precategory_eq_morphism C a b) h).
 Qed.
 
-(** ** Isomorphisms in a precategory *)
+(** * Isomorphisms in a precategory *)
+
+(** ** Definition of isomorphisms *)
 
 Definition is_inverse_in_precat {C : precategory} {a b : ob C}
   (f : a --> b) (g : b --> a) := 
@@ -322,6 +324,8 @@ Proof.
 Qed.
 
 
+(** ** Properties of isomorphisms *)
+(** Stability under composition, inverses etc *)
 
 Lemma is_iso_comp_of_isos {C : precategory} {a b c : ob C}
   (f : iso a b) (g : iso b c) : is_precat_isomorphism (f ;; g).
@@ -448,7 +452,9 @@ Proof.
   apply idpath.
 Qed.
 
-(** ** Saturated precategories *)
+(** * Categories (aka saturated precategories) *)
+
+(** ** Definition of categories *)
 
 Definition precat_paths_to_iso {C : precategory} (a b : ob C):
       a == b -> iso a b.
@@ -486,6 +492,9 @@ Proof.
   apply isaset_iso.
 Qed.
   
+
+(** ** Definition of [isotoid] *)
+
 Definition isotoid (C : precategory) (H : is_category C) {a b : ob C}:
       iso a b -> a == b := invmap (weqpair _ (H a b)).
 
@@ -509,8 +518,8 @@ Proof.
   apply idpath.
 Qed.
 
+(** ** Properties of [idtoiso] and [isotoid] *)
 
-(* not needed, presumably *)
 Definition double_transport' {C : precategory} {a a' b b' : ob C}
    (p : a == a') (q : b == b') (f : a --> b) : a' --> b'.
 Proof.

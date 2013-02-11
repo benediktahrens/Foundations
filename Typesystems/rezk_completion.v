@@ -1,5 +1,5 @@
 
-(************************************************************
+(** **********************************************************
 
 Benedikt Ahrens and Chris Kapulkin
 january 2013
@@ -8,9 +8,13 @@ january 2013
 ************************************************************)
 
 
-(************************************************************
+(** **********************************************************
 
 Contents : Rezk completion
+
+ - Construction of the Rezk completion via Yoneda
+
+ - Universal property of the Rezk completion
 
 ************************************************************)
 
@@ -43,6 +47,8 @@ Notation "p @ q" := (pathscomp0 p q) (at level 60, right associativity).
 
 Ltac pathvia b := (apply (@pathscomp0 _ _ b _ )).
 
+(** * Construction of the Rezk completion via Yoneda *)
+
 Section rezk.
 
 Variable A : precategory.
@@ -73,6 +79,7 @@ Qed.
 
 End rezk.
 
+(** * Universal property of the Rezk completion *)
 
 Section rezk_universal_property.
 
