@@ -634,3 +634,63 @@ Proof.
   apply idpath.
 Qed.
 
+
+(** ** Precategories in style of essentially algebraic cats *)
+(** Of course we later want SETS of objects, rather than types,
+    but the construction can already be specified.
+*)
+       
+Definition precategory_total_morphisms (C : precategory_ob_mor) := total2 (
+   fun ab : dirprod (ob C)(ob C) =>
+        precategory_morphisms (pr1 ab) (pr2 ab)).
+
+Lemma isaset_setcategory_total_morphisms (C : setcategory) : 
+   isaset (precategory_total_morphisms C).
+Proof.
+  change isaset with (isofhlevel 2).
+  apply isofhleveltotal2.
+  apply isofhleveldirprod;
+  apply C.
+  exact (fun x => (pr2 (pr1 x --> pr2 x))).
+Qed.
+
+Definition setcategory_total_morphisms_set (C : setcategory) : hSet :=
+    hSetpair _ (isaset_setcategory_total_morphisms C).
+
+Definition precategory_source (C : precategory_ob_mor) : 
+     precategory_total_morphisms C -> ob C := 
+     fun abf => pr1 (pr1 abf).
+
+Definition precategory_target (C : precategory_ob_mor) : 
+     precategory_total_morphisms C -> ob C := 
+     fun abf => pr2 (pr1 abf).
+
+Definition precategory_total_id (C : precategory_data) : 
+      ob C -> precategory_total_morphisms C :=
+      fun c => tpair _ (dirprodpair c c) (precategory_identity c).
+
+Definition precategory_total_comp'' (C : precategory_data) : 
+      forall f g : precategory_total_morphisms C,
+        precategory_target C f == precategory_source C g ->
+         precategory_total_morphisms C.
+Proof.
+  intros f g H.
+  destruct f as [[a b] f]. simpl in *.
+  destruct g as [[b' c] g]. simpl in *.
+  unfold precategory_target in H; simpl in H.
+  unfold precategory_source in H; simpl in H. 
+  simpl.
+  exists (dirprodpair a c). simpl.
+  exact ((f ;; precategory_eq_morphism C b b' H) ;; g).
+Defined.
+
+Definition precategory_total_comp (C : precategory_data) : 
+      forall f g : precategory_total_morphisms C,
+        precategory_target C f == precategory_source C g ->
+         precategory_total_morphisms C := 
+  fun f g H => 
+     tpair _ (dirprodpair (pr1 (pr1 f))(pr2 (pr1 g)))
+        ((pr2 f ;; precategory_eq_morphism _ _ _ H) ;; pr2 g).
+
+
+

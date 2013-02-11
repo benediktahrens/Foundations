@@ -54,7 +54,7 @@ Local Notation "# F" := (precategory_ob_mor_fun_morphisms F)(at level 3).
 
 
 
-(** ** Prewhiskering with an essentially surjective functor is faithful. *)
+(** * Precomposition with an essentially surjective functor is faithful. *)
 
 Lemma pre_whisker_with_ess_surj_is_faithful (A B C : precategory) 
       (H : ob [A, B]) (p : essentially_surjective H) : 
@@ -87,11 +87,11 @@ Proof.
 Qed.
   
 
-
+(** * Precomposition with an essentially surjective and f. f. functor is full *)
 
 Section lemma62.
 
-(** ** Section variables *)
+(** Section variables *)
 
 Variables A B C : precategory.
 Variable H : ob [A, B].
@@ -413,6 +413,8 @@ Qed.
 End preimage.
 
 End full.
+
+(** * Precomposition with an essentially surjective and f. f. functor is fully faithful *)
 
 Lemma pre_whisker_with_ess_surj_and_fully_faithful_is_full :
   full (pre_whisker_functor A B C H).

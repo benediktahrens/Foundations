@@ -200,7 +200,7 @@ Definition precategory_fun_comp (C C' : precategory_data)
                  forall g : b --> c, 
                 #F (f ;; g) == #F f ;; #F g := pr2 (pr2 F).
 
-(** *** Functors preserve isomorphisms *)
+(** ** Functors preserve isomorphisms *)
 
 Lemma precategory_fun_on_iso_is_iso (C C' : precategory) (F : precategory_fun C C')
     (a b : ob C)(f : iso a b) :
@@ -241,7 +241,7 @@ Proof.
   apply precategory_fun_id.
 Qed.
   
-(** *** Functors preserve inverses *)
+(** ** Functors preserve inverses *)
 
 Lemma precategory_fun_on_inv_from_iso (C C' : precategory) (F : precategory_fun C C')
     (a b : ob C)(f : iso a b) :
@@ -253,7 +253,7 @@ Proof.
 Qed. 
 
 
-(** *** Fully faithful functors *)
+(** ** Fully faithful functors *)
 
 Definition fully_faithful {C D : precategory} (F : precategory_fun C D) := 
   forall a b : ob C, 
@@ -322,7 +322,7 @@ Qed.
 
 
 
-(** Fully faithful functors reflect isos *)
+(** *** Fully faithful functors reflect isos *)
 
 Lemma fully_faithful_reflects_iso_proof (C D : precategory)(F : precategory_fun C D) 
         (HF : fully_faithful F)
@@ -387,12 +387,12 @@ Qed.
 
 
 
-(** *** Essentially surjective functors *)
+(** ** Essentially surjective functors *)
 
 Definition essentially_surjective {C D : precategory} (F : precategory_fun C D) :=
   forall b, ishinh (total2 (fun a => iso (F a) b)).
    
-(** *** Faithful functors *)
+(** ** Faithful functors *)
 
 Definition faithful {C D : precategory} (F : precategory_fun C D) := 
   forall a b : ob C, forall f g : a --> b,
@@ -409,7 +409,7 @@ Proof.
   apply (pr2 (c --> b)).
 Qed.
 
-(** *** Full functors *)
+(** ** Full functors *)
 
 Definition full {C D : precategory} (F : precategory_fun C D) :=
    forall a b (g : F a --> F b), total2 (fun f : a --> b => #F f == g).
@@ -418,7 +418,7 @@ Definition full {C D : precategory} (F : precategory_fun C D) :=
 
 
 
-(** *** Fully faithful is the same as full and faithful *)
+(** ** Fully faithful is the same as full and faithful *)
 
 Definition full_and_faithful {C D : precategory} (F : precategory_fun C D) :=
    dirprod (full F) (faithful F).
@@ -575,63 +575,6 @@ Defined.
 
 
     
-(** ** Precategories in style of essentially algebraic cats *)
-(** Of course we later want SETS of objects, rather than types,
-    but the construction can already be specified.
-*)
-       
-Definition precategory_total_morphisms (C : precategory_ob_mor) := total2 (
-   fun ab : dirprod (ob C)(ob C) =>
-        precategory_morphisms (pr1 ab) (pr2 ab)).
-
-Lemma isaset_setcategory_total_morphisms (C : setcategory) : 
-   isaset (precategory_total_morphisms C).
-Proof.
-  change isaset with (isofhlevel 2).
-  apply isofhleveltotal2.
-  apply isofhleveldirprod;
-  apply C.
-  exact (fun x => (pr2 (pr1 x --> pr2 x))).
-Qed.
-
-Definition setcategory_total_morphisms_set (C : setcategory) : hSet :=
-    hSetpair _ (isaset_setcategory_total_morphisms C).
-
-Definition precategory_source (C : precategory_ob_mor) : 
-     precategory_total_morphisms C -> ob C := 
-     fun abf => pr1 (pr1 abf).
-
-Definition precategory_target (C : precategory_ob_mor) : 
-     precategory_total_morphisms C -> ob C := 
-     fun abf => pr2 (pr1 abf).
-
-Definition precategory_total_id (C : precategory_data) : 
-      ob C -> precategory_total_morphisms C :=
-      fun c => tpair _ (dirprodpair c c) (precategory_identity c).
-
-Definition precategory_total_comp'' (C : precategory_data) : 
-      forall f g : precategory_total_morphisms C,
-        precategory_target C f == precategory_source C g ->
-         precategory_total_morphisms C.
-Proof.
-  intros f g H.
-  destruct f as [[a b] f]. simpl in *.
-  destruct g as [[b' c] g]. simpl in *.
-  unfold precategory_target in H; simpl in H.
-  unfold precategory_source in H; simpl in H. 
-  simpl.
-  exists (dirprodpair a c). simpl.
-  exact ((f ;; precategory_eq_morphism C b b' H) ;; g).
-Defined.
-
-Definition precategory_total_comp (C : precategory_data) : 
-      forall f g : precategory_total_morphisms C,
-        precategory_target C f == precategory_source C g ->
-         precategory_total_morphisms C := 
-  fun f g H => 
-     tpair _ (dirprodpair (pr1 (pr1 f))(pr2 (pr1 g)))
-        ((pr2 f ;; precategory_eq_morphism _ _ _ H) ;; pr2 g).
-
 
 
 (** * Natural transformations *)
@@ -641,6 +584,9 @@ Definition precategory_fun_fun_data {C C' : precategory_data}
   (F F' : precategory_ob_mor_fun C C') :=
      forall x : ob C, F x --> F' x.
 *)
+
+(** ** Definition of natural transformations *)
+
 Definition is_precategory_fun_fun {C C' : precategory_data}
   (F F' : precategory_ob_mor_fun C C')
   (t : forall x : ob C, F x -->  F' x) := 
@@ -713,7 +659,7 @@ Proof.
 Qed.
 
 
-(** ** Functor category (C,C') *)
+(** ** Functor category [[C, D]] *)
 
 Definition precategory_fun_fun_precategory_ob_mor (C C' : precategory_data): 
   precategory_ob_mor := precategory_ob_mor_pair 

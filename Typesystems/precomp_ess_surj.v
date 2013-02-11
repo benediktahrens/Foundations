@@ -46,6 +46,8 @@ Notation "[ C , D ]" := (precategory_fun_precategory C D).
 Local Notation "# F" := (precategory_ob_mor_fun_morphisms F)(at level 3).
 
 
+(** * Lengthy preparation for the main result of this file *)
+
 Section lemma64.
 
 (** ** Section variables *)
@@ -61,7 +63,7 @@ Hypothesis Hff : fully_faithful H.
 Section essentially_surjective.
 
 
-(** ** Preimage of a functor [F] *)
+(** ** Specification of preimage [G] of a functor [F] *)
 
 (** Given a functor [F] from [A] to [C], we construct [G] such that
        [F == G O H] *)
@@ -234,6 +236,8 @@ Qed.
 (** The object part of [G], [Go b], is defined as the first component of 
     the center of [X b]. *)
 
+(** *** [G] on objects *)
+
 Definition Go : ob B -> ob C :=
    fun b : ob B =>
       pr1 (pr1 (pr1 (lemma64_claim1 b))).
@@ -357,7 +361,7 @@ transportf (fun c' : ob C => forall a : ob A, iso (pr1 H a) b ->
 *)
 
 
-(** ** [G] on morphisms *)
+(** *** Preparation for [G] on morphisms *)
 
 (** [G f] will be defined as the first component of the center of
      contraction of [Y f]. *)
@@ -568,6 +572,7 @@ Proof.
   apply Y_contr_eq.
 Qed.
 
+(** *** [G] on morphisms *)
 
 (** We now have the data necessary to define the functor [G]. *)
 
@@ -1103,7 +1108,7 @@ Qed.
 
 Definition GG : ob [B, C] := tpair _ G_precategory_ob_mor_fun is_precategory_fun.
 
-(** ** [GG] is the preimage of [F] under [ _ O H] *)
+(** ** [G] is the preimage of [F] under [ _ O H] *)
 
 (** Given any [a : A], we produce an element in [X (H a)], whose
      first component is [F a]. 
@@ -1259,7 +1264,7 @@ End preimage.
 End essentially_surjective.
 
 
-(** ** The main result *)
+(** * Precomposition with an ess. surj. and f. f. functor is ess. surj. *)
 (** Abstracting from [F] by closing the previous section,
     we can prove essential surjectivity of [_ O H]. *)
 

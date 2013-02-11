@@ -349,8 +349,7 @@ Definition precategory_fun_full_img {C D: precategory}
 
 
 
-(** *** Small exercise: Morphisms in the full subcategory are equivalent to 
-        morphisms in the precategory *)
+(** *** Morphisms in the full subprecat are equiv to morphisms in the precategory *)
 (** does of course not need the category hypothesis *)
 
 Definition hom_in_subcat_from_hom_in_precat (C : precategory) 
@@ -622,8 +621,7 @@ Proof.
   apply H.
 Qed.
 
-(** *** Decomposition of the map from identities in the subcat to 
-       isos in the subcat via isos in the category  *)
+(** *** Decomp of map from id in the subcat to isos in the subcat via isos in ambient precat  *)
 
 Lemma precat_paths_in_sub_as_3_maps
    (a b : ob (full_sub_precategory C')):
@@ -642,8 +640,7 @@ Proof.
   apply idpath.
 Qed.
 
-(** *** The aforementioned decomposed map is a weak equivalence since
-        its decomposition pieces are *)
+(** *** The aforementioned decomposed map is a weak equivalence  *)
 
 Lemma isweq_sub_precat_paths_to_iso 
   (a b : ob (full_sub_precategory C')) :
