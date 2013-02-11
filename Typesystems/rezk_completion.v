@@ -30,6 +30,7 @@ Require Import AXIOM_dep_funext.
 Require Import precategories.
 Require Import precategory_of_hsets.
 Require Import yoneda.
+Require Import sub_precategories.
 Require Import precategory_equivalences.
 Require Import precategory_whiskering.
 Require Import precategory_lemma62.
