@@ -50,7 +50,7 @@ Proof.
   apply (fun _ => B).
 Qed.
 
-Definition set_fun_space (A B : hSet) : hSet := 
+Definition hset_fun_space (A B : hSet) : hSet := 
   hSetpair _ (isaset_set_fun_space A B).
 
 Definition hset_precategory_ob_mor : precategory_ob_mor :=
