@@ -1225,7 +1225,7 @@ Proof.
   apply is_preimage_for_pre_composition.
 Qed.
 
-End lemma64.
+End precomp_w_ess_surj_ff_is_ess_surj.
 
 
 
