@@ -47,7 +47,7 @@ Ltac pathvia b := (apply (@pathscomp0 _ _ b _ )).
 
 Local Notation "a --> b" := (precategory_morphisms a b)(at level 50).
 (*Local Notation "'hom' C" := (precategory_morphisms (C := C)) (at level 2).*)
-Local Notation "f ;; g" := (precategory_compose f g)(at level 50).
+Local Notation "f ;; g" := (compose f g)(at level 50).
 Notation "[ C , D ]" := (precategory_fun_precategory C D).
 Local Notation "# F" := (precategory_ob_mor_fun_morphisms F)(at level 3).
 

@@ -43,7 +43,7 @@ Notation "p @ q" := (pathscomp0 p q) (at level 60, right associativity).
 
 (*Local Notation "a --> b" := (precategory_morphisms a b)(at level 50).*)
 Local Notation "'hom' C" := (precategory_morphisms (C := C)) (at level 2).
-Local Notation "f ;; g" := (precategory_compose f g)(at level 50).
+Local Notation "f ;; g" := (compose f g)(at level 50).
 Notation "[ C , D ]" := (precategory_fun_precategory C D).
 Local Notation "# F" := (precategory_ob_mor_fun_morphisms F)(at level 3).
 
@@ -60,16 +60,16 @@ Definition opp_precat_data (C : precategory_data) : precategory_data.
 Proof.
   exists (opp_precat_op_mor C).
   split.
-  exact (fun c => precategory_identity c).
+  exact (fun c => identity c).
   simpl.
   intros a b c f g.
   exact (g ;; f).
 Defined.
 
-Hint Unfold precategory_identity.
+Hint Unfold identity.
 
-Ltac unf := unfold precategory_identity, 
-                   precategory_compose, 
+Ltac unf := unfold identity, 
+                   compose, 
                    precategory_morphisms;
                    simpl.
 
@@ -77,11 +77,11 @@ Lemma is_precat_opp_precat_data (C : precategory) : is_precategory (opp_precat_d
 Proof.
   repeat split; simpl.
   intros. unf.
-  apply precategory_id_right.
+  apply id_right.
   intros; unf.
-  apply precategory_id_left.
+  apply id_left.
   intros; unf.
-  rewrite precategory_assoc.
+  rewrite assoc.
   apply idpath.
 Qed.
 
@@ -121,10 +121,10 @@ Proof.
   repeat split; unf; simpl.
   intros.
   apply funextsec.
-  intro f. unf. apply precategory_id_left.
+  intro f. unf. apply id_left.
   intros a b d f g.
   apply funextsec. intro h.
-  apply (! precategory_assoc _ _ _ _ _ _ _ _ ).
+  apply (! assoc _ _ _ _ _ _ _ _ ).
 Qed.
 
 Definition yoneda_objects (C : precategory) (c : ob C) : 
@@ -154,7 +154,7 @@ Proof.
   unfold yoneda_objects_ob. simpl.
   unf.
   intro h.
-  apply  ( ! precategory_assoc _ _ _ _ _ _ _ _  ).
+  apply  ( ! assoc _ _ _ _ _ _ _ _  ).
 Qed.
 
 Definition yoneda_morphisms (C : precategory) (c c' : ob C)
@@ -183,7 +183,7 @@ Proof.
   intro c.
   apply funextsec.
   intro f.
-  apply precategory_id_right.
+  apply id_right.
   intros a b c f g.
   apply precategory_fun_fun_eq.
   unf.
@@ -192,7 +192,7 @@ Proof.
   intro d.
   apply funextsec.
   intro h.
-  apply precategory_assoc.
+  apply assoc.
 Qed.
 
 Definition yoneda (C : precategory) : precategory_fun C [C^op, HSET] :=
@@ -207,7 +207,7 @@ Definition yoneda (C : precategory) : precategory_fun C [C^op, HSET] :=
 Definition yoneda_map_1 (C : precategory)(c : ob C)
    (F : precategory_fun C^op HSET) :
        hom _ (yoneda C c) F -> pr1(F c) := 
-   fun h => pr1 h c (precategory_identity c).
+   fun h => pr1 h c (identity c).
 
 
 
@@ -253,7 +253,7 @@ Proof.
   intro f.
   unfold yoneda_map_1.
   simpl.
-  pathvia ((alpha c ;; #F f) (precategory_identity c)).
+  pathvia ((alpha c ;; #F f) (identity c)).
   apply idpath.
   set (H':= precategory_fun_fun_ax _ _ alpha  c a' f). simpl in H'.
   simpl in *.
@@ -261,7 +261,7 @@ Proof.
   clear H'. 
   unf. simpl.
   unfold yoneda_objects_ob in f.
-  set (H' := precategory_id_right C a' c f ).
+  set (H' := id_right C a' c f ).
   apply maponpaths.
   apply H'.
 Qed.
@@ -279,7 +279,7 @@ Qed.
 
 Lemma yoneda_iso_sets (C : precategory) (c : ob C)
    (F : precategory_fun C^op HSET) : 
-   is_precat_isomorphism (C:=HSET) (a := hom _ ((yoneda C) c) F) (b := F c)
+   is_isomorphism (C:=HSET) (a := hom _ ((yoneda C) c) F) (b := F c)
      (yoneda_map_1 C c F).
 Proof.
   exists (yoneda_map_2 C c F).

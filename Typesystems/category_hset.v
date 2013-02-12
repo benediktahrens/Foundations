@@ -99,12 +99,12 @@ Proof.
   destruct f as [f fax]; simpl in *.
   apply (gradth _ (pr1 fax)).
   destruct fax as [g [eta eps]]; simpl in *.
-  unfold precategory_compose, precategory_identity in *; 
+  unfold compose, identity in *; 
   simpl in *.
   intro x.
   apply (happly _ _ _ _ eta x).
   destruct fax as [g [eta eps]]; simpl in *.
-  unfold precategory_compose, precategory_identity in *; 
+  unfold compose, identity in *; 
   simpl in *.
   intro x.
   apply (happly _ _ _ _ eps x).
@@ -124,7 +124,7 @@ Defined.
 
 Lemma hset_equiv_is_iso (A B : hSet) 
       (f : weq (pr1 A) (pr1 B)) :
-           is_precat_isomorphism (C:=HSET) (pr1 f).
+           is_isomorphism (C:=HSET) (pr1 f).
 Proof.
   exists (invmap f).
   simpl.
@@ -132,10 +132,10 @@ Proof.
   set (H':= homotinvweqweq f).
   split; simpl.
   apply funextfunax; intro x; simpl in *.
-  unfold precategory_compose, precategory_identity; simpl.
+  unfold compose, identity; simpl.
   apply H'.
   apply funextfunax; intro x; simpl in *.
-  unfold precategory_compose, precategory_identity; simpl.
+  unfold compose, identity; simpl.
   apply H.
 Qed.
 
@@ -160,7 +160,7 @@ Proof.
   apply idpath.
   apply (total2_paths H).
   apply proofirrelevance.
-  apply isaprop_is_precat_isomorphism.
+  apply isaprop_is_isomorphism.
   intro g.
   assert (H : pr1 (hset_iso_equiv A B (hset_equiv_iso A B g)) == 
               pr1 g).
@@ -195,7 +195,7 @@ Proof.
   apply idpath.
   apply (total2_paths H).
   apply proofirrelevance.
-  apply isaprop_is_precat_isomorphism.
+  apply isaprop_is_isomorphism.
 Qed.
 
 Definition hset_equiv_iso_weq (A B : ob HSET) :
@@ -236,7 +236,7 @@ Proof.
              simpl.
   simpl in *.
   apply funextfun.
-  unfold precategory_identity. simpl.
+  unfold identity. simpl.
   intro x; 
   simpl. clear p.
   destruct A as [A As].
@@ -244,7 +244,7 @@ Proof.
   
   apply (total2_paths H).
   apply proofirrelevance.
-  apply isaprop_is_precat_isomorphism.
+  apply isaprop_is_isomorphism.
 Defined.
 
 

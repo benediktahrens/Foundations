@@ -46,7 +46,7 @@ Ltac pathvia b := (apply (@pathscomp0 _ _ b _ )).
 
 Local Notation "a --> b" := (precategory_morphisms a b)(at level 50).
 (*Local Notation "'hom' C" := (precategory_morphisms (C := C)) (at level 2).*)
-Local Notation "f ;; g" := (precategory_compose f g)(at level 50).
+Local Notation "f ;; g" := (compose f g)(at level 50).
 Notation "[ C , D ]" := (precategory_fun_precategory C D).
 Local Notation "# F" := (precategory_ob_mor_fun_morphisms F)(at level 3).
 
@@ -136,8 +136,8 @@ Proof.
   apply (pre_comp_with_iso_is_inj _ _ _ _ (precategory_fun_on_iso _ _ F _ _ h)
                                           (pr2 (precategory_fun_on_iso _ _ F _ _ h))).
                                           
-  repeat rewrite precategory_assoc.
-     rewrite iso_inv_after_iso. rewrite precategory_id_left.
+  repeat rewrite assoc.
+     rewrite iso_inv_after_iso. rewrite id_left.
   apply ( post_comp_with_iso_is_inj _ _ _  
           (iso_inv_from_iso (precategory_fun_on_iso _ _ G _ _ h))
                      (pr2 (iso_inv_from_iso (precategory_fun_on_iso _ _ G _ _ h)))).
@@ -145,13 +145,13 @@ Proof.
   set (H3 :=  base_paths _ _ (precategory_fun_on_iso_inv _ _ G _ _ h)).
   simpl in H3.
   rewrite <- H3.
-  repeat rewrite <- precategory_assoc.
+  repeat rewrite <- assoc.
   rewrite <- precategory_fun_comp.
   rewrite iso_inv_after_iso.
   rewrite precategory_fun_id.
-  rewrite precategory_id_right.
+  rewrite id_right.
   apply pathsinv0.
-  rewrite precategory_assoc.
+  rewrite assoc.
   apply qanoth.
   
   set (q'anoth := q' anot h).
@@ -161,8 +161,8 @@ Proof.
   apply (pre_comp_with_iso_is_inj _ _ _ _ (precategory_fun_on_iso _ _ F _ _ h)
                                           (pr2 (precategory_fun_on_iso _ _ F _ _ h))).
                                           
-  repeat rewrite precategory_assoc.
-     rewrite iso_inv_after_iso. rewrite precategory_id_left.
+  repeat rewrite assoc.
+     rewrite iso_inv_after_iso. rewrite id_left.
   apply ( post_comp_with_iso_is_inj _ _ _  
           (iso_inv_from_iso (precategory_fun_on_iso _ _ G _ _ h))
                      (pr2 (iso_inv_from_iso (precategory_fun_on_iso _ _ G _ _ h)))).
@@ -170,13 +170,13 @@ Proof.
   set (H3 :=  base_paths _ _ (precategory_fun_on_iso_inv _ _ G _ _ h)).
   simpl in H3.
   rewrite <- H3.
-  repeat rewrite <- precategory_assoc.
+  repeat rewrite <- assoc.
   rewrite <- precategory_fun_comp.
   rewrite iso_inv_after_iso.
   rewrite precategory_fun_id.
-  rewrite precategory_id_right.
+  rewrite id_right.
   apply pathsinv0.
-  rewrite precategory_assoc.
+  rewrite assoc.
   apply q'anoth.
   rewrite H1.
   rewrite H2.
@@ -221,9 +221,9 @@ Proof.
   
   set (P := post_comp_with_iso_is_inj _ _ _ GHk (pr2 GHk)).
   apply P.
-  rewrite <- precategory_assoc.
+  rewrite <- assoc.
   change (iso_inv_from_iso GHk ;; GHk) with (inv_from_iso GHk ;; GHk).
-  rewrite iso_after_iso_inv. rewrite precategory_id_right.
+  rewrite iso_after_iso_inv. rewrite id_right.
   set (Hgamma := precategory_fun_fun_ax _ _ gamma).
   simpl in Hgamma.
   rewrite Hgamma. apply idpath.
@@ -243,7 +243,7 @@ Proof.
   simpl in H4. rewrite H4.
   rewrite precategory_fun_comp.
   unfold g.
-  repeat rewrite precategory_assoc.
+  repeat rewrite assoc.
   apply idpath.
   apply iscontraprop1.
   apply claim1_isinhabited.
@@ -289,8 +289,8 @@ Proof.
                                 gamma a ;; #G h).
   apply (pre_comp_with_iso_is_inj _ _ _ _ (precategory_fun_on_iso _ _ F _ _ h)
                                           (pr2 (precategory_fun_on_iso _ _ F _ _ h))).
-  repeat rewrite precategory_assoc.
-     rewrite iso_inv_after_iso. rewrite precategory_id_left.
+  repeat rewrite assoc.
+     rewrite iso_inv_after_iso. rewrite id_left.
   apply ( post_comp_with_iso_is_inj _ _ _  
           (iso_inv_from_iso (precategory_fun_on_iso _ _ G _ _ h))
                      (pr2 (iso_inv_from_iso (precategory_fun_on_iso _ _ G _ _ h)))).
@@ -298,14 +298,14 @@ Proof.
   set (H3 :=  base_paths _ _ (precategory_fun_on_iso_inv _ _ G _ _ h)).
   simpl in H3.
   rewrite <- H3.
-  repeat rewrite <- precategory_assoc.
+  repeat rewrite <- assoc.
   rewrite <- precategory_fun_comp.
   rewrite iso_inv_after_iso.
   rewrite precategory_fun_id.
-  rewrite precategory_id_right.
+  rewrite id_right.
   apply pathsinv0.
   clear H3.
-  rewrite precategory_assoc.
+  rewrite assoc.
   apply HH.
   
   
@@ -313,8 +313,8 @@ Proof.
                                 gamma a' ;; #G h').
   apply (pre_comp_with_iso_is_inj _ _ _ _ (precategory_fun_on_iso _ _ F _ _ h')
                                           (pr2 (precategory_fun_on_iso _ _ F _ _ h'))).
-  repeat rewrite precategory_assoc.
-     rewrite iso_inv_after_iso. rewrite precategory_id_left.
+  repeat rewrite assoc.
+     rewrite iso_inv_after_iso. rewrite id_left.
   apply ( post_comp_with_iso_is_inj _ _ _  
           (iso_inv_from_iso (precategory_fun_on_iso _ _ G _ _ h'))
                      (pr2 (iso_inv_from_iso (precategory_fun_on_iso _ _ G _ _ h')))).
@@ -322,29 +322,29 @@ Proof.
   set (H3 :=  base_paths _ _ (precategory_fun_on_iso_inv _ _ G _ _ h')).
   simpl in H3.
   rewrite <- H3.
-  repeat rewrite <- precategory_assoc.
+  repeat rewrite <- assoc.
   rewrite <- precategory_fun_comp.
   rewrite iso_inv_after_iso.
   rewrite precategory_fun_id.
-  rewrite precategory_id_right.
+  rewrite id_right.
   apply pathsinv0.
   clear H3.
-  rewrite precategory_assoc.
+  rewrite assoc.
   set (gq' := pr1 (claim1 b')).
   set (q' := pr2 gq').
   set (HH' := q' a' h').
   apply HH'.
   
   rewrite Hb.
-  repeat rewrite <- precategory_assoc.
+  repeat rewrite <- assoc.
   simpl in *.
   rewrite <- (precategory_fun_comp _ _ G _ _ _ h f).
   clear HH q g gq.
   pathvia (inv_from_iso (precategory_fun_on_iso B C F (H a) b h);;
        (gamma a;; #G (h;; f ;; iso_inv_from_iso h' ;; h')) ).
-    repeat rewrite <- precategory_assoc.
+    repeat rewrite <- assoc.
     simpl. rewrite iso_after_iso_inv. 
-           rewrite precategory_id_right.
+           rewrite id_right.
            apply idpath.
   repeat rewrite precategory_assoc.
   rewrite (precategory_fun_comp _ _ G).
@@ -354,24 +354,24 @@ Proof.
   simpl in H3. 
   unfold fully_faithful_inv_hom in P. simpl in P.
   rewrite H3 in P.
-  repeat rewrite <- precategory_assoc.
-  rewrite (precategory_assoc _ _ _ _ _ (gamma a)).
+  repeat rewrite <- assoc.
+  rewrite (assoc _ _ _ _ _ (gamma a)).
   simpl in *.
   rewrite <- P.
   clear H3 P.
   set (H4 := precategory_fun_on_iso_inv _ _ F _ _ h).
   set (H5 := base_paths _ _ H4). simpl in H5.
   rewrite <- H5.
-  repeat rewrite precategory_assoc.
+  repeat rewrite assoc.
   rewrite <- (precategory_fun_comp _ _ F).
-  repeat rewrite precategory_assoc.
+  repeat rewrite assoc.
   rewrite iso_after_iso_inv.
-  rewrite precategory_id_left.
+  rewrite id_left.
   rewrite (precategory_fun_comp _ _ F).
   rewrite precategory_fun_on_inv_from_iso.
   apply pathsinv0.
   rewrite Hb'.
-  repeat rewrite precategory_assoc.
+  repeat rewrite assoc.
   apply idpath.
 Qed.
 
@@ -396,16 +396,16 @@ Proof.
   set (gaid := q a (identity_iso _ )).
   simpl in *.
   change (gamma a) with (pr1 gamma a). 
-  pathvia ((#(pr1 F) (precategory_identity ((pr1 H) a));; pr1 tr);;
+  pathvia ((#(pr1 F) (identity ((pr1 H) a));; pr1 tr);;
        #(pr1 G) (inv_from_iso (identity_iso ((pr1 H) a)))).
        Focus 2. apply pathsinv0. apply gaid.
   rewrite (precategory_fun_id _ _ F).
-  rewrite precategory_id_left.
+  rewrite id_left.
   set (P := iso_inv_of_iso_id _ (pr1 H a)).
   set (Pr := base_paths _ _ P); simpl in Pr.
   rewrite Pr. clear Pr P. simpl in *.
   rewrite (precategory_fun_id _ _ G) .
-  rewrite precategory_id_right.
+  rewrite id_right.
   apply idpath.
 Qed.
   

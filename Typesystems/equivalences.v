@@ -48,7 +48,7 @@ Ltac pathvia b := (apply (@pathscomp0 _ _ b _ )).
 
 Local Notation "a --> b" := (precategory_morphisms a b)(at level 50).
 (*Local Notation "'hom' C" := (precategory_morphisms (C := C)) (at level 2).*)
-Local Notation "f ;; g" := (precategory_compose f g)(at level 50).
+Local Notation "f ;; g" := (compose f g)(at level 50).
 Notation "[ C , D ]" := (precategory_fun_precategory C D).
 Local Notation "# F" := (precategory_ob_mor_fun_morphisms F)(at level 3).
 
@@ -67,9 +67,9 @@ Definition form_adjunction (A B : precategory) (F : ob [A, B])
        (eps : precategory_fun_fun (pr1 (F O G)) (precategory_fun_identity B)) : UU :=
 dirprod 
   (forall a : ob A,
-       # (pr1 F) (pr1 eta a) ;;   pr1 eps (pr1 F a) == precategory_identity (pr1 F a))
+       # (pr1 F) (pr1 eta a) ;;   pr1 eps (pr1 F a) == identity (pr1 F a))
   (forall b : ob B,
-       pr1 eta (pr1 G b) ;; # (pr1 G) (pr1 eps b) == precategory_identity (pr1 G b)).
+       pr1 eta (pr1 G b) ;; # (pr1 G) (pr1 eps b) == identity (pr1 G b)).
 
 Definition are_adjoints (A B : precategory) (F : ob [A, B])
     (G : ob [B, A]) : UU :=
@@ -100,23 +100,22 @@ Definition triangle_id_left_ad (A B : precategory) (F : ob [A, B])
   forall (a : ob A),
        #(pr1 F) (pr1 (pr1 (pr1 (pr2 H))) a);;
        pr1 (pr2 (pr1 (pr2 H))) ((pr1 F) a) ==
-       precategory_identity ((pr1 F) a) := pr1 (pr2 (pr2 H)).
+       identity ((pr1 F) a) := pr1 (pr2 (pr2 H)).
 
 Definition triangle_id_right_ad (A B : precategory) (F : ob [A, B]) 
       (H : is_left_adjoint _ _ F) :
   forall b : ob B,
         pr1 (pr1 (pr1 (pr2 H))) ((pr1 (pr1 H)) b);;
         #(pr1 (pr1 H)) (pr1 (pr2 (pr1 (pr2 H))) b) ==
-        precategory_identity ((pr1 (pr1 H)) b)
-   := pr2 (pr2 (pr2 H)).
+        identity ((pr1 (pr1 H)) b) := pr2 (pr2 (pr2 H)).
 
 (** * Equivalence of (pre)categories *)
 
 Definition equivalence_of_precats (A B : precategory)(F : ob [A, B]) : UU :=
    total2 (fun H : is_left_adjoint _ _ F =>
-     dirprod (forall a, is_precat_isomorphism 
+     dirprod (forall a, is_isomorphism 
                     (eta_from_left_adjoint A B F H a))
-             (forall b, is_precat_isomorphism
+             (forall b, is_isomorphism
                     (eps_from_left_adjoint A B F H b))
              ).
 
@@ -209,7 +208,7 @@ Proof.
   simpl. 
   rewrite transportf_idpath.
   rewrite precategory_fun_id.
-  rewrite precategory_id_left.
+  rewrite id_left.
   apply idpath.
   
  
@@ -242,9 +241,9 @@ Proof.
   rewrite iso_inv_of_iso_comp.
   apply eq_iso.
   simpl.
-  repeat rewrite <- precategory_assoc.
+  repeat rewrite <- assoc.
   rewrite iso_after_iso_inv.
-  rewrite precategory_id_right.
+  rewrite id_right.
   set (H := iso_inv_iso_inv _ _ _ f').
   set (h':= base_paths _ _ H).
   assumption.
@@ -325,7 +324,7 @@ Proof.
   split; simpl.
   intro b.
   unfold rad_mor. simpl.
-  rewrite precategory_id_right.
+  rewrite id_right.
   rewrite iso_inv_after_iso.
   rewrite fully_faithful_inv_identity.
   apply idpath.
@@ -334,12 +333,12 @@ Proof.
   unfold rad_mor; simpl.
   rewrite <- fully_faithful_inv_comp.
   apply maponpaths.
-  repeat rewrite <- precategory_assoc.
+  repeat rewrite <- assoc.
   apply maponpaths.
   apply maponpaths.
-  rewrite precategory_assoc.
+  rewrite assoc.
   rewrite iso_after_iso_inv.
-  rewrite precategory_id_left.
+  rewrite id_left.
   apply idpath.
 Qed.
 
@@ -365,9 +364,9 @@ Proof.
   unfold fully_faithful_inv_hom.
   simpl.
   rewrite H3.
-  repeat rewrite <- precategory_assoc.
+  repeat rewrite <- assoc.
   rewrite iso_after_iso_inv.
-  rewrite precategory_id_right.
+  rewrite id_right.
   apply idpath.
 Qed.
 
@@ -412,14 +411,14 @@ Proof.
   unfold fully_faithful_inv_hom. simpl.
   rewrite H3.
   unfold rad_mor. simpl.
-  repeat rewrite <- precategory_assoc.
+  repeat rewrite <- assoc.
   rewrite iso_inv_after_iso.
-  rewrite precategory_id_right.
+  rewrite id_right.
   unfold fully_faithful_inv_hom; simpl.
   rewrite H3.
-  repeat rewrite precategory_assoc.
+  repeat rewrite assoc.
   rewrite iso_after_iso_inv. 
-  rewrite precategory_id_left.
+  rewrite id_left.
   apply idpath.
 Qed.
 
@@ -465,11 +464,11 @@ Proof.
                                         (rad_ob b))).
   simpl in H3.
   rewrite H3. clear H3.
-  repeat rewrite precategory_assoc.
+  repeat rewrite assoc.
   rewrite iso_after_iso_inv.
-  rewrite <- precategory_assoc.
+  rewrite <- assoc.
   rewrite iso_inv_after_iso.
-  rewrite precategory_id_left.
+  rewrite id_left.
   rewrite precategory_fun_id.
   apply idpath.
 Qed.

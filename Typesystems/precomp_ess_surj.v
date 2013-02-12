@@ -41,7 +41,7 @@ Ltac pathvia b := (apply (@pathscomp0 _ _ b _ )).
 
 Local Notation "a --> b" := (precategory_morphisms a b)(at level 50).
 (*Local Notation "'hom' C" := (precategory_morphisms (C := C)) (at level 2).*)
-Local Notation "f ;; g" := (precategory_compose f g)(at level 50).
+Local Notation "f ;; g" := (compose f g)(at level 50).
 Notation "[ C , D ]" := (precategory_fun_precategory C D).
 Local Notation "# F" := (precategory_ob_mor_fun_morphisms F)(at level 3).
 
@@ -117,7 +117,7 @@ Proof.
   rewrite H3.
   (*rewrite H3.*)
   clear H3.
-  rewrite precategory_assoc.
+  rewrite assoc.
   set (H3 := homotweqinvweq (weq_from_fully_faithful _ _ _ Hff a anot)).
   simpl in H3.
   unfold fully_faithful_inv_hom. simpl.
@@ -179,9 +179,9 @@ Proof.
   simpl in H3.
   unfold fully_faithful_inv_hom. simpl.
   rewrite H3.
-    rewrite <- precategory_assoc.
+    rewrite <- assoc.
     rewrite iso_after_iso_inv.
-    apply precategory_id_right.
+    apply id_right.
   set (quack := qhelp feedtoqhelp).
   simpl in *.
   
@@ -197,7 +197,7 @@ Proof.
   simpl.
   rewrite transportf_idpath.
   apply eq_iso. simpl.
-  rewrite precategory_id_right.
+  rewrite id_right.
   apply idpath.
   
   apply eq_iso.
@@ -260,7 +260,7 @@ Proof.
   simpl.
   apply eq_iso.
   simpl.
-  rewrite precategory_id_right.
+  rewrite id_right.
   apply idpath.
 Qed.
 *)
@@ -301,7 +301,7 @@ Proof.
   rewrite transportf_idpath.
   apply eq_iso.
   simpl.
-  apply precategory_id_right.
+  apply id_right.
 Qed.
 *)
  
@@ -345,7 +345,7 @@ Proof.
   induction i.
   rewrite transportf_idpath.
   simpl.
-  apply precategory_id_right.
+  apply id_right.
 Qed.
   
   
@@ -402,9 +402,9 @@ Proof.
   simpl in H3.
   unfold fully_faithful_inv_hom. simpl.
   rewrite H3.
-  rewrite <- precategory_assoc.
+  rewrite <- assoc.
   rewrite iso_after_iso_inv.
-  apply precategory_id_right.
+  apply id_right.
   
   assert (ssss : iso_comp (precategory_fun_on_iso _ _ F _ _  m') (k b' a' h') == 
                    k b' a0' h0').
@@ -416,9 +416,9 @@ Proof.
   simpl in H3.
   unfold fully_faithful_inv_hom. simpl.
   rewrite H3.
-  rewrite <- precategory_assoc.
+  rewrite <- assoc.
   rewrite iso_after_iso_inv.
-  apply precategory_id_right.
+  apply id_right.
   
   set (hfh := h0 ;; f ;; inv_from_iso h0').
   set (l0 := fully_faithful_inv_hom _ _ H Hff _ _ hfh).
@@ -440,27 +440,27 @@ Proof.
   unfold hfh.
   
   pathvia (h0 ;; f ;; (inv_from_iso h0' ;; h0') ;; inv_from_iso h').
-  repeat rewrite precategory_assoc; apply idpath.
+  repeat rewrite assoc; apply idpath.
   
-  rewrite iso_after_iso_inv. rewrite precategory_id_right.
+  rewrite iso_after_iso_inv. rewrite id_right.
   
   rewrite (precategory_fun_comp _ _ H).
   set (H3 := homotweqinvweq (weq_from_fully_faithful _ _ _ Hff a0 a)).
   simpl in H3.
   unfold fully_faithful_inv_hom. simpl.
   rewrite H3. clear H3.
-  repeat rewrite <- precategory_assoc.
+  repeat rewrite <- assoc.
   apply maponpaths.
   apply pathsinv0.
   apply iso_inv_on_right.
-  rewrite precategory_assoc.
+  rewrite assoc.
   apply iso_inv_on_left.
   apply pathsinv0.
   apply alpha.
 
   assert (star5 : inv_from_iso m ;; l0 == l ;; inv_from_iso m').
   apply iso_inv_on_right.
-  rewrite precategory_assoc.
+  rewrite assoc.
   apply iso_inv_on_left.
   apply (equal_transport_along_weq _ _ (weq_from_fully_faithful _ _ _ Hff a0 a' )).
   apply pathsinv0.
@@ -479,7 +479,7 @@ Proof.
   apply pathsinv0.
   apply sss'.
   
-  repeat rewrite precategory_assoc.
+  repeat rewrite assoc.
   rewrite sss''. clear sss'' sss' sss.
   
   rewrite <- precategory_fun_on_inv_from_iso.
@@ -497,7 +497,7 @@ Proof.
   apply pathsinv0.
   simpl in ssss'. simpl.
   apply ssss'.
-  rewrite <- precategory_assoc.
+  rewrite <- assoc.
   rewrite star4.
   apply idpath.
 Qed.
@@ -525,7 +525,7 @@ Proof.
   apply pathsinv0.
   assert (Hpr : pr1 (Y_inhab b b' f a0 h0 a0' h0') == pr1 t).
   destruct t as [g1 r1]; simpl in *.
-  rewrite <- precategory_assoc.
+  rewrite <- assoc.
   apply iso_inv_on_right.
   set (hfh := h0 ;; f ;; inv_from_iso h0').
   set (l0 := fully_faithful_inv_hom _ _ H Hff _ _ hfh).
@@ -537,8 +537,8 @@ Proof.
   unfold fully_faithful_inv_hom. simpl.
   rewrite H3. clear H3.
   unfold hfh.
-  repeat rewrite <- precategory_assoc.
-  rewrite iso_after_iso_inv. rewrite precategory_id_right.
+  repeat rewrite <- assoc.
+  rewrite iso_after_iso_inv. rewrite id_right.
   apply idpath.
   apply (total2_paths Hpr).
   apply proofirrelevance.
@@ -596,20 +596,20 @@ Proof.
   assert (PR2 : forall (a : ob A) (h : iso ((pr1 H) a) b) (a' : ob A) 
           (h' : iso ((pr1 H) a') b)
     (l : a --> a'),
-  #(pr1 H) l;; h' == h;; precategory_identity b ->
-  #(pr1 F) l;; k b a' h' == k b a h;; precategory_identity (Go b)).
+  #(pr1 H) l;; h' == h;; identity b ->
+  #(pr1 F) l;; k b a' h' == k b a h;; identity (Go b)).
   intros a h a' h' l LL.
-  rewrite precategory_id_right.
+  rewrite id_right.
   set (qb := q b (tpair _ a h) (tpair _ a' h') l).
   simpl in qb.
   apply qb.
-  rewrite precategory_id_right in LL.
+  rewrite id_right in LL.
   apply LL.
   set (Gbrtilde :=
-           tpair _ (precategory_identity (Go b)) PR2 : Y b b (precategory_identity b)).
+           tpair _ (identity (Go b)) PR2 : Y b b (identity b)).
 
   
-  set (H' := pr2 (Y_iscontr b b (precategory_identity b)) Gbrtilde).
+  set (H' := pr2 (Y_iscontr b b (identity b)) Gbrtilde).
   set (H'' := base_paths _ _ H').
   simpl in H'.
   rewrite <- H'.
@@ -660,15 +660,15 @@ Proof.
   rewrite HFFaa.
   clear HFFaa.
   pathvia (h0 ;; f ;; (inv_from_iso h0' ;; h0') ;; f' ;; inv_from_iso h0'').
-  repeat rewrite precategory_assoc; apply idpath.
-  rewrite iso_after_iso_inv. rewrite precategory_id_right.
+  repeat rewrite assoc; apply idpath.
+  rewrite iso_after_iso_inv. rewrite id_right.
   unfold l0''.
   set (HFFaa := homotweqinvweq (weq_from_fully_faithful A B H Hff a0 a0'')).
   unfold fully_faithful_inv_hom.
   simpl in *.
   rewrite HFFaa.
   clear HFFaa.
-  repeat rewrite precategory_assoc; apply idpath.
+  repeat rewrite assoc; apply idpath.
   
   
   assert (PR2 : forall (a : ob A) (h : iso ((pr1 H) a) b)(a' : ob A)
@@ -696,9 +696,9 @@ Proof.
   simpl in H3.
   unfold fully_faithful_inv_hom. simpl.
   rewrite H3.
-  rewrite <- precategory_assoc.
+  rewrite <- assoc.
   rewrite iso_after_iso_inv.
-  apply precategory_id_right.
+  apply id_right.
   
   assert (ssss : iso_comp (precategory_fun_on_iso _ _ F _ _  m') (k b' a' h') == 
                    k b' a0' h0').
@@ -710,9 +710,9 @@ Proof.
   simpl in H3.
   unfold fully_faithful_inv_hom. simpl.
   rewrite H3.
-  rewrite <- precategory_assoc.
+  rewrite <- assoc.
   rewrite iso_after_iso_inv.
-  apply precategory_id_right.
+  apply id_right.
   
   assert (sssss : #(pr1 H) (l0 ;; m') == #(pr1 H) (m ;; l)).
   rewrite (precategory_fun_comp _ _ H).
@@ -730,27 +730,27 @@ Proof.
 (*  unfold hfh.*)
   
   pathvia (h0 ;; f ;; (inv_from_iso h0' ;; h0') ;; inv_from_iso h').
-  repeat rewrite precategory_assoc; apply idpath.
+  repeat rewrite assoc; apply idpath.
   
-  rewrite iso_after_iso_inv. rewrite precategory_id_right.
+  rewrite iso_after_iso_inv. rewrite id_right.
   
   rewrite (precategory_fun_comp _ _ H).
   set (H3 := homotweqinvweq (weq_from_fully_faithful _ _ _ Hff a0 a)).
   simpl in H3.
   unfold fully_faithful_inv_hom. simpl.
   rewrite H3. clear H3.
-  repeat rewrite <- precategory_assoc.
+  repeat rewrite <- assoc.
   apply maponpaths.
   apply pathsinv0.
   apply iso_inv_on_right.
-  rewrite precategory_assoc.
+  rewrite assoc.
   apply iso_inv_on_left.
   apply pathsinv0.
   apply alpha.
 
   assert (star5 : inv_from_iso m ;; l0 == l ;; inv_from_iso m').
   apply iso_inv_on_right.
-  rewrite precategory_assoc.
+  rewrite assoc.
   apply iso_inv_on_left.
   apply (equal_transport_along_weq _ _ (weq_from_fully_faithful _ _ _ Hff a0 a' )).
   apply pathsinv0.
@@ -769,7 +769,7 @@ Proof.
   apply pathsinv0.
   apply sss'.
   
-  repeat rewrite precategory_assoc.
+  repeat rewrite assoc.
   rewrite sss''. clear sss'' sss' sss.
   
   rewrite <- precategory_fun_on_inv_from_iso.
@@ -787,7 +787,7 @@ Proof.
   apply pathsinv0.
   simpl in ssss'. simpl.
   apply ssss'.
-  rewrite <- precategory_assoc.
+  rewrite <- assoc.
   rewrite star4.
   apply idpath.
   
@@ -832,9 +832,9 @@ Proof.
   simpl in H3.
   unfold fully_faithful_inv_hom. simpl.
   rewrite H3.
-  rewrite <- precategory_assoc.
+  rewrite <- assoc.
   rewrite iso_after_iso_inv.
-  apply precategory_id_right.
+  apply id_right.
   
   assert (ssss : iso_comp (precategory_fun_on_iso _ _ F _ _  m') (k b'' a'' h'') == 
                    k b'' a0'' h0'').
@@ -846,9 +846,9 @@ Proof.
   simpl in H3.
   unfold fully_faithful_inv_hom. simpl.
   rewrite H3.
-  rewrite <- precategory_assoc.
+  rewrite <- assoc.
   rewrite iso_after_iso_inv.
-  apply precategory_id_right.
+  apply id_right.
   
   assert (sssss : #(pr1 H) (l0' ;; m') == #(pr1 H) (m ;; l')).
   rewrite (precategory_fun_comp _ _ H).
@@ -866,27 +866,27 @@ Proof.
 (*  unfold hfh.*)
   
   pathvia (h0' ;; f' ;; (inv_from_iso h0'' ;; h0'') ;; inv_from_iso h'').
-  repeat rewrite precategory_assoc; apply idpath.
+  repeat rewrite assoc; apply idpath.
   
-  rewrite iso_after_iso_inv. rewrite precategory_id_right.
+  rewrite iso_after_iso_inv. rewrite id_right.
   
   rewrite (precategory_fun_comp _ _ H).
   set (H3 := homotweqinvweq (weq_from_fully_faithful _ _ _ Hff a0' a')).
   simpl in H3.
   unfold fully_faithful_inv_hom. simpl.
   rewrite H3. clear H3.
-  repeat rewrite <- precategory_assoc.
+  repeat rewrite <- assoc.
   apply maponpaths.
   apply pathsinv0.
   apply iso_inv_on_right.
-  rewrite precategory_assoc.
+  rewrite assoc.
   apply iso_inv_on_left.
   apply pathsinv0.
   apply alpha.
 
   assert (star5 : inv_from_iso m ;; l0' == l' ;; inv_from_iso m').
   apply iso_inv_on_right.
-  rewrite precategory_assoc.
+  rewrite assoc.
   apply iso_inv_on_left.
   apply (equal_transport_along_weq _ _ (weq_from_fully_faithful _ _ _ Hff a0' a'' )).
   apply pathsinv0.
@@ -905,7 +905,7 @@ Proof.
   apply pathsinv0.
   apply sss'.
   
-  repeat rewrite precategory_assoc.
+  repeat rewrite assoc.
   rewrite sss''. clear sss'' sss' sss.
   
   rewrite <- precategory_fun_on_inv_from_iso.
@@ -923,7 +923,7 @@ Proof.
   apply pathsinv0.
   simpl in ssss'. simpl.
   apply ssss'.
-  rewrite <- precategory_assoc.
+  rewrite <- assoc.
   rewrite star4.
   apply idpath.
   
@@ -970,9 +970,9 @@ Proof.
   simpl in H3.
   unfold fully_faithful_inv_hom. simpl.
   rewrite H3.
-  rewrite <- precategory_assoc.
+  rewrite <- assoc.
   rewrite iso_after_iso_inv.
-  apply precategory_id_right.
+  apply id_right.
   
   assert (ssss : iso_comp (precategory_fun_on_iso _ _ F _ _  m') (k b'' a'' h'') == 
                    k b'' a0'' h0'').
@@ -984,9 +984,9 @@ Proof.
   simpl in H3.
   unfold fully_faithful_inv_hom. simpl.
   rewrite H3.
-  rewrite <- precategory_assoc.
+  rewrite <- assoc.
   rewrite iso_after_iso_inv.
-  apply precategory_id_right.
+  apply id_right.
   
   assert (sssss : #(pr1 H) (l0'' ;; m') == #(pr1 H) (m ;; l)).
   rewrite (precategory_fun_comp _ _ H).
@@ -1004,28 +1004,28 @@ Proof.
 (*  unfold hfh.*)
   
   pathvia (h0 ;; (f ;; f') ;; (inv_from_iso h0'' ;; h0'') ;; inv_from_iso h'').
-  repeat rewrite precategory_assoc; apply idpath.
+  repeat rewrite assoc; apply idpath.
   
-  rewrite iso_after_iso_inv. rewrite precategory_id_right.
+  rewrite iso_after_iso_inv. rewrite id_right.
   
   rewrite (precategory_fun_comp _ _ H).
   set (H3 := homotweqinvweq (weq_from_fully_faithful _ _ _ Hff a0 a)).
   simpl in H3.
   unfold fully_faithful_inv_hom. simpl.
   rewrite H3. clear H3.
-  repeat rewrite <- precategory_assoc.
+  repeat rewrite <- assoc.
   apply maponpaths.
   apply pathsinv0.
   apply iso_inv_on_right.
-  repeat rewrite precategory_assoc.
+  repeat rewrite assoc.
   apply iso_inv_on_left.
   apply pathsinv0.
-  repeat rewrite <- precategory_assoc.
+  repeat rewrite <- assoc.
   apply alpha.
 
   assert (star5 : inv_from_iso m ;; l0'' == l ;; inv_from_iso m').
   apply iso_inv_on_right.
-  rewrite precategory_assoc.
+  rewrite assoc.
   apply iso_inv_on_left.
 
   apply (equal_transport_along_weq _ _ (weq_from_fully_faithful _ _ _ Hff a0 a'' )).
@@ -1045,7 +1045,7 @@ Proof.
   apply pathsinv0.
   apply sss'.
   
-  repeat rewrite precategory_assoc.
+  repeat rewrite assoc.
   rewrite sss''. clear sss'' sss' sss.
   
   rewrite <- precategory_fun_on_inv_from_iso.
@@ -1063,7 +1063,7 @@ Proof.
   apply pathsinv0.
   simpl in ssss'. simpl.
   apply ssss'.
-  rewrite <- precategory_assoc.
+  rewrite <- assoc.
   rewrite star4.
   apply idpath.
 
@@ -1087,17 +1087,17 @@ Proof.
   pathvia (inv_from_iso (k b a0 h0);; #(pr1 F) l0;; (k b' a0' h0';;
               inv_from_iso (k b' a0' h0'));; #(pr1 F) l0';; k b'' a0'' h0'').
               
-  rewrite iso_inv_after_iso; rewrite precategory_id_right.
+  rewrite iso_inv_after_iso; rewrite id_right.
   
   rewrite HGff'. 
-  repeat rewrite <- precategory_assoc.
+  repeat rewrite <- assoc.
   apply maponpaths.
   rewrite <- L.
   rewrite (precategory_fun_comp _ _ F).
-  repeat rewrite <- precategory_assoc.
+  repeat rewrite <- assoc.
   apply idpath.
   
-  repeat rewrite <- precategory_assoc.
+  repeat rewrite <- assoc.
   
   apply idpath.
 
@@ -1186,7 +1186,7 @@ Proof.
   
   rewrite idtoiso_inv.
   
-  rewrite <- precategory_assoc.
+  rewrite <- assoc.
   
 
 (*  
@@ -1201,13 +1201,13 @@ Proof.
          k ((pr1 H) a0) a h;;
          ((idtoiso (phi a0);; #(pr1 F) f);; inv_from_iso (idtoiso (phi a0')))).
   intros a h a' h' l alpha.
-  rewrite precategory_assoc.
+  rewrite assoc.
   apply iso_inv_on_left.
   unfold phi.
-  repeat rewrite precategory_assoc.
+  repeat rewrite assoc.
   set (HHHH := Xkphi_idtoiso (pr1 H a0) (XtripleF a0)).
   rewrite HHHH. clear HHHH.
-  repeat rewrite <- precategory_assoc.
+  repeat rewrite <- assoc.
   set (HHHH := Xkphi_idtoiso (pr1 H a0') (XtripleF a0')).
   rewrite HHHH; clear HHHH.
   
@@ -1249,10 +1249,10 @@ Proof.
   
   change (G (#H f)) with (G (#(pr1 H) f)).
   rewrite <- Ycontr2.
-  repeat rewrite precategory_assoc.
-  rewrite iso_after_iso_inv. rewrite precategory_id_left.
-  repeat rewrite <- precategory_assoc.
-  rewrite iso_after_iso_inv. rewrite precategory_id_right.
+  repeat rewrite assoc.
+  rewrite iso_after_iso_inv. rewrite id_left.
+  repeat rewrite <- assoc.
+  rewrite iso_after_iso_inv. rewrite id_right.
   apply idpath.
 Qed.
   

@@ -56,7 +56,7 @@ Notation "a == b" := (paths a b) (at level 70, no associativity).
 Notation "! p " := (pathsinv0 p) (at level 50).
 Notation "p @ q" := (pathscomp0 p q) (at level 60, right associativity).
 Local Notation "a --> b" := (precategory_morphisms a b)(at level 50).
-Local Notation "f ;; g" := (precategory_compose f g)(at level 50).
+Local Notation "f ;; g" := (compose f g)(at level 50).
 Local Notation "# F" := (precategory_ob_mor_fun_morphisms F)(at level 3).
 
 
@@ -72,7 +72,7 @@ Definition is_sub_precategory {C : precategory}
     (C' : hsubtypes (ob C))
     (Cmor' : forall a b:ob C, hsubtypes (a --> b)) :=
 dirprod (forall a : ob C,
-                         C' a ->  Cmor' _ _ (precategory_identity a ))
+                         C' a ->  Cmor' _ _ (identity a ))
               (forall (a b c: ob C) (f: a --> b) (g : b --> c),
                    Cmor' _ _ f -> Cmor' _ _  g -> Cmor' _ _  (f ;; g)).
 
@@ -127,7 +127,7 @@ Definition sub_precategory_morphisms {C : precategory}(C':sub_precategories C)
 Definition sub_precategory_id (C : precategory)(C':sub_precategories C) :
    forall a : ob C,
        sub_precategory_predicate_objects C' a -> 
-       sub_precategory_predicate_morphisms  C' _ _ (precategory_identity a) :=
+       sub_precategory_predicate_morphisms  C' _ _ (identity a) :=
          pr1 (pr2 C').
 
 Definition sub_precategory_comp (C : precategory)(C':sub_precategories C) :
@@ -196,12 +196,12 @@ Proof.
 exists (sub_precategory_ob_mor C C').
 split.
   intro c.
-  exists (precategory_identity (C:=C) (pr1 c)).
+  exists (identity (C:=C) (pr1 c)).
   apply sub_precategory_id.
   apply (pr2 c).
   
   intros a b c f g.
-  exists (precategory_compose (pr1 f) (pr1 g)).
+  exists (compose (pr1 f) (pr1 g)).
   apply (sub_precategory_comp).
   apply f. apply g.
 Defined.
@@ -241,12 +241,12 @@ Proof.
   simpl; intros.
   unfold sub_precategory_comp.
   apply eq_in_sub_precategory. simpl.
-  apply (precategory_id_left _ (pr1 a)).
+  apply (id_left _ (pr1 a)).
   apply eq_in_sub_precategory. simpl.
-  apply (precategory_id_right _ (pr1 a)).
+  apply (id_right _ (pr1 a)).
   apply eq_in_sub_precategory.
   simpl.
-  apply precategory_assoc.
+  apply assoc.
 Qed.
 
 Definition carrier_of_sub_precategory (C : precategory)(C':sub_precategories C) :
@@ -326,8 +326,8 @@ Lemma is_precategory_fun_full_img (C D: precategory) (F : precategory_fun C D) :
 Proof.
   split; simpl. 
   intro a. 
-   assert (H : pr1 (tpair (fun f => htrue) (#F (precategory_identity a)) tt ) ==
-               pr1 (precategory_identity (full_img_functor_obj F a))).
+   assert (H : pr1 (tpair (fun f => htrue) (#F (identity a)) tt ) ==
+               pr1 (identity (full_img_functor_obj F a))).
    simpl. apply precategory_fun_id.
   apply (total2_paths H).
   apply proofirrelevance.
@@ -520,7 +520,7 @@ Variable C' : hsubtypes (ob C).
 (** *** Isos in the full subcategory are equivalent to isos in the precategory *)
 
 Lemma iso_in_subcat_is_iso_in_precat (a b : ob (full_sub_precategory C'))
-       (f : iso a b): is_precat_isomorphism (C:=C) (a:=pr1 a) (b:=pr1 b) 
+       (f : iso a b): is_isomorphism (C:=C) (a:=pr1 a) (b:=pr1 b) 
      (pr1 (pr1 f)).
 Proof.
   destruct f as [f fp].
@@ -535,7 +535,7 @@ Qed.
 
 Lemma iso_in_precat_is_iso_in_subcat (a b : ob (full_sub_precategory C'))
      (f : iso (pr1 a) (pr1 b)) : 
-   is_precat_isomorphism (C:=full_sub_precategory C')  
+   is_isomorphism (C:=full_sub_precategory C')  
      (precategory_morphisms_in_subcat f tt).
 Proof.
   destruct f as [f fp].
