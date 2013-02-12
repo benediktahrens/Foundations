@@ -61,20 +61,20 @@ Proof.
   apply is_category_HSET.
 Defined.
 
-Definition Rezk_eta : precategory_fun A Rezk_completion.
+Definition Rezk_eta : functor A Rezk_completion.
 Proof.
-  apply (precategory_fun_full_img (yoneda A)).
+  apply (functor_full_img (yoneda A)).
 Defined.
 
 Lemma Rezk_eta_is_fully_faithful : fully_faithful Rezk_eta.
 Proof.
-  apply (precategory_fun_full_img_fully_faithful_if_fun_is _ _ (yoneda A)).
+  apply (functor_full_img_fully_faithful_if_fun_is _ _ (yoneda A)).
   apply yoneda_fully_faithful.
 Qed.
 
 Lemma Rezk_eta_essentially_surjective : essentially_surjective Rezk_eta.
 Proof.
-  apply (precategory_fun_full_img_essentially_surjective _ _ (yoneda A)).
+  apply (functor_full_img_essentially_surjective _ _ (yoneda A)).
 Qed.
 
 End rezk.

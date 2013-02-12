@@ -23,7 +23,7 @@ Contents :
                        full image
                     This factorization is fully faithful
                        if the functor is
-                       [precategory_fun_full_img_fully_faithful_if_fun_is]
+                       [functor_full_img_fully_faithful_if_fun_is]
                                            
                     Isos in full subcategory are equiv
                       to isos in the precategory
@@ -57,7 +57,7 @@ Notation "! p " := (pathsinv0 p) (at level 50).
 Notation "p @ q" := (pathscomp0 p q) (at level 60, right associativity).
 Local Notation "a --> b" := (precategory_morphisms a b)(at level 50).
 Local Notation "f ;; g" := (compose f g)(at level 50).
-Local Notation "# F" := (precategory_ob_mor_fun_morphisms F)(at level 3).
+Local Notation "# F" := (functor_on_morphisms F)(at level 3).
 
 
 
@@ -268,7 +268,7 @@ Definition precategory_morphisms_in_subcat {C : precategory} {C':sub_precategori
 (** ** Functor from a sub-precategory to the ambient precategory *)
 
 Definition sub_precategory_inclusion_data (C : precategory) (C':sub_precategories C):
-  precategory_ob_mor_fun C' C. 
+  functor_data C' C. 
 Proof.
   exists (@pr1 _ _ ). 
   intros a b. 
@@ -277,7 +277,7 @@ Defined.
 
 Definition is_functor_sub_precategory_inclusion (C : precategory) 
          (C':sub_precategories C) :
-    is_precategory_fun  (sub_precategory_inclusion_data C C').
+    is_functor  (sub_precategory_inclusion_data C C').
 Proof.
   split;
   simpl; 
@@ -288,17 +288,17 @@ Qed.
 
  
 Definition sub_precategory_inclusion (C : precategory)(C': sub_precategories C) :
-    precategory_fun C' C := tpair _ _ (is_functor_sub_precategory_inclusion C C').
+    functor C' C := tpair _ _ (is_functor_sub_precategory_inclusion C C').
 
 (** ** The (full) image of a functor *)
 
-Definition full_img_sub_precategory {C D : precategory}(F : precategory_fun C D) :
+Definition full_img_sub_precategory {C D : precategory}(F : functor C D) :
     sub_precategories D := 
-       full_sub_precategory (sub_img_precategory_fun F).
+       full_sub_precategory (sub_img_functor F).
 
 (** ** Given a functor F : C -> D, we obtain a functor F : C -> Img(F) *)
 
-Definition full_img_functor_obj {C D : precategory}(F : precategory_fun C D) :
+Definition full_img_functor_obj {C D : precategory}(F : functor C D) :
    ob C -> ob (full_img_sub_precategory F).
 Proof.
   intro c.
@@ -311,8 +311,8 @@ Proof.
   apply identity_iso.
 Defined.
 
-Definition full_img_functor_data {C D : precategory}(F : precategory_fun C D) :
-  precategory_ob_mor_fun C (full_img_sub_precategory F).
+Definition full_img_functor_data {C D : precategory}(F : functor C D) :
+  functor_data C (full_img_sub_precategory F).
 Proof.
   exists (full_img_functor_obj F).
   simpl.
@@ -321,14 +321,14 @@ Proof.
   exact tt.
 Defined.
 
-Lemma is_precategory_fun_full_img (C D: precategory) (F : precategory_fun C D) :
-  is_precategory_fun (full_img_functor_data F).
+Lemma is_functor_full_img (C D: precategory) (F : functor C D) :
+  is_functor (full_img_functor_data F).
 Proof.
   split; simpl. 
   intro a. 
    assert (H : pr1 (tpair (fun f => htrue) (#F (identity a)) tt ) ==
                pr1 (identity (full_img_functor_obj F a))).
-   simpl. apply precategory_fun_id.
+   simpl. apply functor_id.
   apply (total2_paths H).
   apply proofirrelevance.
   apply htrue.
@@ -338,13 +338,13 @@ Proof.
   set (H':= H (full_img_functor_obj F a)(full_img_functor_obj F c)).
   apply H'.
   simpl.
-  apply precategory_fun_comp.
+  apply functor_comp.
 Qed.
 
-Definition precategory_fun_full_img {C D: precategory} 
-       (F : precategory_fun C D) :
-   precategory_fun C (full_img_sub_precategory F) :=
-   tpair _ _ (is_precategory_fun_full_img C D F).
+Definition functor_full_img {C D: precategory} 
+       (F : functor C D) :
+   functor C (full_img_sub_precategory F) :=
+   tpair _ _ (is_functor_full_img C D F).
 
 
 
@@ -401,9 +401,9 @@ Definition weq_hom_in_subcat_from_hom_in_precat (C : precategory)
   tpair _ _ (isweq_hom_in_subcat_from_hom_in_precat C C' a b).
 
 
-Lemma image_is_in_image (C D : precategory) (F : precategory_fun C D) 
+Lemma image_is_in_image (C D : precategory) (F : functor C D) 
      (a : ob C):
-    is_in_img_precategory_fun F (F a).
+    is_in_img_functor F (F a).
 Proof.
   apply hinhpr.
   exists a.
@@ -412,24 +412,24 @@ Defined.
 
 
 
-Lemma precategory_fun_full_img_fully_faithful_if_fun_is (C D : precategory)
-   (F : precategory_fun C D) (H : fully_faithful F) : 
-   fully_faithful (precategory_fun_full_img F).
+Lemma functor_full_img_fully_faithful_if_fun_is (C D : precategory)
+   (F : functor C D) (H : fully_faithful F) : 
+   fully_faithful (functor_full_img F).
 Proof.
   unfold fully_faithful in *.
   intros a b.
   set (H' := weq_hom_in_subcat_from_hom_in_precat).
-  set (H'' := H' D (is_in_img_precategory_fun F)).
-(*  assert (Hx : (ob (full_sub_precategory (is_in_img_precategory_fun F)))).
+  set (H'' := H' D (is_in_img_functor F)).
+(*  assert (Hx : (ob (full_sub_precategory (is_in_img_functor F)))).
       exists (F a).
         simpl. apply hinhpr. exists a. apply idpath. *)
-  set (Fa := tpair (fun a : ob D => is_in_img_precategory_fun F a) 
+  set (Fa := tpair (fun a : ob D => is_in_img_functor F a) 
         (F a) (image_is_in_image _ _ F a)).
-  set (Fb := tpair (fun a : ob D => is_in_img_precategory_fun F a) 
+  set (Fb := tpair (fun a : ob D => is_in_img_functor F a) 
         (F b) (image_is_in_image _ _ F b)).
   set (H3 := (H'' Fa Fb)).
-  assert (H2 : precategory_ob_mor_fun_morphisms (precategory_fun_full_img F) (a:=a) (b:=b) == 
-                  funcomp (precategory_ob_mor_fun_morphisms F (a:=a) (b:=b))
+  assert (H2 : functor_on_morphisms (functor_full_img F) (a:=a) (b:=b) == 
+                  funcomp (functor_on_morphisms F (a:=a) (b:=b))
                           ((H3))).
   apply funextsec. intro f.
   simpl.
@@ -449,11 +449,11 @@ Qed.
 
 (** *** Image factorization C -> Img(F) -> D *)
 
-Lemma precategory_fun_full_img_factorization_ob (C D: precategory) 
-   (F : precategory_fun C D):
-  precategory_ob_mor_fun_objects F == 
-  precategory_ob_mor_fun_objects (precategory_fun_composite _ _ _ 
-       (precategory_fun_full_img F) 
+Lemma functor_full_img_factorization_ob (C D: precategory) 
+   (F : functor C D):
+  functor_on_objects F == 
+  functor_on_objects (functor_composite _ _ _ 
+       (functor_full_img F) 
             (sub_precategory_inclusion D _)).
 Proof.
   simpl.
@@ -464,19 +464,19 @@ Defined.
 (**  works up to eta conversion *)
 
 (*
-Lemma precategory_fun_full_img_factorization (C D: precategory) 
-                (F : precategory_fun C D) :
-    F == precategory_fun_composite _ _ _ (precategory_fun_full_img F) 
+Lemma functor_full_img_factorization (C D: precategory) 
+                (F : functor C D) :
+    F == functor_composite _ _ _ (functor_full_img F) 
             (sub_precategory_inclusion D _).
 Proof.
-  apply precategory_fun_eq. About precategory_fun_full_img_factorization_ob.
-  set (H := precategory_fun_full_img_factorization_ob C D F).
+  apply functor_eq. About functor_full_img_factorization_ob.
+  set (H := functor_full_img_factorization_ob C D F).
   simpl in *.
   destruct F as [F Fax].
   simpl. 
   destruct F as [Fob Fmor]; simpl in *.
   apply (total2_paths2 (H)).
-  unfold precategory_fun_full_img_factorization_ob in H.
+  unfold functor_full_img_factorization_ob in H.
   simpl in *.
   apply dep_funextfunax.
   intro a.
@@ -664,12 +664,12 @@ Qed.
 End full_sub_cat.
 
 
-Lemma precategory_fun_full_img_essentially_surjective (A B : precategory)
-     (F : precategory_fun A B) :
-  essentially_surjective (precategory_fun_full_img F).
+Lemma functor_full_img_essentially_surjective (A B : precategory)
+     (F : functor A B) :
+  essentially_surjective (functor_full_img F).
 Proof.
   unfold essentially_surjective.
-  unfold precategory_fun_full_img.
+  unfold functor_full_img.
   simpl.
   intros [d p].
   apply p.

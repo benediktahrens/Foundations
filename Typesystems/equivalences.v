@@ -49,12 +49,12 @@ Ltac pathvia b := (apply (@pathscomp0 _ _ b _ )).
 Local Notation "a --> b" := (precategory_morphisms a b)(at level 50).
 (*Local Notation "'hom' C" := (precategory_morphisms (C := C)) (at level 2).*)
 Local Notation "f ;; g" := (compose f g)(at level 50).
-Notation "[ C , D ]" := (precategory_fun_precategory C D).
-Local Notation "# F" := (precategory_ob_mor_fun_morphisms F)(at level 3).
+Notation "[ C , D ]" := (functor_precategory C D).
+Local Notation "# F" := (functor_on_morphisms F)(at level 3).
 
 Definition functor_composite (A B C : precategory) (F : ob [A, B])
       (G : ob [B , C]) : ob [A , C] := 
-   precategory_fun_composite _ _ _ F G.
+   functor_composite _ _ _ F G.
 
 Notation "G 'O' F" := (functor_composite _ _ _ F G) (at level 25).
 
@@ -63,8 +63,8 @@ Notation "G 'O' F" := (functor_composite _ _ _ F G) (at level 25).
 
 Definition form_adjunction (A B : precategory) (F : ob [A, B])
        (G : ob [B, A]) 
-       (eta : precategory_fun_fun (precategory_fun_identity A) (pr1 (G O F)))  
-       (eps : precategory_fun_fun (pr1 (F O G)) (precategory_fun_identity B)) : UU :=
+       (eta : nat_trans (functor_identity A) (pr1 (G O F)))  
+       (eps : nat_trans (pr1 (F O G)) (functor_identity B)) : UU :=
 dirprod 
   (forall a : ob A,
        # (pr1 F) (pr1 eta a) ;;   pr1 eps (pr1 F a) == identity (pr1 F a))
@@ -74,8 +74,8 @@ dirprod
 Definition are_adjoints (A B : precategory) (F : ob [A, B])
     (G : ob [B, A]) : UU :=
   total2 (fun etaeps : dirprod 
-            (precategory_fun_fun (precategory_fun_identity A) (pr1 (G O F)))
-            (precategory_fun_fun (pr1 (F O G)) (precategory_fun_identity B)) =>
+            (nat_trans (functor_identity A) (pr1 (G O F)))
+            (nat_trans (pr1 (F O G)) (functor_identity B)) =>
       form_adjunction A B F G (pr1 etaeps) (pr2 etaeps)).
 
 Definition is_left_adjoint (A B : precategory) (F : ob [A, B]) : UU :=
@@ -86,12 +86,12 @@ Definition right_adjoint (A B : precategory) (F : ob [A, B])
 
 Definition eta_from_left_adjoint (A B : precategory) (F : ob [A, B]) 
       (H : is_left_adjoint _ _ F) : 
-  precategory_fun_fun (precategory_fun_identity A) (pr1 (pr1 H O F)) := pr1 (pr1 (pr2 H)).
+  nat_trans (functor_identity A) (pr1 (pr1 H O F)) := pr1 (pr1 (pr2 H)).
 
 
 Definition eps_from_left_adjoint (A B : precategory) (F : ob [A, B]) 
       (H : is_left_adjoint _ _ F)  : 
- precategory_fun_fun (pr1 (F O pr1 H)) (precategory_fun_identity B)
+ nat_trans (pr1 (F O pr1 H)) (functor_identity B)
    := pr2 (pr1 (pr2 H)).
 
 
@@ -122,21 +122,21 @@ Definition equivalence_of_precats (A B : precategory)(F : ob [A, B]) : UU :=
 
 Definition eta_iso_from_equivalence_of_precats (A B : precategory)
   (F : ob [A, B]) (HF : equivalence_of_precats _ _ F) : 
-       iso (C:=[A, A]) (precategory_fun_identity A) 
+       iso (C:=[A, A]) (functor_identity A) 
                               (right_adjoint _ _ _ (pr1 HF) O F).
 Proof.
   exists (eta_from_left_adjoint _ _ _ (pr1 HF)).
-  apply precategory_fun_iso_if_pointwise_iso.
+  apply functor_iso_if_pointwise_iso.
   apply (pr1 (pr2 HF)).
 Defined.
 
 Definition eps_iso_from_equivalence_of_precats (A B : precategory)
   (F : ob [A, B]) (HF : equivalence_of_precats _ _ F) : 
        iso (C:=[B, B]) (F O right_adjoint _ _ _ (pr1 HF))
-                (precategory_fun_identity B).
+                (functor_identity B).
 Proof.
   exists (eps_from_left_adjoint _ _ _ (pr1 HF)).
-  apply precategory_fun_iso_if_pointwise_iso.
+  apply functor_iso_if_pointwise_iso.
   apply (pr2 (pr2 HF)).
 Defined.
 
@@ -196,18 +196,18 @@ Proof.
 
   apply (total2_paths2 (B:=fun a' => iso ((pr1 F) a') b) (isotoid _ HA g)).
   pathvia (iso_comp (iso_inv_from_iso 
-    (precategory_fun_on_iso _ _ F _ _ (idtoiso (isotoid _ HA g)))) f).
+    (functor_on_iso _ _ F _ _ (idtoiso (isotoid _ HA g)))) f).
   generalize (isotoid _ HA g).
   intro p0.
   induction p0.
   simpl.
   
-  rewrite <- precategory_fun_on_iso_inv.
+  rewrite <- functor_on_iso_inv.
   rewrite iso_inv_of_iso_id.
   apply eq_iso.
   simpl. 
   rewrite transportf_idpath.
-  rewrite precategory_fun_id.
+  rewrite functor_id.
   rewrite id_left.
   apply idpath.
   
@@ -219,7 +219,7 @@ Proof.
   clear p.
   clear g.
   clear fminusf.
-  assert (HFg : precategory_fun_on_iso A B F a a'
+  assert (HFg : functor_on_iso A B F a a'
         (iso_from_fully_faithful_reflection A B F HF a a'
            (iso_comp f (iso_inv_from_iso f'))) == 
            iso_comp f (iso_inv_from_iso f')).
@@ -313,13 +313,13 @@ Defined.
 
 (** Above data specifies a functor *)
 
-Definition rad_precategory_ob_mor_fun : precategory_ob_mor_fun B A.
+Definition rad_functor_data : functor_data B A.
 Proof.
   exists rad_ob.
   exact rad_mor.
 Defined.
   
-Lemma rad_is_precategory_fun : is_precategory_fun rad_precategory_ob_mor_fun.
+Lemma rad_is_functor : is_functor rad_functor_data.
 Proof.
   split; simpl.
   intro b.
@@ -344,18 +344,18 @@ Qed.
 
 Definition rad : ob [B, A].
 Proof.
-  exists rad_precategory_ob_mor_fun.
-  apply rad_is_precategory_fun.
+  exists rad_functor_data.
+  apply rad_is_functor.
 Defined.
 
 
 (** Epsilon is natural *)
 
-Lemma rad_eps_is_precategory_fun_fun : is_precategory_fun_fun 
-    (pr1 (F O rad)) (precategory_fun_identity B)
+Lemma rad_eps_is_nat_trans : is_nat_trans 
+    (pr1 (F O rad)) (functor_identity B)
        (fun b => rad_eps b).
 Proof.
-  unfold is_precategory_fun_fun.
+  unfold is_nat_trans.
   simpl.
   intros b b' g.
   unfold rad_mor.
@@ -370,16 +370,16 @@ Proof.
   apply idpath.
 Qed.
 
-Definition rad_eps_trans : precategory_fun_fun _ _ :=
-   tpair _ _ rad_eps_is_precategory_fun_fun.
+Definition rad_eps_trans : nat_trans _ _ :=
+   tpair _ _ rad_eps_is_nat_trans.
 
 (** Eta is natural *)
 
-Lemma rad_eta_is_precategory_fun_fun : is_precategory_fun_fun 
-         (precategory_fun_identity A) (pr1 (rad O F)) 
+Lemma rad_eta_is_nat_trans : is_nat_trans 
+         (functor_identity A) (pr1 (rad O F)) 
        (fun a => rad_eta a).
 Proof.
-  unfold is_precategory_fun_fun.
+  unfold is_nat_trans.
   simpl.
   intros a a' f.
   unfold rad_mor. simpl.
@@ -387,10 +387,10 @@ Proof.
           (weq_from_fully_faithful _ _ _ HF a (rad_ob ((pr1 F) a')))).
   apply h'.
   simpl.
-  rewrite precategory_fun_comp.
-  rewrite precategory_fun_comp.
+  rewrite functor_comp.
+  rewrite functor_comp.
   unfold rad_eta.
-  set (HHH := rad_eps_is_precategory_fun_fun (pr1 F a) (pr1 F a')).
+  set (HHH := rad_eps_is_nat_trans (pr1 F a) (pr1 F a')).
   simpl in HHH.
   rewrite <- HHH.
   clear h'.
@@ -422,8 +422,8 @@ Proof.
   apply idpath.
 Qed.
 
-Definition rad_eta_trans : precategory_fun_fun _ _ :=
-   tpair _ _ rad_eta_is_precategory_fun_fun.
+Definition rad_eta_trans : nat_trans _ _ :=
+   tpair _ _ rad_eta_is_nat_trans.
 
 
 (** The data [rad], [eta], [eps] forms an adjunction *)
@@ -447,8 +447,8 @@ Proof.
           (weq_from_fully_faithful _ _ _ HF (rad_ob b) (rad_ob b))).
        apply h'.
   simpl.
-  rewrite precategory_fun_comp.
-  set (Heta := precategory_fun_fun_ax _ _ rad_eta_trans).
+  rewrite functor_comp.
+  set (Heta := nat_trans_ax _ _ rad_eta_trans).
   simpl in Heta.
   unfold rad_eta.
   unfold fully_faithful_inv_hom.
@@ -469,7 +469,7 @@ Proof.
   rewrite <- assoc.
   rewrite iso_inv_after_iso.
   rewrite id_left.
-  rewrite precategory_fun_id.
+  rewrite functor_id.
   apply idpath.
 Qed.
   
