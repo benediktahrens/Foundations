@@ -10,14 +10,14 @@ january 2013
 
 (************************************************************
 
-Contents : Prewhiskering with a fully faithful and  
+Contents : 
+
+Precomposition with a fully faithful and  
            essentially surjective functor yields
            a full and faithful, i.e. a fully faithful, 
            functor
 	
-	   Faithfulness is already proved before, 
-           in this file we prove fullness and 
- 	   full faithfullness
+	  
 
 ************************************************************)
 
@@ -56,9 +56,9 @@ Local Notation "# F" := (precategory_ob_mor_fun_morphisms F)(at level 3).
 
 (** * Precomposition with an essentially surjective functor is faithful. *)
 
-Lemma pre_whisker_with_ess_surj_is_faithful (A B C : precategory) 
+Lemma pre_composition_with_ess_surj_is_faithful (A B C : precategory) 
       (H : ob [A, B]) (p : essentially_surjective H) : 
-           faithful (pre_whisker_functor A B C H).
+           faithful (pre_composition_functor A B C H).
 Proof.
   intros F G gamma delta ex.
   simpl in *.
@@ -416,8 +416,8 @@ End full.
 
 (** * Precomposition with an essentially surjective and f. f. functor is fully faithful *)
 
-Lemma pre_whisker_with_ess_surj_and_fully_faithful_is_full :
-  full (pre_whisker_functor A B C H).
+Lemma pre_composition_with_ess_surj_and_fully_faithful_is_full :
+  full (pre_composition_functor A B C H).
 Proof.
   unfold full.
   intros F G gamma.
@@ -425,19 +425,19 @@ Proof.
   apply pdelta_preimage.
 Defined.
 
-Lemma pre_whisker_with_ess_surj_and_fully_faithful_is_full_and_faithful : 
-   full_and_faithful (pre_whisker_functor A B C H).
+Lemma pre_composition_with_ess_surj_and_fully_faithful_is_full_and_faithful : 
+   full_and_faithful (pre_composition_functor A B C H).
 Proof.
   split.
-  apply pre_whisker_with_ess_surj_and_fully_faithful_is_full.
-  apply pre_whisker_with_ess_surj_is_faithful. assumption.
+  apply pre_composition_with_ess_surj_and_fully_faithful_is_full.
+  apply pre_composition_with_ess_surj_is_faithful. assumption.
 Qed.
 
-Lemma pre_whisker_with_ess_surj_and_fully_faithful_is_fully_faithful : 
-   fully_faithful (pre_whisker_functor A B C H).
+Lemma pre_composition_with_ess_surj_and_fully_faithful_is_fully_faithful : 
+   fully_faithful (pre_composition_functor A B C H).
 Proof.
   apply full_and_faithful_implies_fully_faithful.
-  apply pre_whisker_with_ess_surj_and_fully_faithful_is_full_and_faithful.
+  apply pre_composition_with_ess_surj_and_fully_faithful_is_full_and_faithful.
 Qed.
 
 

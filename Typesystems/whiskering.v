@@ -9,9 +9,15 @@ january 2013
 
 (** **********************************************************
 
-Contents : Prewhiskering with respect to a functor
-	
-           Prewhiskering with an essentially surjective 
+Contents : 
+
+- Precomposition with a functor for 
+   - functors and
+   - natural transformations (whiskering)
+
+- Functoriality of precomposition	
+
+- Precomposition with an essentially surjective 
 	   functor yields a faithful functor
 
 ************************************************************)
@@ -102,18 +108,18 @@ Proof.
   apply is_precat_fun_fun_post_whisker.
 Defined.
 
-(** Prewhiskering is functorial *)
-(** Postwhiskering is, too, but that's not of our concern for now. *)
+(** Precomposition with a functor is functorial *)
+(** Postcomposition is, too, but that's not of our concern for now. *)
 
-Definition pre_whisker_precategory_ob_mor_fun (A B C : precategory)
+Definition pre_composition_precategory_ob_mor_fun (A B C : precategory)
       (H : ob [A, B]) : precategory_ob_mor_fun [B,C] [A,C].
 Proof.
   exists (fun G => G O H).
   exact (fun a b gamma => pre_whisker _ _ _ H _ _ gamma).
 Defined.
 
-Lemma pre_whisker_is_precategory_fun (A B C : precategory) (H : ob [A, B]) :
-    is_precategory_fun (pre_whisker_precategory_ob_mor_fun A B C H).
+Lemma pre_composition_is_precategory_fun (A B C : precategory) (H : ob [A, B]) :
+    is_precategory_fun (pre_composition_precategory_ob_mor_fun A B C H).
 Proof.
   split; simpl.
   intro G.
@@ -127,11 +133,11 @@ Proof.
   apply idpath.
 Qed.
 
-Definition pre_whisker_functor (A B C : precategory) (H : ob [A , B]) :
+Definition pre_composition_functor (A B C : precategory) (H : ob [A , B]) :
       precategory_fun [B, C] [A, C].
 Proof.
-  exists (pre_whisker_precategory_ob_mor_fun A B C H).
-  apply pre_whisker_is_precategory_fun.
+  exists (pre_composition_precategory_ob_mor_fun A B C H).
+  apply pre_composition_is_precategory_fun.
 Defined.
 
 

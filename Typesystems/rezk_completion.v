@@ -87,24 +87,24 @@ Variables A C : precategory.
 Hypothesis Ccat : is_category C.
 
 Lemma pre_comp_rezk_eta_is_fully_faithful :
-    fully_faithful (pre_whisker_functor A (Rezk_completion A) C (Rezk_eta A)).
+    fully_faithful (pre_composition_functor A (Rezk_completion A) C (Rezk_eta A)).
 Proof.
-  apply pre_whisker_with_ess_surj_and_fully_faithful_is_fully_faithful.
+  apply pre_composition_with_ess_surj_and_fully_faithful_is_fully_faithful.
   apply Rezk_eta_essentially_surjective.
   apply Rezk_eta_is_fully_faithful.
 Qed.
 
 Lemma pre_comp_rezk_eta_is_ess_surj :
-   essentially_surjective (pre_whisker_functor A (Rezk_completion A) C (Rezk_eta A)).
+   essentially_surjective (pre_composition_functor A (Rezk_completion A) C (Rezk_eta A)).
 Proof.
-  apply pre_whisker_essentially_surjective.
+  apply pre_composition_essentially_surjective.
   assumption.
   apply Rezk_eta_essentially_surjective.
   apply Rezk_eta_is_fully_faithful.
 Qed.
 
 Theorem Rezk_eta_Universal_Property : 
-  isweq (pre_whisker_functor A (Rezk_completion A) C (Rezk_eta A)).
+  isweq (pre_composition_functor A (Rezk_completion A) C (Rezk_eta A)).
 Proof.
   apply equiv_of_cats_is_weq_of_objects.
   apply is_category_functor_category; 

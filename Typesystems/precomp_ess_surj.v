@@ -10,7 +10,7 @@ january 2013
 
 (************************************************************
 
-Contents : Prewhiskering with a fully faithful and  
+Contents : Precomposition with a fully faithful and  
            essentially surjective functor yields
            an essentially surjective functor
 
@@ -58,7 +58,7 @@ Variable H : ob [A, B].
 Hypothesis p : essentially_surjective H.
 Hypothesis Hff : fully_faithful H.
 
-(**  We prove that prewhiskering with a [H] yields an essentially surjective functor *)
+(**  We prove that precomposition with a [H] yields an essentially surjective functor *)
 
 Section essentially_surjective.
 
@@ -1169,7 +1169,7 @@ Defined.
 (** Now for the functor as a whole. It remains to prove 
     equality on morphisms, modulo transport. *)
 
-Lemma is_preimage_for_pre_whiskering : GG O H == F.
+Lemma is_preimage_for_pre_composition : GG O H == F.
 Proof.
   apply (precategory_fun_eq _ _ (GG O H) F).
   apply (total2_paths extphi).
@@ -1268,8 +1268,8 @@ End essentially_surjective.
 (** Abstracting from [F] by closing the previous section,
     we can prove essential surjectivity of [_ O H]. *)
 
-Lemma pre_whisker_essentially_surjective : 
-       essentially_surjective (pre_whisker_functor A B C H).
+Lemma pre_composition_essentially_surjective : 
+       essentially_surjective (pre_composition_functor A B C H).
 Proof.
   intro F.
   intro p'.
@@ -1277,7 +1277,7 @@ Proof.
   apply f.
   exists (GG F).
   apply idtoiso.
-  apply is_preimage_for_pre_whiskering.
+  apply is_preimage_for_pre_composition.
 Qed.
 
 End lemma64.
