@@ -10,6 +10,80 @@ Require Import hnat.
 Require Import catqalg.
 Require Import pathnotations.
 Import pathnotations.PathNotations.
+Require Import basic_lemmas_which_should_be_in_uu0.
+
+(** * Definition of C-systems *)
+
+Definition Csystem_predata := total2 (
+  fun obmor : dirprod (nat -> hSet)
+                      (nat -> nat -> hSet) =>
+     dirprod (forall n m, pr2 obmor n m -> pr1 obmor n) (*source*)
+             (forall n m, pr2 obmor n m -> pr1 obmor m) (*target*)
+).
+
+Definition Ob (c : Csystem_predata) : nat -> hSet := pr1 (pr1 c).
+Coercion Ob : Csystem_predata >-> Funclass.
+
+Definition Mor (c : Csystem_predata) : nat -> nat -> hSet := pr2 (pr1 c).
+
+Definition Csource {c : Csystem_predata} {n m : nat} (f : Mor c n m) : Ob c n :=
+      pr1 (pr2 c) _ _ f.
+
+Definition Ctarget {c : Csystem_predata} {n m : nat} (f : Mor c n m) : Ob c m :=
+      pr2 (pr2 c) _ _ f.
+    
+
+Definition Hom {c : Csystem_predata}{n m : nat} (a : Ob c n)(b : Ob c m) : UU :=
+   total2 (fun f : Mor c n m => 
+              dirprod (Csource f == a)
+                      (Ctarget f == b)).
+
+Lemma Hom_eq (c : Csystem_predata)(n m : nat) (a : Ob c n)(b : Ob c m) 
+      (f g : Hom a b) :
+   pr1 f == pr1 g -> f == g.
+Proof.
+  intro H;
+  apply (total2_paths H).
+  apply pairofobuip.
+Qed.
+
+
+Definition Csystem_catdata := total2 (
+  fun c : Csystem_predata => dirprod
+     (forall n (a : Ob c n), Hom a a)
+     (forall n m k 
+      (a : Ob c n) (b : Ob c m) (c : Ob c k),
+      forall (f : Hom a b) (g : Hom b c), Hom a c)).
+
+Definition Csystem_predata_from_Csystem_catdata (c : Csystem_catdata) :
+    Csystem_predata := pr1 c.
+Coercion Csystem_predata_from_Csystem_catdata : Csystem_catdata >-> Csystem_predata.
+
+
+Definition Csystem_id (c : Csystem_catdata){n : nat} (a : Ob c n) : Hom a a :=
+            pr1 (pr2 c) _ a.
+
+Definition Csystem_comp (C : Csystem_catdata){n m k : nat} {a : Ob C n}
+    {b : Ob C m} {c : Ob C k} : Hom a b -> Hom b c -> Hom a c :=
+       fun f g => pr2 (pr2 C) _ _ _ _ _ _ f g.
+
+Notation "f ;; g" := (Csystem_comp _ f g) (at level 50).
+
+Definition comp_assoc (C : Csystem_catdata){n m k l : nat} (a : Ob C n)
+     (b : Ob C m) (c : Ob C k) (d : Ob C l) 
+     (f : Hom a b) (g : Hom b c) (h : Hom c d) : (f ;; g) ;; h == f ;; (g ;; h).
+
+Definition id_type (c : Csystem_predata) := forall n (a : Ob c n), Hom a a.
+
+Definition comp_type (c : Csystem_predata) := forall n m k 
+    (a : Ob c n) (b : Ob c m) (c : Ob c k),
+    forall (f : Hom a b) (g : Hom b c), Hom a c.
+
+Definition assoc (c : Csystem_predata)
+
+
+    ob : nat -> hSet
+    mor : nat -> nat -> hSet
 
 
 (** * Definition of C-Systems [Csystem] *)

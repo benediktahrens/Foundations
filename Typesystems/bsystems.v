@@ -38,7 +38,7 @@ Fixpoint iter { B : nat -> hSet } ( f : forall n, B (S n) -> B n )
 
 Definition preBsystem_data := total2 (
   fun BBtilde : dirprod (nat -> hSet) (nat -> hSet) =>
-    dirprod (forall n, pr1 BBtilde ( S n) -> pr1 BBtilde n)  (* ft *)
+    dirprod (forall n, pr1 BBtilde (S n) -> pr1 BBtilde n)  (* ft *)
             (forall n, pr2 BBtilde (S n) -> pr1 BBtilde (S n))). (* partial *)
 
 Definition BB (X : preBsystem_data) : nat -> hSet := pr1 (pr1 X).
@@ -61,7 +61,8 @@ dirprod (
   dirprod (forall (i n : nat) (r : Btilde B (S n)) (X : BB B (S i + S n)),
              Bpartial r == iter (@Bft B) (S i) (S n) X ->  BB B (S i + n))  (* S *)
           (forall (i n : nat) (r : Btilde B (S n)) (s : Btilde B (S i + S n)),
-             Bpartial r == iter (@Bft B) (S i) (S n) (Bpartial s) -> Btilde B (S i + n) (* Stilde *)
+             Bpartial r == iter (@Bft B) (S i) (S n) (Bpartial s) -> Btilde B (S i + n) 
+                (* Stilde *)
              )
          )
         )
@@ -111,13 +112,16 @@ Definition Bsystem := total2 (fun B : Bsystem_data =>
            (dirprod (forall i n : nat, forall Y : BB B (S n), forall s : Btilde B (S i + n),
                            forall (H : Bft Y == iter (@Bft B) (S i) n (Bpartial s)),
                       Bpartial (BTtilde Y s H) == BT Y (Bpartial s) H) (* Baxiom2 *)
-                    (dirprod (forall n : nat, forall r : Btilde B (S n), forall X : BB B (S (S n)),
-                              forall (H : Bpartial r == Bft X), Bft (BS (i:=0) r X H) == Bft (Bpartial r)) 
+                    (dirprod (forall n : nat, forall r : Btilde B (S n), 
+                              forall X : BB B (S (S n)),
+                              forall (H : Bpartial r == Bft X), 
+                                     Bft (BS (i:=0) r X H) == Bft (Bpartial r)) 
                                          (* Baxiom3ieq0 *)
                              (forall i n : nat, forall r : Btilde B (S n), 
                                   forall X : BB B (S (S ( (i + S n)))),
                                   forall (H : Bpartial r == iter (@Bft B) (S (S i)) _ X), 
-                                       Bft (BS (i:= S i) r X H) == BS r (Bft X) H)  (* Baxiom3igt0 *)
+                                       Bft (BS (i:= S i) r X H) == BS r (Bft X) H)  
+                                             (* Baxiom3igt0 *)
                     )
             )
            )
@@ -209,7 +213,8 @@ Definition preBsystem_morphism_ft B B' (F : preBsystem_morphism B B') :
    forall n (X : BB B (S n)), BBmap F (Bft X) == Bft (BBmap F X) := pr1 (pr2 F).
 
 Definition preBsystem_morphism_partial B B' (F : preBsystem_morphism B B') :
-   forall n (s : Btilde B (S n)), BBmap F (Bpartial s) == Bpartial (Btildemap F s) := pr2 (pr2 F).
+   forall n (s : Btilde B (S n)), BBmap F (Bpartial s) == Bpartial (Btildemap F s) := 
+        pr2 (pr2 F).
 
 
 (** *** Iteration lemmas *)
