@@ -149,15 +149,37 @@ Definition is_categorical (C : Csystem_catdata) :=
       (forall (n m k l : nat) (a : Ob C n) (b : Ob C m) (c : Ob C k) (d : Ob C l) 
        (f : Hom a b) (g : Hom b c) (h : Hom c d), (f ;; g) ;; h == f ;; (g ;; h)).
 
+Lemma isaprop_is_categorical (C : Csystem_catdata) : isaprop (is_categorical C).
+Proof.
+  repeat apply isapropdirprod; 
+  repeat (apply impred; intros);
+  apply (isaset_Hom _ _ _ _ ).
+Qed.
+
+
 (** ** Final object *)
 
 Definition final_object {C : Csystem_catdata} {n} (X : Ob C n) :=
    forall m (Y : Ob C m), iscontr (Hom Y X).
 
+Lemma isaprop_final_object (C : Csystem_catdata) n (X : Ob C n) : isaprop (final_object X).
+Proof.
+  repeat (apply impred; intros);
+  apply isapropiscontr.
+Qed.
+  
+
 (** **  The point as final object  *)
 
 Definition Cpt_is_final (C : Csystem_catdata) := total2 (
    fun F : iscontr (Ob C 0) => final_object (pr1 F)).
+
+Lemma isaprop_Cpt_is_final (C : Csystem_catdata) : isaprop (Cpt_is_final C).
+Proof.
+  apply isofhleveltotal2.
+  apply isapropiscontr.
+  intro; apply isaprop_final_object.
+Qed.
 
 
 (** ** Definition of being a pullback *)
@@ -172,8 +194,8 @@ Definition Cpt_is_final (C : Csystem_catdata) := total2 (
        i
 *)
 
-Definition is_pullback (C : Csystem_catdata) {n m k l : nat}
-   (a : Ob C n) (b : Ob C m) (c : Ob C k) (d : Ob C l) 
+Definition is_pullback {C : Csystem_catdata} {n m k l : nat}
+   {a : Ob C n} {b : Ob C m} {c : Ob C k} {d : Ob C l} 
    (f : Hom a b) (g : Hom a c) (h : Hom b d) (i : Hom c d) :=
   dirprod (f ;; h == g ;; i) 
        (forall n' (a' : Ob C n') (f' : Hom a' b) (g' : Hom a' c),
@@ -182,6 +204,23 @@ Definition is_pullback (C : Csystem_catdata) {n m k l : nat}
               hProppair (dirprod (fg' ;; f == f')(fg' ;; g == g')) 
               (isapropdirprod _ _ (isaset_Hom a' b _ _ )(isaset_Hom a' c _ _ ))
                 )).
+
+Lemma isaprop_is_pullback (C : Csystem_catdata) {n m k l : nat}
+   {a : Ob C n} {b : Ob C m} {c : Ob C k} {d : Ob C l} 
+   (f : Hom a b) (g : Hom a c) (h : Hom b d) (i : Hom c d):
+            isaprop (is_pullback f g h i).
+Proof.
+  apply isapropdirprod.
+  apply (isaset_Hom _ _ _ _ ).
+  repeat (apply impred; intros).
+  change (isofhlevel 1) with (isaprop).
+  apply (isaprop_exists_unique (hSetpair (Hom t0 a)(isaset_Hom t0 a))
+         (fun fg' : Hom t0 a =>
+      hProppair (dirprod (fg';; f == t1) (fg';; g == t2))
+        (isapropdirprod (fg';; f == t1) (fg';; g == t2)
+           (isaset_Hom t0 b (fg';; f) t1) (isaset_Hom t0 c (fg';; g) t2)))).
+Qed.
+
 
 
 (** ** Pullback square needs "cast" *)
@@ -204,7 +243,16 @@ Defined.
 Definition pullback_proj (C : Csystem_star_q) := forall n (X : Ob C (S n)) m (Y : Ob C m)
    (f : Hom Y (Cft X)), total2 (
    fun H : Cft (Cstar X f) == Y =>
-   is_pullback C _ _ _ _ (Cq X f) (Cp C (Cstar X f)) (Cp C X) (change_source f H)).
+   is_pullback (Cq X f) (Cp C (Cstar X f)) (Cp C X) (change_source f H)).
+
+Lemma isaprop_pullback_proj (C : Csystem_star_q) : isaprop (pullback_proj C).
+Proof.
+  repeat (apply impred; intro).
+  apply isofhleveltotal2.
+  apply (pr2 (Ob C _ ) ).
+  intros.
+  apply isaprop_is_pullback.
+Qed.
 
 (** ** Finally, when do we have a C-system? *)
 
@@ -213,7 +261,27 @@ Definition is_Csystem (C : Csystem_star_q) :=
      (is_categorical C)
      (dirprod (Cpt_is_final C)(pullback_proj C)).
 
+Lemma isaprop_is_Csystem (C : Csystem_star_q) : isaprop (is_Csystem C).
+Proof.
+  apply isapropdirprod.
+  apply isaprop_is_categorical.
+  apply isapropdirprod.
+  apply isaprop_Cpt_is_final.
+  apply isaprop_pullback_proj.
+Qed.
 
+
+
+
+
+
+
+
+(******************************************)
+
+(* FROM HERE ON GARBAGE *)
+
+(******************************************)
 
 
 (*
@@ -234,7 +302,7 @@ Definition id_left (C : Csystem_cat) : forall (n m : nat) (a : Ob C n) (b : Ob C
 Definition id_right (C : Csystem_cat) : forall (n m : nat) (a : Ob C n) (b : Ob C m)
    (f : Hom a b), f ;; Csystem_id b == f := pr2 (pr1 (pr2 C)).
 
-*)
+
 
 
 Definition unique_empty (C : Csystem_catdata) := total2 (
@@ -483,4 +551,5 @@ Record cstructure := {
 
 
 Check (fun X : cstructure => ob X).
+*)
 *)
