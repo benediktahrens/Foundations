@@ -14,6 +14,11 @@ Require Import basic_lemmas_which_should_be_in_uu0.
 
 (** * Definition of C-systems *)
 
+(** ** Objects and Morphisms *)
+(** Both objects and morphisms are graded by "length",
+   but morphisms are not indexed by source and target.
+   We later define the type [Hom {n m} a b] for convenience. *)
+
 Definition Csystem_predata := total2 (
   fun obmor : dirprod (nat -> hSet)
                       (nat -> nat -> hSet) =>
@@ -32,6 +37,7 @@ Definition Csource {c : Csystem_predata} {n m : nat} (f : Mor c n m) : Ob c n :=
 Definition Ctarget {c : Csystem_predata} {n m : nat} (f : Mor c n m) : Ob c m :=
       pr2 (pr2 c) _ _ f.
     
+(** *** Hom notation morphisms *)
 
 Definition Hom {c : Csystem_predata}{n m : nat} (a : Ob c n)(b : Ob c m) : UU :=
    total2 (fun f : Mor c n m => 
@@ -64,6 +70,7 @@ Proof.
   apply pairofobuip.
 Qed.
 
+(** ** Composition and Identity *)
 
 Definition Csystem_catdata := total2 (
   fun c : Csystem_predata => dirprod
@@ -86,48 +93,7 @@ Definition Csystem_comp (C : Csystem_catdata){n m k : nat} {a : Ob C n}
 
 Notation "f ;; g" := (Csystem_comp _ f g) (at level 50).
 
-
-Definition Csystem_cat := total2 (
-   fun C : Csystem_catdata => dirprod 
-      (dirprod (forall (n m : nat) (a : Ob C n) (b : Ob C m)
-                  (f : Hom a b), Csystem_id a ;; f == f)
-               (forall (n m : nat) (a : Ob C n) (b : Ob C m)
-                  (f : Hom a b), f ;; Csystem_id b == f)
-      )
-      (forall (n m k l : nat) (a : Ob C n) (b : Ob C m) (c : Ob C k) (d : Ob C l) 
-       (f : Hom a b) (g : Hom b c) (h : Hom c d), (f ;; g) ;; h == f ;; (g ;; h))).
-
-Definition Csystem_catdata_from_Csystem_cat (C : Csystem_cat) : Csystem_catdata :=
-     pr1 C.
-Coercion Csystem_catdata_from_Csystem_cat : Csystem_cat >-> Csystem_catdata.
-
-Definition comp_assoc (C : Csystem_cat) : forall (n m k l : nat) (a : Ob C n)
-     (b : Ob C m) (c : Ob C k) (d : Ob C l) 
-     (f : Hom a b) (g : Hom b c) (h : Hom c d), (f ;; g) ;; h == f ;; (g ;; h) :=
-        pr2 (pr2 C).
-
-Definition id_left (C : Csystem_cat) : forall (n m : nat) (a : Ob C n) (b : Ob C m)
-   (f : Hom a b), Csystem_id a ;; f == f := pr1 (pr1 (pr2 C)).
-
-Definition id_right (C : Csystem_cat) : forall (n m : nat) (a : Ob C n) (b : Ob C m)
-   (f : Hom a b), f ;; Csystem_id b == f := pr2 (pr1 (pr2 C)).
-
-Definition unique_empty (C : Csystem_catdata) := total2 (
-   fun pt : Ob C 0 => forall a : Ob C 0, a == pt).
-
-Definition Csystem_cat_pointed := total2 (
-   fun C : Csystem_cat => unique_empty C).
-
-Definition Csystem_cat_from_Csystem_cat_pointed (C : Csystem_cat_pointed) : 
-    Csystem_cat := pr1 C.
-Coercion Csystem_cat_from_Csystem_cat_pointed : Csystem_cat_pointed >-> Csystem_cat.
-
-Definition Csystem_cat_pt (C : Csystem_cat_pointed) : Ob C 0 := pr1 (pr2 C).
-
-Definition Csystem_cat_pointed_final (C : Csystem_cat_pointed) := total2 (
-     fun fin_mor : forall n (a : Ob C n), Hom a (Csystem_cat_pt C) => 
-            forall n (a : Ob C n) (g : Hom a (Csystem_cat_pt C)), 
-                  g == fin_mor n a).
+(** ** Father and Canonical Projections *)
 
 Definition Csystem_ft_projection (C : Csystem_catdata) := total2 (
    fun ft : forall n, Ob C (S n) -> Ob C n =>
@@ -146,6 +112,8 @@ Definition Cft {C : Csystem_ft_proj} {n : nat} (X : Ob C (S n)) : Ob C n :=
 Definition Cp (C : Csystem_ft_proj) {n : nat} (X : Ob C (S n)) : Hom X (Cft X) :=
    pr2 (pr2 C) n X.
 
+(** ** Pullback data for pullbacks of can. projections *)
+
 Definition Csystem_star_q_data (C : Csystem_ft_proj) := total2 (
      fun star : forall (n : nat) (X : Ob C (S n)) 
               m (Y : Ob C m) (f : Hom Y (Cft X)), Ob C (S m) =>
@@ -163,11 +131,46 @@ Definition Cstar {C : Csystem_star_q}{n : nat} (X : Ob C (S n)) {m : nat}
     {Y : Ob C m} (f : Hom Y (Cft X)) : Ob C (S m) := pr1 (pr2 C) n X m Y f.
 
 Definition Cq {C : Csystem_star_q}{n : nat} (X : Ob C (S n)) {m : nat}
-    (Y : Ob C m) (f : Hom Y (Cft X)) : Hom (Cstar _ f) X := pr2 (pr2 C) n X m Y f.
+    {Y : Ob C m} (f : Hom Y (Cft X)) : Hom (Cstar _ f) X := pr2 (pr2 C) n X m Y f.
+
+
+
+(** * Properties of a C-system *)
+
+(** ** Categorical properties *)  
+
+Definition is_categorical (C : Csystem_catdata) := 
+  dirprod 
+      (dirprod (forall (n m : nat) (a : Ob C n) (b : Ob C m)
+                  (f : Hom a b), Csystem_id a ;; f == f)
+               (forall (n m : nat) (a : Ob C n) (b : Ob C m)
+                  (f : Hom a b), f ;; Csystem_id b == f)
+      )
+      (forall (n m k l : nat) (a : Ob C n) (b : Ob C m) (c : Ob C k) (d : Ob C l) 
+       (f : Hom a b) (g : Hom b c) (h : Hom c d), (f ;; g) ;; h == f ;; (g ;; h)).
+
+(** ** Final object *)
+
+Definition final_object {C : Csystem_catdata} {n} (X : Ob C n) :=
+   forall m (Y : Ob C m), iscontr (Hom Y X).
+
+(** **  The point as final object  *)
+
+Definition Cpt_is_final (C : Csystem_catdata) := total2 (
+   fun F : iscontr (Ob C 0) => final_object (pr1 F)).
 
 
 (** ** Definition of being a pullback *)
-(** Input: a square of arrows *)
+(** Input: a square of arrows 
+
+       f
+   a -----> b
+   |        | 
+  g|        |h
+   v        v
+   c -----> d
+       i
+*)
 
 Definition is_pullback (C : Csystem_catdata) {n m k l : nat}
    (a : Ob C n) (b : Ob C m) (c : Ob C k) (d : Ob C l) 
@@ -175,11 +178,86 @@ Definition is_pullback (C : Csystem_catdata) {n m k l : nat}
   dirprod (f ;; h == g ;; i) 
        (forall n' (a' : Ob C n') (f' : Hom a' b) (g' : Hom a' c),
          f' ;; h == g' ;; i ->
-         
          exists_unique (fun fg' : Hom a' a => 
               hProppair (dirprod (fg' ;; f == f')(fg' ;; g == g')) 
               (isapropdirprod _ _ (isaset_Hom a' b _ _ )(isaset_Hom a' c _ _ ))
                 )).
+
+
+(** ** Pullback square needs "cast" *)
+(** For the pullback square to typecheck, we need a cast in the lower left corner. *)
+
+(** We change the source of the lower horizontal morphism without changing
+    the morphism itself. *)
+
+Definition change_source {C : Csystem_catdata} {n} {a : Ob C n} {m} {b : Ob C m}
+         (f : Hom a b) {a' : Ob C n} (H : a' == a) : Hom a' b.
+Proof.
+  exists (pr1 f).
+  split.
+  destruct H.
+  exact (pr1 (pr2 f)).
+  exact (pr2 (pr2 f)).
+Defined.
+
+
+Definition pullback_proj (C : Csystem_star_q) := forall n (X : Ob C (S n)) m (Y : Ob C m)
+   (f : Hom Y (Cft X)), total2 (
+   fun H : Cft (Cstar X f) == Y =>
+   is_pullback C _ _ _ _ (Cq X f) (Cp C (Cstar X f)) (Cp C X) (change_source f H)).
+
+(** ** Finally, when do we have a C-system? *)
+
+Definition is_Csystem (C : Csystem_star_q) :=
+   dirprod 
+     (is_categorical C)
+     (dirprod (Cpt_is_final C)(pullback_proj C)).
+
+
+
+
+(*
+
+Definition Csystem_catdata_from_Csystem_cat (C : Csystem_cat) : Csystem_catdata :=
+     pr1 C.
+Coercion Csystem_catdata_from_Csystem_cat : Csystem_cat >-> Csystem_catdata.
+
+
+Definition comp_assoc (C : Csystem_cat) : forall (n m k l : nat) (a : Ob C n)
+     (b : Ob C m) (c : Ob C k) (d : Ob C l) 
+     (f : Hom a b) (g : Hom b c) (h : Hom c d), (f ;; g) ;; h == f ;; (g ;; h) :=
+        pr2 (pr2 C).
+
+Definition id_left (C : Csystem_cat) : forall (n m : nat) (a : Ob C n) (b : Ob C m)
+   (f : Hom a b), Csystem_id a ;; f == f := pr1 (pr1 (pr2 C)).
+
+Definition id_right (C : Csystem_cat) : forall (n m : nat) (a : Ob C n) (b : Ob C m)
+   (f : Hom a b), f ;; Csystem_id b == f := pr2 (pr1 (pr2 C)).
+
+*)
+
+
+Definition unique_empty (C : Csystem_catdata) := total2 (
+   fun pt : Ob C 0 => forall a : Ob C 0, a == pt).
+
+Definition Csystem_cat_pointed := total2 (
+   fun C : Csystem_cat => unique_empty C).
+
+Definition Csystem_cat_from_Csystem_cat_pointed (C : Csystem_cat_pointed) : 
+    Csystem_cat := pr1 C.
+Coercion Csystem_cat_from_Csystem_cat_pointed : Csystem_cat_pointed >-> Csystem_cat.
+
+Definition Csystem_cat_pt (C : Csystem_cat_pointed) : Ob C 0 := pr1 (pr2 C).
+
+Definition Csystem_cat_pointed_final (C : Csystem_cat_pointed) := total2 (
+     fun fin_mor : forall n (a : Ob C n), Hom a (Csystem_cat_pt C) => 
+            forall n (a : Ob C n) (g : Hom a (Csystem_cat_pt C)), 
+                  g == fin_mor n a).
+
+
+
+
+
 
 
 
