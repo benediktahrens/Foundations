@@ -38,6 +38,23 @@ Definition Hom {c : Csystem_predata}{n m : nat} (a : Ob c n)(b : Ob c m) : UU :=
               dirprod (Csource f == a)
                       (Ctarget f == b)).
 
+Lemma isaset_Hom {C : Csystem_predata}{n m : nat} (a : Ob C n)(b : Ob C m) :
+   isaset (Hom a b).
+Proof.
+  change (isaset) with (isofhlevel 2).
+  apply isofhleveltotal2.
+  apply (pr2 (Mor C n m)).
+  intro x.
+  apply isofhleveldirprod.
+  set (H:= pr2 (Ob C n)).
+  simpl in H.
+  unfold isaset in H.
+  apply hlevelntosn.
+  apply H.
+  apply hlevelntosn.
+  apply (pr2 (Ob C m)).
+Qed.
+
 Lemma Hom_eq (c : Csystem_predata)(n m : nat) (a : Ob c n)(b : Ob c m) 
       (f g : Hom a b) :
    pr1 f == pr1 g -> f == g.
@@ -60,7 +77,7 @@ Definition Csystem_predata_from_Csystem_catdata (c : Csystem_catdata) :
 Coercion Csystem_predata_from_Csystem_catdata : Csystem_catdata >-> Csystem_predata.
 
 
-Definition Csystem_id (c : Csystem_catdata){n : nat} (a : Ob c n) : Hom a a :=
+Definition Csystem_id {c : Csystem_catdata}{n : nat} (a : Ob c n) : Hom a a :=
             pr1 (pr2 c) _ a.
 
 Definition Csystem_comp (C : Csystem_catdata){n m k : nat} {a : Ob C n}
@@ -69,9 +86,121 @@ Definition Csystem_comp (C : Csystem_catdata){n m k : nat} {a : Ob C n}
 
 Notation "f ;; g" := (Csystem_comp _ f g) (at level 50).
 
-Definition comp_assoc (C : Csystem_catdata){n m k l : nat} (a : Ob C n)
+
+Definition Csystem_cat := total2 (
+   fun C : Csystem_catdata => dirprod 
+      (dirprod (forall (n m : nat) (a : Ob C n) (b : Ob C m)
+                  (f : Hom a b), Csystem_id a ;; f == f)
+               (forall (n m : nat) (a : Ob C n) (b : Ob C m)
+                  (f : Hom a b), f ;; Csystem_id b == f)
+      )
+      (forall (n m k l : nat) (a : Ob C n) (b : Ob C m) (c : Ob C k) (d : Ob C l) 
+       (f : Hom a b) (g : Hom b c) (h : Hom c d), (f ;; g) ;; h == f ;; (g ;; h))).
+
+Definition Csystem_catdata_from_Csystem_cat (C : Csystem_cat) : Csystem_catdata :=
+     pr1 C.
+Coercion Csystem_catdata_from_Csystem_cat : Csystem_cat >-> Csystem_catdata.
+
+Definition comp_assoc (C : Csystem_cat) : forall (n m k l : nat) (a : Ob C n)
      (b : Ob C m) (c : Ob C k) (d : Ob C l) 
-     (f : Hom a b) (g : Hom b c) (h : Hom c d) : (f ;; g) ;; h == f ;; (g ;; h).
+     (f : Hom a b) (g : Hom b c) (h : Hom c d), (f ;; g) ;; h == f ;; (g ;; h) :=
+        pr2 (pr2 C).
+
+Definition id_left (C : Csystem_cat) : forall (n m : nat) (a : Ob C n) (b : Ob C m)
+   (f : Hom a b), Csystem_id a ;; f == f := pr1 (pr1 (pr2 C)).
+
+Definition id_right (C : Csystem_cat) : forall (n m : nat) (a : Ob C n) (b : Ob C m)
+   (f : Hom a b), f ;; Csystem_id b == f := pr2 (pr1 (pr2 C)).
+
+Definition unique_empty (C : Csystem_catdata) := total2 (
+   fun pt : Ob C 0 => forall a : Ob C 0, a == pt).
+
+Definition Csystem_cat_pointed := total2 (
+   fun C : Csystem_cat => unique_empty C).
+
+Definition Csystem_cat_from_Csystem_cat_pointed (C : Csystem_cat_pointed) : 
+    Csystem_cat := pr1 C.
+Coercion Csystem_cat_from_Csystem_cat_pointed : Csystem_cat_pointed >-> Csystem_cat.
+
+Definition Csystem_cat_pt (C : Csystem_cat_pointed) : Ob C 0 := pr1 (pr2 C).
+
+Definition Csystem_cat_pointed_final (C : Csystem_cat_pointed) := total2 (
+     fun fin_mor : forall n (a : Ob C n), Hom a (Csystem_cat_pt C) => 
+            forall n (a : Ob C n) (g : Hom a (Csystem_cat_pt C)), 
+                  g == fin_mor n a).
+
+Definition Csystem_ft_projection (C : Csystem_catdata) := total2 (
+   fun ft : forall n, Ob C (S n) -> Ob C n =>
+      forall n (X : Ob C (S n)), Hom X (ft _ X)).
+
+Definition Csystem_ft_proj := total2 (
+   fun C : Csystem_catdata => Csystem_ft_projection C).
+
+Definition Csystem_catdata_from_Csystem_ft_proj (C : Csystem_ft_proj) :
+    Csystem_catdata := pr1 C.
+Coercion Csystem_catdata_from_Csystem_ft_proj : Csystem_ft_proj >-> Csystem_catdata.
+
+Definition Cft {C : Csystem_ft_proj} {n : nat} (X : Ob C (S n)) : Ob C n :=
+    pr1 (pr2 C) n X.
+
+Definition Cp (C : Csystem_ft_proj) {n : nat} (X : Ob C (S n)) : Hom X (Cft X) :=
+   pr2 (pr2 C) n X.
+
+Definition Csystem_star_q_data (C : Csystem_ft_proj) := total2 (
+     fun star : forall (n : nat) (X : Ob C (S n)) 
+              m (Y : Ob C m) (f : Hom Y (Cft X)), Ob C (S m) =>
+       forall (n : nat) (X : Ob C (S n)) 
+              m (Y : Ob C m) (f : Hom Y (Cft X)), Hom (star n X m Y f) X).
+
+Definition Csystem_star_q := total2 (
+   fun C : Csystem_ft_proj => Csystem_star_q_data C).
+
+Definition Csystem_ft_proj_from_Csystem_star_q (C : Csystem_star_q) : Csystem_ft_proj :=
+   pr1 C.
+Coercion Csystem_ft_proj_from_Csystem_star_q : Csystem_star_q >-> Csystem_ft_proj.
+
+Definition Cstar {C : Csystem_star_q}{n : nat} (X : Ob C (S n)) {m : nat}
+    {Y : Ob C m} (f : Hom Y (Cft X)) : Ob C (S m) := pr1 (pr2 C) n X m Y f.
+
+Definition Cq {C : Csystem_star_q}{n : nat} (X : Ob C (S n)) {m : nat}
+    (Y : Ob C m) (f : Hom Y (Cft X)) : Hom (Cstar _ f) X := pr2 (pr2 C) n X m Y f.
+
+
+(** ** Definition of being a pullback *)
+(** Input: a square of arrows *)
+
+Definition is_pullback (C : Csystem_catdata) {n m k l : nat}
+   (a : Ob C n) (b : Ob C m) (c : Ob C k) (d : Ob C l) 
+   (f : Hom a b) (g : Hom a c) (h : Hom b d) (i : Hom c d) :=
+  dirprod (f ;; h == g ;; i) 
+       (forall n' (a' : Ob C n') (f' : Hom a' b) (g' : Hom a' c),
+         f' ;; h == g' ;; i ->
+         
+         exists_unique (fun fg' : Hom a' a => 
+              hProppair (dirprod (fg' ;; f == f')(fg' ;; g == g')) 
+              (isapropdirprod _ _ (isaset_Hom a' b _ _ )(isaset_Hom a' c _ _ ))
+                )).
+
+
+
+
+                  (isapropdirprod _ _ (isaset_Hom ) a'))). (isaset_Hom _ _ ) a )
+)).
+         
+         total2 (fun fg' : Hom a' a =>
+               dirprod (fg' ;; f == f')(fg' ;; g == g'))).
+
+
+       True.
+
+
+
+
+=> forall n (a : Ob C n) 
+        (f : Mor a 
+
+Definition final_in_Csystem_cat (C : Csystem_cat) := total2
+
 
 Definition id_type (c : Csystem_predata) := forall n (a : Ob c n), Hom a a.
 

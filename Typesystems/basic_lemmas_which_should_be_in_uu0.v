@@ -12,6 +12,7 @@ Require Import pathnotations.
 Import pathnotations.PathNotations.
 
 
+
 (** Transport with the inverse *)
 
 Lemma transport_to_the_left (A : UU) (B : A -> UU) (a a' : A)
@@ -474,6 +475,36 @@ Proof.
   destruct (pr1 (pr2 (B x) px py)).
   apply idpath.
 Defined.
+
+
+(** * About unique existence *)
+
+Definition exists_unique {X : UU} (P : X -> hProp) := total2 (
+   fun x => dirprod (P x)
+                    (forall y, P y -> y == x)).
+
+Lemma isaprop_exists_unique (X : hSet) (P : X -> hProp) : isaprop (exists_unique P).
+Proof.
+  apply invproofirrelevance.
+  intros x x'.
+  assert (H : pr1 x == pr1 x').
+  apply (pr2 (pr2 x')).
+  apply (pr1 (pr2 x)).
+  apply (total2_paths H).
+  destruct x as [x pq].
+  destruct x' as [x' pq'].
+  simpl in *.
+  apply proofirrelevance.
+  apply isapropdirprod.
+  exact (pr2 (P x')).
+  apply impred; intro.
+  apply impred; intro.
+  apply (pr2 X).
+Qed.
+  
+
+
+
 
 
 (*
