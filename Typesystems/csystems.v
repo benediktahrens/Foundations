@@ -282,6 +282,14 @@ Fixpoint ICft (C : Csystem_data) (i : nat) : forall (n : nat),
    | S i' => fun n => fun X => (ICft C i' _ (Cft X))
    end.
 
+Fixpoint ICft' (C : Csystem_data) (i : nat) : forall (n : nat), 
+        Ob C (S i + n) -> Ob C (S n) :=
+   match i return forall n, Ob C (S (i + n)) -> Ob C (S n) with
+   | 0 => fun n => fun X => X
+   | S i' => fun n => fun X => Cft (ICft' C i' _ X)
+   end.
+
+
 Implicit Arguments ICft [C n].
 
 (** ** Iterated canonical projections *)
@@ -298,6 +306,8 @@ Implicit Arguments ICp [C n].
 Print Cq.
 (** ** Iterated star and q operations *)
 
+
+(*
 Fixpoint ICq (C : Csystem_data) (i : nat) n (X : Ob C (S (i + n)))
      m (Y : Ob C m) (f : Hom Y (ICft i X))  :=
    match i return forall  n (X : Ob C (S (i + n))) m (Y : Ob C m) (f : Hom Y (ICft i X)), _ with
@@ -305,8 +315,33 @@ Fixpoint ICq (C : Csystem_data) (i : nat) n (X : Ob C (S (i + n)))
    | S i' => fun n (X : Ob C (S (S i' + n))) m (Y : Ob C m) (f : Hom Y (ICft (S i') X)) => 
             Cq X (ICq C i' n (Cft X) _ _ f)
    end.
+*)
+
+Print tpair.
 
 
+
+Definition ICstar_ICq (C : Csystem_data) (i : nat) : 
+    forall n (X : Ob C ((S i + n))) m (Y : Ob C m) (f : Hom Y (ICft i X)),
+        total2 (fun x : Ob C (i + m) => Hom x (ICft i X)).
+induction i.
+intros. simpl in *.
+exists Y. exists (pr1 f). exists (pr1 (pr2 f)). exact (pr2 (pr2 f)).
+intros.
+exists (Cstar X (pr2 (IHi n (Cft X) m _ f))).
+
+
+Fixpoint ICstar_ICq (C : Csystem_data) (i : nat) : 
+    forall n (X : Ob C ((S i + n))) m (Y : Ob C m) (f : Hom Y (ICft i X)),
+        total2 (fun x : Ob C (i + m) => Hom x (ICft i X)) :=
+  match i return forall n (X : Ob C ((S i + n))) m (Y : Ob C m) (f : Hom Y (ICft i X)),
+                  total2 (fun x : Ob C (i + m) => Hom x (ICft i X)) with
+  | 0 => fun n X m Y f => tpair (fun x => Hom _ _ ) Y f
+  | S i' => fun n X m Y f => 
+         tpair (fun x : Ob C (S i' + m) => Hom x X) 
+                 (Cstar X (pr2 (ICstar_ICq C i' n (Cft X) m _ f)))
+                 (Cq X (pr2 (ICstar_ICq C i' n (Cft X) m _ f)))
+  end.
  
 Fixpoint ICstar (C : Csystem_data) (i : nat) : 
   forall n (X : Ob C ((S i + n))) m (Y : Ob C m) (f : Hom Y (ICft i X)), Ob C ( (i + m)) :=
@@ -316,9 +351,9 @@ Fixpoint ICstar (C : Csystem_data) (i : nat) :
   | S i' => fun n X m Y f => Cstar X (ICq C i' n (Cft X) m _ f) 
   end
 with
-   ICq (C : Csystem_data) (i : nat) (*: 
+   ICq (C : Csystem_data) (i : nat) : 
    forall n (X : Ob C S (i + n)) m (Y : Ob C m) (f : Hom Y (ICft i X)), 
-         Hom (ICstar C i n X m Y f) X*)  :=
+         Hom (ICstar C i n X m Y f) X  :=
    match i (*return forall  n (X : Ob C S (i + n)) m (Y : Ob C m) (f : Hom Y (ICft i X)), 
          Hom (ICstar C i n X m Y f) X*) with
    | 0 => fun n X m Y f => f
