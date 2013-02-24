@@ -275,31 +275,98 @@ Qed.
 
 (** ** Iterated father *)
 
-Fixpoint ICft (C : Csystem_data) (i : nat) : forall (n : nat),
-        Ob C (S (i + n)) -> Ob C (S n) :=
-   match i return forall n, Ob C (S (i + n)) -> Ob C (S n) with
+
+Fixpoint ICft (C : Csystem_data) (i : nat) : forall (n : nat), 
+        Ob C (i + n) -> Ob C n :=
+   match i return forall n, Ob C (i + n) -> Ob C n with
    | 0 => fun n => fun X => X
    | S i' => fun n => fun X => (ICft C i' _ (Cft X))
    end.
 
+(*
+Definition ICft' (C : Csystem_data) (i : nat) : forall (n : nat), 
+        Ob C (i + n) -> Ob C n.
+induction i.
+ exact (fun n => fun X => X).
+ intros n X.
+ apply Cft.
+ apply IHi.
+ (* transport along (S i + n == i + S n) *)
+
+
 Fixpoint ICft' (C : Csystem_data) (i : nat) : forall (n : nat), 
+        Ob C (i + n) -> Ob C n :=
+   match i return forall n, Ob C (i + n) -> Ob C n with
+   | 0 => fun n => fun X => X
+   | S i' => fun n => fun (X : Ob C (S i' + n)) => Cft (ICft C i' _ (X))
+   end.
+*)
+
+
+(*
+Fixpoint ICft (C : Csystem_data) (i : nat) : forall (n : nat),
         Ob C (S i + n) -> Ob C (S n) :=
    match i return forall n, Ob C (S (i + n)) -> Ob C (S n) with
    | 0 => fun n => fun X => X
-   | S i' => fun n => fun X => Cft (ICft' C i' _ X)
-   end.
+   | S i' => fun n => fun X => (ICft C i' _ (Cft X))
+   end. Print ICft.
+*)
 
+Lemma bla : forall i n, S i + n == i + S n.
+Proof.
+  induction i; 
+  simpl in *; intros.
+  apply idpath.
+  apply maponpaths.
+  apply IHi.
+Defined.
+Print bla.  
+
+(*
+Lemma ICft_change (C : Csystem_data) (i : nat) : forall (n : nat) (X : Ob C (S (i + n))),
+      ICft C (S i) n (X) == Cft (ICft C i (S n) (transportf (fun x => Ob C x) (bla _ _ ) X)).
+Proof.  
+  induction i.
+  simpl.
+  intros n X.
+  rewrite transportf_idpath.
+  apply idpath.
+  
+  intros n X.
+  unfold bla.
+  simpl.  
+*)
 
 Implicit Arguments ICft [C n].
 
+
 (** ** Iterated canonical projections *)
 
-Fixpoint ICp (C : Csystem_data) (i : nat) : forall (n : nat) (X : Ob C (S (i + n))),
+Fixpoint ICp (C : Csystem_data) (i : nat) : forall (n : nat) (X : Ob C (i + n)),
          Hom X (ICft i X) :=
-   match i return forall (n : nat)(X : Ob C (S (i + n))), Hom X (ICft i X) with
+   match i return forall (n : nat)(X : Ob C ((i + n))), Hom X (ICft i X) with
    | 0 => fun n => fun X => Csystem_id X
    | S i' => fun n => fun X => Cp _ X ;; ICp C i' n (Cft X)  (*;; Cp (ICft C i' n X)*)
    end.
+
+(*
+Definition ICp' (C : Csystem_data) (i : nat) : forall (n : nat) (X : Ob C (i + n)),
+         Hom X (ICft i X).
+induction i.
+exact (fun n => fun X => Csystem_id X).
+intros n X .
+(* transport X along (S i + n == i + S n) *)
+exact (IHi _ X ;; Cp _ (ICft _ )).
+
+
+
+Fixpoint ICp' (C : Csystem_data) (i : nat) : forall (n : nat) (X : Ob C (i + n)),
+         Hom X (ICft i X) :=
+   match i return forall (n : nat)(X : Ob C ((i + n))), Hom X (ICft i X) with
+   | 0 => fun n => fun X => Csystem_id X
+   | S i' => fun n => fun X => Cp _ X ;; ICp C i' n (Cft X)  (*;; Cp (ICft C i' n X)*)
+   end.
+*)
 
 Implicit Arguments ICp [C n].
 
@@ -322,13 +389,29 @@ Print tpair.
 
 
 Definition ICstar_ICq (C : Csystem_data) (i : nat) : 
-    forall n (X : Ob C ((S i + n))) m (Y : Ob C m) (f : Hom Y (ICft i X)),
+    forall n (X : Ob C ((i + n))) m (Y : Ob C m) (f : Hom Y (ICft i X)),
         total2 (fun x : Ob C (i + m) => Hom x (ICft i X)).
 induction i.
 intros. simpl in *.
-exists Y. exists (pr1 f). exists (pr1 (pr2 f)). exact (pr2 (pr2 f)).
+exists Y. exact f.
 intros.
-exists (Cstar X (pr2 (IHi n (Cft X) m _ f))).
+
+set (f' := (IHi n (Cft X) m _ f)).
+simpl in f'.
+destruct f' as [fs q].
+Check @Cstar. Check @ICft.
+
+set (f1 := Cstar X q).
+exists f1.
+exact (Cq _ q).
+
+simpl . Check @Cstar.
+destruct i. simpl.
+exists (Cstar X f'). exists
+unfold ICft in H.
+simpl in *.
+
+exists (Cstar X H). (pr2 (IHi n (Cft X) m _ f))).
 
 
 Fixpoint ICstar_ICq (C : Csystem_data) (i : nat) : 
