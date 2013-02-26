@@ -4,10 +4,12 @@ Add Rec LoadPath "../Generalities".
 Add Rec LoadPath "../hlevel1".
 Add Rec LoadPath "../hlevel2".
 
-Require Import hSet.
-Require Import hnat.
+Require Import DP_Nat.
 
-Require Import catqalg.
+Require Import hSet.
+(*Require Import hnat.*)
+
+(*Require Import catqalg.*)
 Require Import pathnotations.
 Import pathnotations.PathNotations.
 Require Import basic_lemmas_which_should_be_in_uu0.
@@ -283,7 +285,7 @@ Fixpoint ICft (C : Csystem_data) (i : nat) : forall (n : nat),
    | S i' => fun n => fun X => (ICft C i' _ (Cft X))
    end.
 
-(*
+
 Definition ICft' (C : Csystem_data) (i : nat) : forall (n : nat), 
         Ob C (i + n) -> Ob C n.
 induction i.
@@ -291,6 +293,8 @@ induction i.
  intros n X.
  apply Cft.
  apply IHi.
+ About nat.
+ exact X.
  (* transport along (S i + n == i + S n) *)
 
 
