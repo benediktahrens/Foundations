@@ -37,6 +37,9 @@ Definition Csystem_predata := total2 (
              (forall n m, pr2 obmor n m -> sstage_type m (pr1 obmor)) (*target*)
 ).
 
+
+Definition Csystem_stower (C : Csystem_predata) : stower := pr1 (pr1 C).
+
 Definition Ob (c : Csystem_predata) (n : nat) : hSet := sstage_type n (pr1 (pr1 c)).
 Coercion Ob : Csystem_predata >-> Funclass.
 
@@ -108,7 +111,7 @@ Notation "f ;; g" := (Csystem_comp _ f g) (at level 50).
 (** ** Father and Canonical Projections *)
 
 Definition Csystem_ft_projection (C : Csystem_catdata) := total2 (
-   fun ft : forall n, Ob C n -> Ob C (n -- 1) =>
+   fun ft : forall n (X : Ob C n),  =>
       forall n (X : Ob C n), Hom X (ft _ X)).
 
 Definition Csystem_ft_proj := total2 (

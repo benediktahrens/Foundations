@@ -33,8 +33,11 @@ Definition toptower ( T : tower ) :=
    con ( total2 ( fun t' : towerbase T => towerbase ( towerfiber T t' ) ) )
          ( fun x => towerfiber ( towerfiber T ( pr1 x ) ) ( pr2 x ) ) . 
 
+
+
+
 Definition stage ( n : nat ) ( T : tower ) : 
-       total2 ( fun Tn : Type => forall t : Tn , Type ) .
+       total2 ( fun Tn : Type => Tn -> Type ) .
 Proof. 
   intro n. 
   induction n . 
@@ -42,16 +45,72 @@ Proof.
   
   destruct T as [T' S'].
   exists T'.
-  exact (fun t' => towerbase (S' t')).
+  exact (fun t' : T' => towerbase (S' t')).
   
   (* exact (match T with con T' S' => ( tpair (fun Tn : Type => Tn -> Type) 
        T' (fun t' : T' => towerbase ( S' t' ) ) ) end ) . *)
 
   intro T. 
   exact ( IHn ( toptower T ) ) .  
-Defined. 
+Defined.
 
-Definition  stage_type (n : nat) (T : tower) : Type := pr1 (stage n T).
+Fixpoint stage' (n : nat)  {struct n} : tower -> 
+         total2 (fun Tn : Type => Tn -> Type) :=
+  match n return tower -> total2 (fun Tn : Type =>  Tn -> Type) with
+  | 0 => fun T => tpair (fun Tn : Type => forall t : Tn, Type) 
+                        (towerbase T) 
+                        (fun t : towerbase T => towerbase (towerfiber T t))
+  | S n' => fun T => stage' n' (toptower T)
+  end.
+ 
+
+Definition  stage_type (n : nat) (T : tower) : Type := pr1 (stage' n T).
+
+(** write [T n] for [stage_type n T] in comments *)
+(** Type of possible context extensions of [t : T n] *)
+
+Definition context_ext (T : tower) (n : nat) (t : stage_type n T) : Type :=
+   (pr2 (stage' n T) t).
+
+Definition father  (n : nat) (T : tower) (t : stage_type (S n) T) : 
+    stage_type n T.
+Proof.
+  induction n.
+  
+  unfold stage_type.
+  simpl.
+  intros T x.
+  exact (pr1 x).
+  
+  unfold stage_type in *. 
+  simpl in *.
+  intros T x.
+  
+  apply IHn.
+  apply x.
+Defined.
+
+Print father.
+
+Fixpoint father' (n : nat) : forall T : tower, stage_type (S n) T -> stage_type n T :=
+  match n return forall T : tower, stage_type (S n) T -> stage_type n T with
+  | 0 => fun T x => pr1 x
+  | S n' => fun T x => father' n' (toptower T) x
+  end.
+
+
+  apply (pr1 x).
+  
+  unfold stage
+  simpl in *.
+ 
+  intros T n x.
+  destruct x.
+
+(* here i wanted to do something stupid, namely... *)
+Definition context_ext' (T : tower) (n : nat) (t : stage_type n T) : 
+   stage_type (S n) T :=
+   
 
 
 (** ** need the same thing for hSets *)
@@ -116,7 +175,7 @@ Defined.
 Definition  sstage_type (n : nat) (T : stower) : hSet := pr1 (sstage n T).
 
 
-
+Definition stower_objects (T : stower) : Type := total2 (fun n => sstage_type n T).
 
 
 
