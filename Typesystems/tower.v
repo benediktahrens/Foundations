@@ -72,6 +72,8 @@ Definition  stage_type (n : nat) (T : tower) : Type := pr1 (stage' n T).
 Definition context_ext (T : tower) (n : nat) (t : stage_type n T) : Type :=
    (pr2 (stage' n T) t).
 
+(** Father operation on towers *)
+
 Definition father  (n : nat) (T : tower) (t : stage_type (S n) T) : 
     stage_type n T.
 Proof.
@@ -90,7 +92,7 @@ Proof.
   apply x.
 Defined.
 
-Print father.
+(** Father operation as explicit fixpoint rather than by tactics *)
 
 Fixpoint father' (n : nat) : forall T : tower, stage_type (S n) T -> stage_type n T :=
   match n return forall T : tower, stage_type (S n) T -> stage_type n T with
@@ -98,6 +100,32 @@ Fixpoint father' (n : nat) : forall T : tower, stage_type (S n) T -> stage_type 
   | S n' => fun T x => father' n' (toptower T) x
   end.
 
+(** Iterated father *)
+
+Definition Ift (i : nat) (n : nat) : forall T : tower, stage_type (i + n) T -> stage_type n T.
+induction i.
+  intros n T X.
+  exact X.
+  
+  intros n T X.
+  apply IHi.
+  apply father'.
+  apply X.
+Defined.
+
+Definition Ift' (i : nat) (n : nat) : forall T : tower, stage_type (i + n) T -> stage_type n T.
+induction i.
+  intros n T X.
+  exact X.
+  
+  intros n T X.
+  apply father'.
+  apply IHi.
+  apply X.
+  apply IHi.
+  apply father'.
+  apply X.
+Defined.
 
   apply (pr1 x).
   
