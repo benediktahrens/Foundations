@@ -7,6 +7,9 @@ Add Rec LoadPath "../hlevel2/".
 Require Export uu0.
 Require Export hSet.
 
+Require Export pathnotations.
+Import pathnotations.PathNotations.
+
 Unset Automatic Introduction.
 
 CoInductive tower := con : forall T : Type, ( T -> tower ) -> tower.
@@ -28,11 +31,10 @@ Definition towerfiber ( T : tower ) ( t : towerbase T ) : tower :=
 (** basefibertower = con *)
 Definition basefibertower ( T : Type ) ( F : T -> tower ) : tower := con T F . 
 
-(** *)
+(** collapsing the lowest two floors into one by sigmaing *)
 Definition toptower ( T : tower ) := 
    con ( total2 ( fun t' : towerbase T => towerbase ( towerfiber T t' ) ) )
          ( fun x => towerfiber ( towerfiber T ( pr1 x ) ) ( pr2 x ) ) . 
-
 
 
 
@@ -91,6 +93,39 @@ Proof.
   apply IHn.
   apply x.
 Defined.
+
+Lemma father_of_context_ext (n : nat) (T : tower) (t : stage_type n T) 
+   (t1 : context_ext T n t) : father _ T t1 ==  t.
+
+Definition father'  (n : nat) (T : tower) (t : stage_type (S n) T) : 
+    stage_type n T.
+Proof.
+  destruct n.
+  intros T X.
+  exact (pr1 X).
+  
+  intros T X.
+  unfold stage_type in X.
+  simpl in *.
+  exact (pr1 X).
+  
+  induction n.
+  
+  unfold stage_type.
+  simpl.
+  intros T x.
+  exact (pr1 x).
+  
+  unfold stage_type in *. 
+  simpl in *.
+  intros T x.
+  
+  apply IHn.
+  apply x.
+Defined.
+
+
+
 
 (** Father operation as explicit fixpoint rather than by tactics *)
 
