@@ -29,29 +29,56 @@ Proof.
   intro T.  
   exact ( towerbasefiber T ) . 
 
-  intro T. 
-  split with ( total2 ( fun x : pr1 ( IHn T ) => towerbase ( pr2 ( IHn T ) x ) ) ).  
+  intro T.
+  exists ( total2 ( fun x : pr1 ( IHn T ) => towerbase ( pr2 ( IHn T ) x ) ) ).  
   intro x .
   exact (toweroverbase (pr2 x)).
 (*  destruct x as [ xn G ] . 
   exact ( toweroverbase G ) .   
 *)
-Defined. 
+Defined.
+
+Fixpoint towerstage' (n : nat) : tower -> 
+    total2 (fun Tn : Type => forall t : Tn , tower) :=
+ match n with
+ | 0 => fun T => towerbasefiber T
+ | S n' => fun T => tpair (fun Tn : Type => forall t : Tn , tower)
+   (total2 (fun x : pr1 (towerstage' n' T) => towerbase (pr2 (towerstage' n' T) x))) 
+   (fun x => toweroverbase (pr2 x))
+ end.
+
+Print towerstage. 
 
 Definition towerfloor ( n : nat ) ( T : tower ) : Type := pr1 (towerstage n T).
 
-Definition towerover { n : nat } { T : tower } ( G : towerfloor n T ) : tower := 
+Definition towerfather {n : nat} {T : tower} (x : towerfloor (S n) T) :
+    towerfloor n T := pr1 x.
+
+Definition towerover { n : nat } { T : tower } (G : towerfloor n T) : tower := 
    pr2 (towerstage n T) G.
 
-Definition towerfiber { n : nat } { T : tower } ( G : towerfloor n T ) := 
-   towerbase ( towerover G ) . 
+Definition towerfiber {n : nat} {T : tower} (G : towerfloor n T) := 
+   towerbase (towerover G). 
 
+(*
+Definition towerfatherofextension (n : nat) (T : tower) (G : towerfloor n T)
+  (Y : towerfiber G) : paths (towerfather (tpair _ Y G)) G .
+*)
 Definition towerfibertotowerfloor { n : nat } { T : tower } ( G : towerfloor n T ) 
    ( G' : towerfiber G ) : towerfloor ( S n ) T := tpair _ G G' .
 
+Lemma towerfatherofextension (n : nat) (T : tower) (G : towerfloor n T)
+  (Y : towerfiber G) : paths (towerfather (towerfibertotowerfloor G Y)) G .
+Proof.
+  intros.
+  apply idpath.
+Qed.
+
+
+
 (* Functions berween towers *)
 
-CoInductive towerfun : forall ( T T' : tower ) , Type := 
+CoInductive towerfun : forall  T T' : tower, Type := 
    towerfunconstr : forall ( T T' : tower ) ( f0 : towerbase T -> towerbase T' ) 
   ( ff : forall t0 : towerbase T , towerfun ( toweroverbase t0 ) 
         ( toweroverbase ( f0 t0 ) ) ) , towerfun T T' . 
@@ -62,7 +89,7 @@ CoFixpoint toweridfun ( T : tower ) : towerfun T T :=
 Definition towerfunonbase { T T' : tower } ( f : towerfun T T' ) : 
        towerbase T -> towerbase T' .
 Proof. 
-  intros T1 T2 f G . 
+  intros T1 T2 f G .
   destruct f as [ T T' f0 ff ] .  
   exact ( f0 G ) . 
 Defined. 
@@ -87,12 +114,31 @@ Proof.
   exact ( tpair _ ( towerfunonbase f )  ( towerfunontowersoverbase f ) ) .   
 
   intros .  
-  split with ( fun x => tpair _ (pr1 (IHn T T' f) (pr1 x)) 
+  exists ( fun x => tpair _ (pr1 (IHn T T' f) (pr1 x)) 
    ( towerfunonbase (pr2 (IHn T T' f) (pr1 x) ) (pr2 x)) ) . 
   intro G. 
   destruct G as [ G1 G2 ] . 
   apply ( towerfunontowersoverbase  (pr2 (IHn T T' f) G1 ) G2 ) . 
-Defined. 
+Defined.
+
+Fixpoint towerfunover' (n : nat) : forall (T T' : tower) (f : towerfun T T'),
+  total2 ( fun fn : towerfloor n T -> towerfloor n T' => 
+    forall G : towerfloor n T , towerfun ( towerover G ) ( towerover ( fn G ) ) ) :=
+ match n return 
+ forall (T T' : tower) (f : towerfun T T'),
+    total2 ( fun fn : towerfloor n T -> towerfloor n T' => 
+     forall G : towerfloor n T , towerfun ( towerover G ) ( towerover ( fn G ) ) ) 
+ with
+ | 0 => fun T T' f => tpair _ (towerfunonbase f) (towerfunontowersoverbase f)
+ | S n' => fun T T' f =>
+    tpair  (fun fn : towerfloor (S n') T -> towerfloor (S n') T' => 
+      forall G : towerfloor (S n') T , towerfun ( towerover G ) ( towerover ( fn G))) 
+       (fun x : towerfloor (S n') _ => tpair _ (pr1 (towerfunover' n' T T' f) (pr1 x)) 
+      (towerfunonbase (pr2 (towerfunover' n' T T' f) (pr1 x) ) (pr2 x)))
+      (fun G =>  towerfunontowersoverbase  (pr2 (towerfunover' n' T T' f) (pr1 G)) 
+                    (pr2 G))
+ end.
+
 
 (* Some constructions related to toptower *)
 
@@ -107,7 +153,7 @@ CoFixpoint towerstrmap ( T : tower ) ( t0 : towerbase T ) :
 
 Definition toptowertotower ( T : tower ) : towerfun ( toptower T ) T := 
   towerfunconstr ( toptower T ) T 
-  ( fun t01 => @pr1 _ ( fun t' : towerbase T => towerbase ( toweroverbase t' ) ) t01 ) 
+  ( fun t01 => @pr1 _ ( fun t' : towerbase T => towerbase ( toweroverbase t' ) ) t01) 
   ( fun t01 => towerstrmap ( toweroverbase ( pr1 t01 ) ) ( pr2 t01 ) )  . 
 
 (* .... *)
@@ -151,19 +197,24 @@ simpl .  intros n T .  destruct T . intro G .  unfold towerfloor in G .
 
 
 
-(* The type of carriers of B-systems - towers together with a one step ramification at each floor other than the base floor. *)
+(* The type of carriers of B-systems - towers together with a one step 
+ramification at each floor other than the base floor. *)
 
 Notation B := towerfiberoverfloor.
 
-Definition bsystemcarrier := total2 ( fun T : tower => forall ( n : nat ) ( G : towerfloor n T ) ( G' : B G ) , Type ) . 
+Definition bsystemcarrier := total2 ( fun T : tower => forall ( n : nat ) 
+  ( G : towerfloor n T ) ( G' : B G ) , Type ) . 
 
 Definition bsystemcarriertotower ( T : bsystemcarrier ) := pr1 T .
 
 Coercion bsystemcarriertotower : bsystemcarrier >-> tower.
 
-Definition BT { n : nat } { T : bsystemcarrier } { G : towerfloor n T } ( G' : B G ) := pr2 T n G G' . 
+Definition BT { n : nat } { T : bsystemcarrier } { G : towerfloor n T } ( G' : B G ):= 
+pr2 T n G G' . 
 
-Definition bsystemcarrierover { n : nat } { T : bsystemcarrier } ( G : towerfloor n T ) := tpair _ ( towerover G )  
+Definition bsystemcarrierover { n : nat } { T : bsystemcarrier } 
+  
+  ( G : towerfloor n T ) := tpair _ ( towerover G )  
 
 (* Types of structures on brtowers which together form the structure of a B-system. *)
 
