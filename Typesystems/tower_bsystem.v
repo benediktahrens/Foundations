@@ -159,7 +159,7 @@ Definition toptowertotower ( T : tower ) : towerfun ( toptower T ) T :=
 (* .... *)
 
 
-
+(*
 Definition toptowertotoptower { T1 T2 : tower } ( f : towerfun T1 T2 ) : 
   towerfun ( toptower T1 ) ( toptower T2 ) .
 Proof .  intros . destruct f as [ T T' f0 ff1 ] . 
@@ -184,12 +184,10 @@ intros T G . exact ( fun x => G ) .
 
 intros T G
 
-
-
 simpl .  intros n T .  destruct T . intro G .  unfold towerfloor in G . 
  unfold towerstage in G .  simpl in G . induction n . 
 
-
+*)
 
 
 
@@ -199,18 +197,34 @@ simpl .  intros n T .  destruct T . intro G .  unfold towerfloor in G .
 
 (* The type of carriers of B-systems - towers together with a one step 
 ramification at each floor other than the base floor. *)
-
+(*
 Notation B := towerfiberoverfloor.
+*)
 
+(*
 Definition bsystemcarrier := total2 ( fun T : tower => forall ( n : nat ) 
   ( G : towerfloor n T ) ( G' : B G ) , Type ) . 
+*)
+
+Definition bsystemcarrier := total2 ( fun T : tower => forall ( n : nat ) 
+  ( G : towerfloor ( S n ) T ) , Type ) . 
 
 Definition bsystemcarriertotower ( T : bsystemcarrier ) := pr1 T .
 
 Coercion bsystemcarriertotower : bsystemcarrier >-> tower.
 
-Definition BT { n : nat } { T : bsystemcarrier } { G : towerfloor n T } ( G' : B G ):= 
-pr2 T n G G' . 
+Definition BT ( n : nat ) ( T : bsystemcarrier ) (G : towerfloor (S n) T) :=  pr2 T n G . 
+
+
+Definition Tops ( T : bsystemcarrier ) := forall ( n : nat ) ( G : towerfloor ( S n ) T ), 
+    towerfun ( towerover ( pr1 G ) ) ( towerover G ) . 
+
+Definition Ttops ( T : bsystemcarrier ) ( Top : Tops T ) := 
+forall ( n m : nat ) ( G : towerfloor ( S n ) T ) ( G' : towerfloor ( S m ) ( towerover G ) ), 
+            BT m (towerover G) G' -> BT ( Top G G' ) .  
+
+Definition deltas ( T : tower ) := forall ( n : nat ) (    
+
 
 Definition bsystemcarrierover { n : nat } { T : bsystemcarrier } 
   
