@@ -4,7 +4,7 @@ Add Rec LoadPath "../Generalities".
 Add Rec LoadPath "../hlevel1".
 Add Rec LoadPath "../hlevel2".
 
-(*Require Import DP_Nat.*)
+Require Import DP_Nat.
 
 Require Import hSet.
 (*Require Import hnat.*)
@@ -17,7 +17,7 @@ Require Import basic_lemmas_which_should_be_in_uu0.
 
 Section tower_version.
 
-Require Import tower.
+Require Import tower_improved.
 
 (** * Definition of C-systems *)
 
