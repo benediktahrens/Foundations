@@ -272,12 +272,7 @@ Proof.
   apply idpath.
   simpl.
   rewrite IHi.
-  
   clear IHi.
-  induction i.
-  apply idpath.
-  simpl.
-  Check @maponpaths.
 Admitted.
 
 (** ** Iterated canonical projections *)
