@@ -31,25 +31,362 @@ Require Import tower_improved.
 *)
 
 Definition Csystem_predata := total2 (
-  fun obmor : dirprod stower
-                      (nat -> nat -> hSet) =>
-     dirprod (forall n m, pr2 obmor n m -> sstage_type n (pr1 obmor)) (*source*)
-             (forall n m, pr2 obmor n m -> sstage_type m (pr1 obmor)) (*target*)
-).
+  fun T : stower => forall n m, stowerfloor n T -> stowerfloor m T -> hSet).
+
+Definition Csystem_stower (C : Csystem_predata) : stower := pr1 C.
+Coercion Csystem_stower : Csystem_predata >-> stower.
+
+Definition ob (C : Csystem_predata) n : hSet := stowerfloor n C.
+
+Definition hom (C : Csystem_predata) n m (a : ob C n) (b : ob C m): hSet :=
+            pr2 C n m a b.
+Local Notation "a --> b" := (hom _ _ _ a b)(at level 50).
+
+Definition Csystem_catdata := total2 (
+  fun C : Csystem_predata => dirprod
+     (forall n (a : ob C n), a --> a)
+     (forall n m k 
+      (a : ob C n) (b : ob C m) (c : ob C k),
+       a --> b -> b --> c -> a --> c)).
+
+Definition Csystem_predata_from_Csystem_catdata (c : Csystem_catdata) :
+    Csystem_predata := pr1 c.
+Coercion Csystem_predata_from_Csystem_catdata : Csystem_catdata >-> Csystem_predata.
 
 
-Definition Csystem_stower (C : Csystem_predata) : stower := pr1 (pr1 C).
+Definition Csystem_id {C : Csystem_catdata}{n : nat} (a : ob C n) : a --> a :=
+            pr1 (pr2 C) _ a.
 
-Definition Ob (c : Csystem_predata) (n : nat) : hSet := sstage_type n (pr1 (pr1 c)).
-Coercion Ob : Csystem_predata >-> Funclass.
+Definition Csystem_comp (C : Csystem_catdata)(n m k : nat) (a : ob C n)
+    (b : ob C m) (c : ob C k) : a --> b -> b --> c -> a --> c :=
+       fun f g => pr2 (pr2 C) _ _ _ _ _ _ f g.
 
-Definition Mor (c : Csystem_predata) : nat -> nat -> hSet := pr2 (pr1 c).
+Notation "f ;; g" := (Csystem_comp _ _ _ _ _ _ _ f g) (at level 50).
 
-Definition Csource {c : Csystem_predata} {n m : nat} (f : Mor c n m) : Ob c n :=
-      pr1 (pr2 c) _ _ f.
 
-Definition Ctarget {c : Csystem_predata} {n m : nat} (f : Mor c n m) : Ob c m :=
-      pr2 (pr2 c) _ _ f.
+(** ** Father and Canonical Projections *)
+
+Definition Csystem_projection (C : Csystem_catdata) := 
+   forall n (X : ob C (S n)), X --> stowerfather X.
+
+(*
+Definition Csystem_ft_projection (C : Csystem_catdata) := total2 (
+   fun ft : forall n (X : ob C n) =>
+      forall n (X : Ob C n), Hom X (ft _ X)).
+*)
+
+Definition Csystem_proj := total2 (
+   fun C : Csystem_catdata => Csystem_projection C).
+
+Definition Csystem_catdata_from_Csystem_proj (C : Csystem_proj) :
+    Csystem_catdata := pr1 C.
+Coercion Csystem_catdata_from_Csystem_proj : Csystem_proj >-> Csystem_catdata.
+
+Definition Cft {C : Csystem_predata} {n} (X : ob C (S n)) := stowerfather X.
+
+Definition Cp (C : Csystem_proj) {n : nat} (X : ob C (S n)) : X --> Cft X :=
+   pr2 C n X.
+
+(** ** Pullback data for pullbacks of can. projections *)
+
+Definition Csystem_star_q (C : Csystem_proj) := 
+    forall (n : nat) (X : ob C (S n)) m (Y : ob C m) (f : Y --> (Cft X)),
+       total2 (fun star : stowerfiber Y => stowerfibertostowerfloor _ star --> X).
+
+
+Definition Csystem_data := total2 (
+   fun C : Csystem_proj => Csystem_star_q C).
+
+Definition Csystem_proj_from_Csystem_data (C : Csystem_data) : Csystem_proj :=
+   pr1 C.
+Coercion Csystem_proj_from_Csystem_data : Csystem_data >-> Csystem_proj.
+
+Definition Cstar {C : Csystem_data}{n : nat} (X : ob C (S n)) {m : nat}
+    {Y : ob C m} (f : Y --> Cft X) : ob C (S m) :=  
+  stowerfibertostowerfloor _ (pr1 (pr2 C n X m Y f)).
+
+Definition Cq {C : Csystem_data}{n : nat} (X : ob C (S n)) {m : nat}
+    {Y : ob C m} (f : Y --> Cft X) : Cstar _ f --> X := pr2 (pr2 C n X m Y f).
+
+
+
+(** * Axioms of a C-system *)
+
+(** ** Categorical axioms *)  
+
+Definition is_categorical (C : Csystem_catdata) := 
+  dirprod 
+      (dirprod (forall (n m : nat) (a : ob C n) (b : ob C m)
+                  (f : a --> b), Csystem_id a ;; f == f)
+               (forall (n m : nat) (a : ob C n) (b : ob C m)
+                  (f : a --> b), f ;; Csystem_id b == f)
+      )
+      (forall (n m k l : nat) (a : ob C n) (b : ob C m) (c : ob C k) (d : ob C l) 
+       (f : a --> b) (g : b --> c) (h : c --> d), (f ;; g) ;; h == f ;; (g ;; h)).
+
+Lemma isaprop_is_categorical (C : Csystem_catdata) : isaprop (is_categorical C).
+Proof.
+  repeat apply isapropdirprod;
+  repeat (apply impred; intros);
+  apply ( _ --> _).
+Qed.
+
+
+(** ** Final object *)
+
+Definition final_object {C : Csystem_catdata} {n} (X : ob C n) :=
+   forall m (Y : ob C m), iscontr (Y --> X).
+
+Lemma isaprop_final_object (C : Csystem_catdata) n (X : ob C n) : 
+            isaprop (final_object X).
+Proof.
+  repeat (apply impred; intros);
+  apply isapropiscontr.
+Qed.
+  
+
+(** **  The point as final object  *)
+
+Definition Cpt_is_final (C : Csystem_catdata) := total2 (
+   fun F : iscontr (ob C 0) => final_object (pr1 F)).
+
+Lemma isaprop_Cpt_is_final (C : Csystem_catdata) : isaprop (Cpt_is_final C).
+Proof.
+  apply isofhleveltotal2.
+  apply isapropiscontr.
+  intro; apply isaprop_final_object.
+Qed.
+
+
+(** ** Definition of being a pullback *)
+(** Input: a square of arrows 
+
+       f
+   a -----> b
+   |        | 
+  g|        |h
+   v        v
+   c -----> d
+       i
+*)
+
+Definition is_pullback {C : Csystem_catdata} {n m k l : nat}
+   {a : ob C n} {b : ob C m} {c : ob C k} {d : ob C l} 
+   (f : a --> b) (g : a --> c) (h : b --> d) (i : c --> d) :=
+  dirprod (f ;; h == g ;; i) 
+       (forall n' (a' : ob C n') (f' : a' --> b) (g' : a' --> c),
+         f' ;; h == g' ;; i ->
+        iscontr (total2 (fun fg' : a' --> a => 
+                   dirprod (fg' ;; f == f')(fg' ;; g == g')))).
+
+
+(*
+Definition is_pullback {C : Csystem_catdata} {n m k l : nat}
+   {a : ob C n} {b : ob C m} {c : ob C k} {d : ob C l} 
+   (f : a --> b) (g : a --> c) (h : b --> d) (i : c --> d) :=
+  dirprod (f ;; h == g ;; i) 
+       (forall n' (a' : Ob C n') (f' : Hom a' b) (g' : Hom a' c),
+         f' ;; h == g' ;; i ->
+        iscontr (total2 (fun fg' : Hom a' a => 
+              hProppair (dirprod (fg' ;; f == f')(fg' ;; g == g')) 
+              (isapropdirprod _ _ (isaset_Hom a' b _ _ )(isaset_Hom a' c _ _ ))
+                ))).
+*)
+
+Lemma isaprop_is_pullback (C : Csystem_catdata) {n m k l : nat}
+   {a : ob C n} {b : ob C m} {c : ob C k} {d : ob C l} 
+   (f : a --> b) (g : a --> c) (h : b --> d) (i : c --> d):
+            isaprop (is_pullback f g h i).
+Proof.
+  apply isapropdirprod.
+  apply (_ --> _ ).
+  repeat (apply impred; intros).
+  change (isofhlevel 1) with (isaprop).
+  apply isapropiscontr.
+Qed.
+
+
+
+(** ** Pullback square needs "cast" *)
+(** For the pullback square to typecheck, we need a cast in the lower left corner. *)
+
+(** We change the source of the lower horizontal morphism without changing
+    the morphism itself. *)
+
+
+Definition pullback_proj (C : Csystem_data) := forall n (X : ob C (S n)) m (Y : ob C m)
+   (f : Y --> (Cft X)), 
+(*total2 (
+   fun H : Cft (Cstar X f) == Y =>
+*)
+   is_pullback (Cq X f) (Cp C (Cstar X f)) (Cp C X) f.
+
+Lemma isaprop_pullback_proj (C : Csystem_data) : isaprop (pullback_proj C).
+Proof.
+  repeat (apply impred; intro).
+  apply isaprop_is_pullback.
+Qed.
+
+Definition is_Csystem (C : Csystem_data) :=
+   dirprod 
+     (is_categorical C)
+     (dirprod (Cpt_is_final C)(pullback_proj C)).
+
+Lemma isaprop_is_Csystem (C : Csystem_data) : isaprop (is_Csystem C).
+Proof.
+  apply isapropdirprod.
+  apply isaprop_is_categorical.
+  apply isapropdirprod.
+  apply isaprop_Cpt_is_final.
+  apply isaprop_pullback_proj.
+Qed.
+
+Fixpoint ICft (C : Csystem_data) (i : nat){struct i} : forall (n : nat), 
+        ob C (i + n) -> ob C n :=
+   match i return forall n, ob C (i + n) -> ob C n with
+   | 0 => fun n => fun X => X
+   | S i' => fun n => fun X => (ICft C i' _ (Cft X))
+   end.
+
+Implicit Arguments ICft [C n].
+
+Fixpoint ICft' (C : Csystem_data) (i : nat){struct i} : forall (n : nat), 
+        ob C (i + n) -> ob C n :=
+   match i return forall n, ob C (i + n) -> ob C n with
+   | 0 => fun n => fun X : ob C n => X
+   | S i' => fun n => fun (X : ob C (i' + S n)) => Cft (ICft' _ _ _ X)
+   end.
+
+
+Implicit Arguments ICft' [C n].
+(*
+Lemma eq_ICft_ICft' (C : Csystem_data) (i n : nat) (X : ob C (S i + n)) : 
+    ICft' i (Cft X) == Cft (ICft' i X).
+*)
+
+
+Lemma eq_ICft_ICft' (C : Csystem_data) (i n : nat) (X : ob C (i + n)) : 
+    ICft i X == ICft' i X.
+Proof.
+  induction i.
+  apply idpath.
+  simpl.
+  rewrite IHi.
+  
+  clear IHi.
+  induction i.
+  apply idpath.
+  simpl.
+  Check @maponpaths.
+Admitted.
+
+(** ** Iterated canonical projections *)
+
+Fixpoint ICp (C : Csystem_data) (i : nat){struct i} : forall (n : nat) (X : ob C (i + n)),
+          X --> ICft i X :=
+   match i return forall (n : nat)(X : ob C ((i + n))), X --> (ICft i X) with
+   | 0 => fun n => fun X => Csystem_id X
+   | S i' => fun n => fun X => Cp _ X ;; ICp C i' n (Cft X)  (*;; Cp (ICft C i' n X)*)
+   end.
+
+
+
+
+Fixpoint ICp' (C : Csystem_data) (i : nat) : forall (n : nat) (X : ob C (i + n)),
+          X --> ICft' i X :=
+   match i return forall (n : nat)(X : ob C ((i + n))), X --> (ICft' i X) with
+   | 0 => fun n => fun (X : ob C n) => Csystem_id X
+   | S i' => fun n => fun X  => ICp' C i' (S n) (X) ;; Cp _ _  (*;; Cp (ICft C i' n X)*)
+   end.
+
+Implicit Arguments ICp [C n].
+
+Definition ICstar_ICq (C : Csystem_data) (i : nat) : 
+    forall n (X : ob C ((i + n))) m (Y : ob C m) (f : Y --> (ICft' i X)),
+        total2 (fun Z : ob C (i + m) => Z --> (ICft' i X)).
+induction i.
+intros. simpl in *.
+exists Y. exact f.
+intros.
+Check @Cq.
+
+set (f' := Cq _ f).
+
+(* set (f'cor := Cq (ICft' i (n := S n) X) f). *)
+set (f4 := IHi _ _ _ _  f').
+
+set (f' := (IHi n (Cft X) m _ f)).
+simpl in *.
+destruct f' as [fs q].
+Check @Cstar. Check @ICft.
+
+set (f1 := Cstar X q).
+exists f1.
+exact (Cq _ q).
+
+simpl . Check @Cstar.
+destruct i. simpl.
+exists (Cstar X f'). exists
+unfold ICft in H.
+simpl in *.
+
+exists (Cstar X H). (pr2 (IHi n (Cft X) m _ f))).
+
+
+Fixpoint ICstar_ICq (C : Csystem_data) (i : nat) : 
+    forall n (X : Ob C ((S i + n))) m (Y : Ob C m) (f : Hom Y (ICft i X)),
+        total2 (fun x : Ob C (i + m) => Hom x (ICft i X)) :=
+  match i return forall n (X : Ob C ((S i + n))) m (Y : Ob C m) (f : Hom Y (ICft i X)),
+                  total2 (fun x : Ob C (i + m) => Hom x (ICft i X)) with
+  | 0 => fun n X m Y f => tpair (fun x => Hom _ _ ) Y f
+  | S i' => fun n X m Y f => 
+         tpair (fun x : Ob C (S i' + m) => Hom x X) 
+                 (Cstar X (pr2 (ICstar_ICq C i' n (Cft X) m _ f)))
+                 (Cq X (pr2 (ICstar_ICq C i' n (Cft X) m _ f)))
+  end.
+
+
+(** * Derived notions *)
+
+(** ** Iterated father *)
+
+
+
+Fixpoint ICft (C : Csystem_data) (i : nat) : forall n : nat, 
+    ob C n -> ob C (n -- i) :=
+    match i return forall n, Ob C n -> Ob C (n -- i) with
+    | 0 => fun n => fun X => X
+    | S i' => fun n => fun X => (ICft C i' _ (Cft X))
+    end.
+
+
+Fixpoint ICft (C : Csystem_data) (i : nat) : forall (n : nat), 
+        Ob C (i + n) -> Ob C n :=
+   match i return forall n, Ob C (i + n) -> Ob C n with
+   | 0 => fun n => fun X => X
+   | S i' => fun n => fun X => (ICft C i' _ (Cft X))
+   end.
+
+
+Definition ICft' (C : Csystem_data) (i : nat) : forall (n : nat), 
+        Ob C (i + n) -> Ob C n.
+induction i.
+ exact (fun n => fun X => X).
+ intros n X.
+ apply Cft.
+ apply IHi.
+ About nat.
+ exact X.
+ (* transport along (S i + n == i + S n) *)
+
+
+Fixpoint ICft' (C : Csystem_data) (i : nat) : forall (n : nat), 
+        Ob C (i + n) -> Ob C n :=
+   match i return forall n, Ob C (i + n) -> Ob C n with
+   | 0 => fun n => fun X => X
+   | S i' => fun n => fun (X : Ob C (S i' + n)) => Cft (ICft C i' _ (X))
+   end.
+
     
 (** *** Hom notation morphisms *)
 
