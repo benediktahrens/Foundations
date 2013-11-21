@@ -2836,13 +2836,13 @@ Proof. intros . intro y . apply ( isdecpropweqf ( weqhfibershomot f g h y ) ( is
 
 Theorem isdecinclcomp { X Y Z : UU } ( f : X -> Y ) ( g : Y -> Z ) ( isf : isdecincl f ) ( isg : isdecincl g ) : isdecincl ( fun x : X => g ( f x ) ) .
 Proof. intros. intro z .  set ( gf := fun x : X => g ( f x ) ) . assert ( wy : forall ye : hfiber g z , weq ( hfiber f ( pr1 ye ) ) ( hfiber ( hfibersgftog f g z ) ye ) ) . apply  ezweqhf .  
-assert ( ww : forall y : Y , weq ( hfiber f y ) ( hfiber gf ( g y ) ) ) . apply samehfibers . apply ( isdecincltoisincl _ isg ) .  
+assert ( ww : forall y : Y , weq ( hfiber f y ) ( hfiber gf ( g y ) ) ) . apply (samehfibers _ _ isg). 
   destruct ( pr1 ( isg z ) ) as [ ye | nye ] . destruct ye as [ y e ] .  destruct e . apply ( isdecpropweqf ( ww y ) ( isf y ) ) .   assert ( wz : weq ( hfiber gf z ) ( hfiber g z ) ) . split with ( hfibersgftog f g z ) . intro ye .   destruct ( nye ye ) .  apply ( isdecpropweqb wz ( isg z ) ) .  Defined .
 
 (** The conditions of the following theorem can be weakened by assuming only that the h-fibers of g satisfy [ isdeceq ] i.e. are "sets with decidable equality". *)
 
 Theorem isdecinclf { X Y Z : UU } ( f : X -> Y ) ( g : Y -> Z ) ( isg : isincl g ) ( isgf : isdecincl ( fun x : X => g ( f x ) ) ) : isdecincl f .
-Proof. intros . intro y . set ( gf := fun x : _ => g ( f x ) )  .  assert ( ww :  weq ( hfiber f y ) ( hfiber gf ( g y ) ) ) . apply samehfibers . assumption . apply ( isdecpropweqb ww ( isgf ( g y ) ) ) . Defined . 
+Proof. intros . intro y . set ( gf := fun x : _ => g ( f x ) )  .  assert ( ww :  weq ( hfiber f y ) ( hfiber gf ( g y ) ) ) . apply (samehfibers _ _ isg) . apply ( isdecpropweqb ww ( isgf ( g y ) ) ) . Defined . 
 
 (** *)
 
