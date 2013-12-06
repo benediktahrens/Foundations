@@ -2908,8 +2908,10 @@ Note : some of the results above this point in code use a very limitted form of 
 
 (** etacorrection *)
 
-Axiom etacorrection: forall T:UU, forall P:T -> UU, forall f: (forall t:T, P t), paths f (fun t:T => f t). 
+Lemma etacorrection: forall T:UU, forall P:T -> UU, forall f: (forall t:T, P t), paths f (fun t:T => f t). 
+  trivial. Defined.
 
+(* (* Anomaly: Uncaught exception Term.DestKO(_). Please report. *)
 Lemma isweqetacorrection { T : UU } (P:T -> UU): isweq (fun f: forall t:T, P t => (fun t:T => f t)).
 Proof. intros.  apply (isweqhomot  (fun f: forall t:T, P t => f) (fun f: forall t:T, P t => (fun t:T => f t)) (fun f: forall t:T, P t => etacorrection _ P f) (idisweq _)). Defined. 
 
@@ -2922,6 +2924,7 @@ Definition etacor { X Y : UU } (f:X -> Y) : paths f (fun x:X => f x) := etacorre
 
 Lemma etacoronpaths { X Y : UU } (f1 f2 : X->Y) : paths (fun x:X => f1 x) (fun x:X => f2 x) -> paths f1 f2. 
 Proof. intros X Y f1 f2 X0. set (ec:= weqeta (fun x:X => Y) ). apply (invmaponpathsweq  ec f1 f2 X0). Defined.
+*)
 
 
 (** Dependent functions and sections up to homotopy I *)
@@ -2931,9 +2934,9 @@ Definition toforallpaths { T : UU }  (P:T -> UU) (f g :forall t:T, P t) : (paths
 Proof. intros T P f g X t. destruct X. apply (idpath (f t)). Defined. 
 
 
-Definition sectohfiber { X : UU } (P:X -> UU): (forall x:X, P x) -> (hfiber (fun f:_ => fun x:_ => pr1  (f x)) (fun x:X => x)) := (fun a : forall x:X, P x => tpair _ (fun x:_ => tpair _ x (a x)) (idpath (fun x:X => x))).
+Definition sectohfiber { X : UU } (P:X -> UU): (forall x:X, P x) -> (@hfiber _ (X -> X) (fun f:X -> total2 P => fun x => pr1  (f x)) (fun x:X => x)) := (fun a : forall x:X, P x => tpair _ (fun x => tpair _ x (a x)) (idpath (fun x:X => x))).
 
-Definition hfibertosec  { X : UU } (P:X -> UU):  (hfiber (fun f:_ => fun x:_ => pr1  (f x)) (fun x:X => x)) -> (forall x:X, P x):= fun se:_  => fun x:X => match se as se' return P x with tpair s e => (transportf P (toforallpaths (fun x:X => X)  (fun x:X => pr1 (s x)) (fun x:X => x) e x) (pr2  (s x))) end.
+Definition hfibertosec  { X : UU } (P:X -> UU):  (@hfiber _ (X->X) (fun f:X->total2 P => fun x:_ => pr1  (f x)) (fun x:X => x)) -> (forall x:X, P x):= fun se:_  => fun x:X => match se as se' return P x with tpair s e => (transportf P (toforallpaths (fun x:X => X)  (fun x:X => pr1 (s x)) (fun x:X => x) e x) (pr2  (s x))) end.
 
 Definition sectohfibertosec { X : UU } (P:X -> UU): forall a: forall x:X, P x, paths (hfibertosec _  (sectohfiber _ a)) a := fun a:_ => (pathsinv0 (etacorrection _ _ a)).
 
@@ -2943,7 +2946,7 @@ Definition sectohfibertosec { X : UU } (P:X -> UU): forall a: forall x:X, P x, p
 
 Axiom funextfunax : forall (X Y:UU)(f g:X->Y),  (forall x:X, paths (f x) (g x)) -> (paths f g). 
 
-Lemma isweqlcompwithweq { X X' : UU} (w: weq X X') (Y:UU) : isweq (fun a:X'->Y => (fun x:X => a (w x))).
+Lemma isweqlcompwithweq { X X' : UU} (w: weq X X') (Y:UU) : @isweq (X' -> Y) (X -> Y) (fun a:X'->Y => (fun x:X => a (w x))).
 Proof. intros. set (f:= (fun a:X'->Y => (fun x:X => a (w x)))). set (g := fun b:X-> Y => fun x':X' => b ( invweq  w x')). 
 set (egf:= (fun a:X'->Y => funextfunax X' Y (fun x':X' => (g (f a)) x') a (fun x': X' =>  maponpaths a  (homotweqinvweq w x')))).
 set (efg:= (fun a:X->Y => funextfunax X Y (fun x:X => (f (g a)) x) a (fun x: X =>  maponpaths a  (homotinvweqweq w x)))). 
@@ -2951,7 +2954,7 @@ apply (gradth  f g egf efg). Defined.
 
 
 
-Lemma isweqrcompwithweq { Y Y':UU } (w: weq Y Y')(X:UU): isweq (fun a:X->Y => (fun x:X => w (a x))).
+Lemma isweqrcompwithweq { Y Y':UU } (w: weq Y Y')(X:UU): @isweq (X -> Y) (X -> Y') (fun a:X->Y => (fun x:X => w (a x))).
 Proof. intros. set (f:= (fun a:X->Y => (fun x:X => w (a x)))). set (g := fun a':X-> Y' => fun x:X => (invweq  w (a' x))). 
 set (egf:= (fun a:X->Y => funextfunax X Y (fun x:X => (g (f a)) x) a (fun x: X => (homotinvweqweq w (a x))))).
 set (efg:= (fun a':X->Y' => funextfunax X Y' (fun x:X => (f (g a')) x) a' (fun x: X =>  (homotweqinvweq w (a' x))))). 
