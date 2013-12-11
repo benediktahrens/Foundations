@@ -2911,7 +2911,6 @@ Note : some of the results above this point in code use a very limitted form of 
 Lemma etacorrection: forall T:UU, forall P:T -> UU, forall f: (forall t:T, P t), paths f (fun t:T => f t). 
   trivial. Defined.
 
-(* (* Anomaly: Uncaught exception Term.DestKO(_). Please report. *)
 Lemma isweqetacorrection { T : UU } (P:T -> UU): isweq (fun f: forall t:T, P t => (fun t:T => f t)).
 Proof. intros.  apply (isweqhomot  (fun f: forall t:T, P t => f) (fun f: forall t:T, P t => (fun t:T => f t)) (fun f: forall t:T, P t => etacorrection _ P f) (idisweq _)). Defined. 
 
@@ -2924,8 +2923,6 @@ Definition etacor { X Y : UU } (f:X -> Y) : paths f (fun x:X => f x) := etacorre
 
 Lemma etacoronpaths { X Y : UU } (f1 f2 : X->Y) : paths (fun x:X => f1 x) (fun x:X => f2 x) -> paths f1 f2. 
 Proof. intros X Y f1 f2 X0. set (ec:= weqeta (fun x:X => Y) ). apply (invmaponpathsweq  ec f1 f2 X0). Defined.
-*)
-
 
 (** Dependent functions and sections up to homotopy I *)
 
@@ -2997,8 +2994,8 @@ apply ( iscontrretract p s eps0). assumption. Defined.
 
 
 Theorem isweqtoforallpaths { T : UU } (P:T -> UU)( f g: forall t:T, P t) : isweq (toforallpaths P f g). 
-Proof. intros. set (tmap:= fun ff: total2 (fun f0: forall t:T, P t, paths f0 g) => tpair (fun f0:forall t:T, P t => forall t:T, paths (f0 t) (g t)) (pr1  ff) (toforallpaths P (pr1  ff) g (pr2  ff))). assert (is1: iscontr (total2 (fun f0: forall t:T, P t, paths f0 g))). apply (iscontrcoconustot _ g).   assert (is2:iscontr (total2 (fun f0:forall t:T, P t => forall t:T, paths (f0 t) (g t)))). apply funextweql1.  
-assert (X: isweq tmap).  apply (isweqcontrcontr  tmap is1 is2).  apply (isweqtotaltofib (fun f0: forall t:T, P t, paths f0 g) (fun f0:forall t:T, P t => forall t:T, paths (f0 t) (g t)) (fun f0:forall t:T, P t =>  (toforallpaths P f0 g)) X f).  Defined. 
+Proof. intros. set (tmap:= fun ff: total2 (fun f0: forall t:T, P t => paths f0 g) => tpair (fun f0:forall t:T, P t => forall t:T, paths (f0 t) (g t)) (pr1  ff) (toforallpaths P (pr1  ff) g (pr2  ff))). assert (is1: iscontr (total2 (fun f0: forall t:T, P t => paths f0 g))). apply (iscontrcoconustot _ g).   assert (is2:iscontr (total2 (fun f0:forall t:T, P t => forall t:T, paths (f0 t) (g t)))). apply funextweql1.  
+assert (X: isweq tmap).  apply (isweqcontrcontr  tmap is1 is2).  apply (isweqtotaltofib (fun f0: forall t:T, P t => paths f0 g) (fun f0:forall t:T, P t => forall t:T, paths (f0 t) (g t)) (fun f0:forall t:T, P t =>  (toforallpaths P f0 g)) X f).  Defined. 
 
 
 Theorem weqtoforallpaths { T : UU } (P:T -> UU)(f g : forall t:T, P t) : weq (paths f g) (forall t:T, paths (f t) (g t)) .
@@ -3158,7 +3155,9 @@ set (map1inv :=  totalfun (fun pointover : forall x : X, P x =>
       forall x:X, paths  ((f x) (pointover x)) (s x)) (fun pointover : forall x : X, P x =>
       paths (fun x : X => f x (pointover x)) s) (fun pointover: forall x:X, P x => funextsec _  (fun x : X => f x (pointover x)) s)).
 
-assert (is1: isweq map1inv). apply (isweqfibtototal _ _ (fun pointover: forall x:X, P x => weqfunextsec _ (fun x : X => f x (pointover x)) s ) ).
+assert (is1: isweq map1inv). Opaque funextsec. apply (isweqfibtototal ((fun pointover : forall x : X, P x =>
+               forall x : X, paths (f x (pointover x)) (s x))) ((fun pointover : forall x : X, P x =>
+               paths (fun x : X => f x (pointover x)) s)) (fun pointover: forall x:X, P x => weqfunextsec Q (fun x : X => f x (pointover x)) s ) ).
 
 apply (twooutof3c map2inv map1inv is2 is1). Defined. 
 

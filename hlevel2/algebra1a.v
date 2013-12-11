@@ -120,13 +120,13 @@ Definition grrinvax_is { X : hSet } { opp : binop X } ( is : isgrop opp ) := pr2
 
 
 Lemma isweqrmultingr_is { X : hSet } { opp : binop X } ( is : isgrop opp ) ( x0 : X ) : isrinvertible opp x0 .
-Proof . intros .  destruct is as [ is istr ] . set ( f := fun x : X => opp x x0 ) . set ( g := fun x : X , opp x ( ( pr1 istr ) x0 ) ) .  destruct is as [ assoc isun0 ] . destruct istr as [ inv0 axs ] .   destruct isun0 as [ un0 unaxs ] .  simpl in * |-  . 
+Proof . intros .  destruct is as [ is istr ] . set ( f := fun x : X => opp x x0 ) . set ( g := fun x : X => opp x ( ( pr1 istr ) x0 ) ) .  destruct is as [ assoc isun0 ] . destruct istr as [ inv0 axs ] .   destruct isun0 as [ un0 unaxs ] .  simpl in * |-  . 
 assert ( egf : forall x : _ , paths ( g ( f x ) ) x ) . intro x . unfold f . unfold g . destruct ( pathsinv0 ( assoc x x0 ( inv0 x0 ) ) ) .  assert ( e := pr2 axs x0 ) .   simpl in e . rewrite e . apply ( pr2 unaxs x ) .  
 assert ( efg : forall x : _ , paths ( f ( g x ) ) x ) . intro x .  unfold f . unfold g . destruct ( pathsinv0 ( assoc x ( inv0 x0 ) x0 ) ) . assert ( e := pr1 axs x0 ) . simpl in e . rewrite e . apply ( pr2 unaxs x ) .  
 apply ( gradth _ _ egf efg ) . Defined .  
 
 Lemma isweqlmultingr_is { X : hSet } { opp : binop X } ( is : isgrop opp )  ( x0 : X ) : islinvertible opp x0 .
-Proof . intros .   destruct is as [ is istr ] .  set ( f := fun x : X => opp x0 x ) . set ( g := fun x : X , opp ( ( pr1 istr ) x0 ) x ) .  destruct is as [ assoc isun0 ] . destruct istr as [ inv0 axs ] .  destruct isun0 as [ un0 unaxs ] .  simpl in * |-  . 
+Proof . intros .   destruct is as [ is istr ] .  set ( f := fun x : X => opp x0 x ) . set ( g := fun x : X => opp ( ( pr1 istr ) x0 ) x ) .  destruct is as [ assoc isun0 ] . destruct istr as [ inv0 axs ] .  destruct isun0 as [ un0 unaxs ] .  simpl in * |-  . 
 assert ( egf : forall x : _ , paths ( g ( f x ) ) x ) . intro x . unfold f . unfold g . destruct ( assoc ( inv0 x0 ) x0 x  ) . assert ( e := pr1 axs x0 ) . simpl in e . rewrite e . apply ( pr1 unaxs x ) .  
 assert ( efg : forall x : _ , paths ( f ( g x ) ) x ) . intro x . unfold f . unfold g . destruct ( assoc x0 ( inv0 x0 ) x  ) . assert ( e := pr2 axs x0 ) . simpl in e . rewrite e . apply ( pr1 unaxs x ) .  
 apply ( gradth _ _ egf efg ) . Defined .  
@@ -770,7 +770,7 @@ Proof .  intros .  unfold isbinophrel .   split . assert ( int : forall a b c : 
 (** **** Direct products *)
 
 Definition setwithbinopdirprod ( X Y : setwithbinop ) : setwithbinop .
-Proof . intros . split with ( setdirprod X Y ) . unfold binop .  simpl . apply ( fun xy xy' : _ => dirprodpair ( op ( pr1 xy ) ( pr1 xy' ) ) ( op ( pr2 xy ) ( pr2 xy' ) ) ) . Defined .  
+Proof . intros . split with ( setdirprod X Y ) .  exact ( fun xy xy' : _ => dirprodpair ( op ( pr1 xy ) ( pr1 xy' ) ) ( op ( pr2 xy ) ( pr2 xy' ) ) ) . Defined .  
 
 
 
@@ -983,7 +983,7 @@ simpl . apply ( dirprodpair qtop1 qtop2 )  . Defined .
 (** **** Direct products *)
 
 Definition setwith2binopdirprod ( X Y : setwith2binop ) : setwith2binop .
-Proof . intros . split with ( setdirprod X Y ) . simpl . apply ( dirprodpair ( fun xy xy' : _ => dirprodpair ( op1 ( pr1 xy ) ( pr1 xy' ) ) ( op1 ( pr2 xy ) ( pr2 xy' ) ) ) ( fun xy xy' : _ => dirprodpair ( op2 ( pr1 xy ) ( pr1 xy' ) ) ( op2 ( pr2 xy ) ( pr2 xy' ) ) ) ) . Defined .  
+Proof . intros . split with ( setdirprod X Y ) . exact ( dirprodpair ( fun xy xy' : _ => dirprodpair ( op1 ( pr1 xy ) ( pr1 xy' ) ) ( op1 ( pr2 xy ) ( pr2 xy' ) ) ) ( fun xy xy' : _ => dirprodpair ( op2 ( pr1 xy ) ( pr1 xy' ) ) ( op2 ( pr2 xy ) ( pr2 xy' ) ) ) ) . Defined .  
 
 
 
