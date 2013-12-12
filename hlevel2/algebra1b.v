@@ -664,9 +664,9 @@ Definition invongrquot { X : gr } ( R : @binopeqrel X ) : setquot R -> setquot R
 Lemma isinvongrquot { X : gr } ( R : @binopeqrel X ) : isinv ( @op ( setwithbinopquot R ) ) ( setquotpr R ( unel X ) ) ( invongrquot R ) . 
 Proof . intros . split .
 
-unfold islinv .  apply ( setquotunivprop R ( fun x : setwithbinopquot R, eqset (@op ( setwithbinopquot R ) (invongrquot R x) x) (setquotpr R (unel X)) ) ) .  intro x . apply ( @maponpaths _ _ ( setquotpr R ) ( @op X ( grinv X x ) x ) ( unel X ) ) .  apply ( grlinvax X ) . 
+unfold islinv .  apply ( setquotunivprop R ( fun x : setwithbinopquot R => eqset (@op ( setwithbinopquot R ) (invongrquot R x) x) (setquotpr R (unel X)) ) ) .  intro x . apply ( @maponpaths _ _ ( setquotpr R ) ( @op X ( grinv X x ) x ) ( unel X ) ) .  apply ( grlinvax X ) . 
 
-unfold isrinv .  apply ( setquotunivprop R ( fun x : setwithbinopquot R, eqset (@op ( setwithbinopquot R ) x (invongrquot R x) ) (setquotpr R (unel X)) ) ) .  intro x . apply ( @maponpaths _ _ ( setquotpr R ) ( @op X x ( grinv X x ) ) ( unel X ) ) .  apply ( grrinvax X ) . Defined .
+unfold isrinv .  apply ( setquotunivprop R ( fun x : setwithbinopquot R => eqset (@op ( setwithbinopquot R ) x (invongrquot R x) ) (setquotpr R (unel X)) ) ) .  intro x . apply ( @maponpaths _ _ ( setquotpr R ) ( @op X x ( grinv X x ) ) ( unel X ) ) .  apply ( grrinvax X ) . Defined .
 
 Opaque isinvongrquot . 
 

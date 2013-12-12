@@ -418,7 +418,7 @@ Proof. intro . simpl . induction n as [ | n IHn ] .  auto with natarith . simpl 
 Hint Resolve natplusnsm : natarith .
 
 Lemma natpluscomm ( n m : nat ) : paths ( n + m ) ( m + n ) .
-Proof. intro. induction n as [ | n IHn ] . intro . auto with natarith .  intro .  set ( int := IHn ( S m ) ) . set ( int2 := pathsinv0 ( natplusnsm n m ) ) . set ( int3 := pathsinv0 ( natplusnsm m n ) ) .  set ( int4 := pathscomp0 int2 int  ) .  apply ( pathscomp0 int4 int3 ) . Defined . 
+Proof. intro. induction n as [ | n IHn ] . intro . induction m. reflexivity. exact (maponpaths S IHm). intro .  set ( int := IHn ( S m ) ) . set ( int2 := pathsinv0 ( natplusnsm n m ) ) . set ( int3 := pathsinv0 ( natplusnsm m n ) ) .  set ( int4 := pathscomp0 int2 int  ) .  apply ( pathscomp0 int4 int3 ) . Defined . 
 Hint Resolve natpluscomm : natarith . 
 
 Lemma natplusassoc ( n m k : nat ) : paths ( ( n + m ) + k ) ( n + ( m + k ) ) .
@@ -877,7 +877,8 @@ Proof. intro n . induction n as [ | n IHn ] . intro .  simpl .  apply idpath .  
 Hint Resolve multnsm : natarith .
 
 Lemma natmultcomm ( n m : nat ) : paths ( n * m ) ( m * n ) .
-Proof. intro . induction n as [ | n IHn ] . intro .  auto with natarith . intro m .  rewrite ( multsnm n m ) .  rewrite ( multnsm m n ) .  apply ( maponpaths ( fun x : _ => m + x ) ( IHn m ) ) .   Defined .
+Proof. intro . induction n as [ | n IHn ] . intro . rewrite (natmult0n m). rewrite (natmultn0 m). reflexivity.
+intro m .  rewrite ( multsnm n m ) .  rewrite ( multnsm m n ) .  apply ( maponpaths ( fun x : _ => m + x ) ( IHn m ) ) .   Defined .
 
 Lemma natrdistr ( n m k : nat ) : paths ( ( n + m ) * k ) ( n * k + m * k ) .
 Proof . intros . induction n as [ | n IHn ] . auto with natarith .   simpl . rewrite ( natplusassoc k ( n * k ) ( m * k ) ) .   apply ( maponpaths ( fun x : _ => k + x ) ( IHn ) ) .  Defined . 
