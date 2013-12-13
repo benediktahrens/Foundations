@@ -8,3 +8,8 @@ TAGS
 .#*
 html
 Make.makefile.bak
+N*.cmi
+N*.cmx
+N*.cmxs
+N*.native
+N*.o
