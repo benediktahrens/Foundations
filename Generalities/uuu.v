@@ -17,7 +17,7 @@ Unset Automatic Introduction.  (** This line has to be removed for the file to c
 
 (** Universe structure *)
 
-Notation UUU := Set .
+Notation UUU := Set (only parsing).
 
 Inductive empty: UUU := .
 Inductive unit : UUU :=  tt : unit.

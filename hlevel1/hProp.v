@@ -31,7 +31,7 @@ Require Export Foundations.Generalities.uu0 .
 
 (** Universe structure *)
 
-Definition UU0 := UU .
+Notation UU0 := UU .
 
 (* end of " Preambule " . *)
 
@@ -117,10 +117,10 @@ Notation hinhprinv := hinhunivcor1 .
 
 
 Lemma weqishinhnegtoneg ( X : UU0 ) : weq ( ishinh ( neg X ) ) ( neg X ) .
-Proof . intro . assert ( lg : logeq ( ishinh ( neg X ) ) ( neg X ) ) . split . simpl . apply ( @hinhuniv _ ( hProppair _ ( isapropneg X ) ) ) .    simpl . intro nx . apply nx . apply hinhpr . apply ( weqimplimpl ( pr1 lg ) ( pr2 lg ) ( pr2 ( ishinh _ ) ) ( isapropneg X ) ) .  Defined . 
+Proof . intro . assert ( lg : logeq ( ishinh ( neg X ) ) ( neg X ) ) . split . simpl . apply ( @hinhuniv _ ( hProppair _ ( isapropneg X ) ) ) .    simpl . intro nx . apply nx . apply hinhpr . simple apply ( weqimplimpl ( pr1 lg ) ( pr2 lg ) ( pr2 ( ishinh _ ) ) ( isapropneg X ) ) .  Defined . 
 
 Lemma weqnegtonegishinh ( X : UU0 ) : weq ( neg X ) ( neg ( ishinh X ) ) .
-Proof . intro .  assert ( lg : logeq ( neg ( ishinh X ) ) ( neg X ) ) . split . apply ( negf ( hinhpr X ) ) .  intro nx .  unfold neg .  simpl . apply ( @hinhuniv _ ( hProppair _ isapropempty ) ) .  apply nx . apply ( weqimplimpl ( pr2 lg ) ( pr1 lg ) ( isapropneg _ ) ( isapropneg _ ) ) .   Defined . 
+Proof . intro .  assert ( lg : logeq ( neg ( ishinh X ) ) ( neg X ) ) . split . apply ( negf ( hinhpr X ) ) .  intro nx .  unfold neg .  simpl . apply ( @hinhuniv _ ( hProppair _ isapropempty ) ) .  apply nx . simple apply ( weqimplimpl ( pr2 lg ) ( pr1 lg ) ( isapropneg _ ) ( isapropneg _ ) ) .   Defined . 
 
  
 (** *** [ ishinh ] and [ coprod ] *)
@@ -155,7 +155,7 @@ Definition wittohexists { X : UU0 } ( P : X -> UU0 ) ( x : X ) ( is : P x ) : he
 Definition total2tohexists { X : UU0 } ( P : X -> UU0 ) : total2 P -> hexists P := hinhpr _ . 
 
 Definition weqneghexistsnegtotal2   { X : UU0 } ( P : X -> UU0 ) : weq ( neg ( hexists P ) ) ( neg ( total2 P ) ) .
-Proof . intros . assert ( lg : ( neg ( hexists P ) ) <-> ( neg ( total2 P ) )  ) . split . apply ( negf ( total2tohexists P ) ) . intro nt2 . unfold neg . change ( ishinh_UU ( total2 P ) -> hfalse ) . apply ( hinhuniv ) .  apply nt2 . apply ( weqimplimpl ( pr1 lg ) ( pr2 lg ) ( isapropneg _ ) ( isapropneg _ ) ) .  Defined . 
+Proof . intros . assert ( lg : ( neg ( hexists P ) ) <-> ( neg ( total2 P ) )  ) . split . apply ( negf ( total2tohexists P ) ) . intro nt2 . unfold neg . change ( ishinh_UU ( total2 P ) -> hfalse ) . apply ( hinhuniv ) .  apply nt2 . simple apply ( weqimplimpl ( pr1 lg ) ( pr2 lg ) ( isapropneg _ ) ( isapropneg _ ) ) .  Defined . 
 
 
 (** *** Associativity and commutativity of [ hdisj ] and [ hconj ] up to logical equivalence *)
@@ -188,7 +188,14 @@ Lemma forallnegtoneghexists { X : UU0 } ( F : X -> UU0 ) : ( forall x : X , neg 
 Proof. intros X F nf . change ( ( ishinh_UU ( total2 F ) ) -> hfalse ) . apply hinhuniv .   intro t2 . destruct t2 as [ x f ] .  apply ( nf x f ) . Defined . 
 
 Lemma neghexisttoforallneg { X : UU0 } ( F : X -> UU0 ) : neg ( hexists F ) -> forall x : X , neg ( F x ) .
-Proof . intros X F nhe x . intro fx .  apply ( nhe ( hinhpr _ ( tpair F x fx ) ) ) . Defined . 
+Proof . intros X F nhe x . intro fx .  
+
+assert ( s : ishinh (total2 F) ).
+  exact (hinhpr _ (tpair F x fx)).
+set (f := nhe).
+unfold neg, hexists in f.
+exact (f s).
+Defined . 
 
 Definition weqforallnegtonegexists { X : UU0 } ( F : X -> UU0 ) : weq ( forall x : X , neg ( F x ) ) ( neg ( hexists F ) ) .
 Proof . intros . apply ( weqimplimpl ( forallnegtoneghexists F ) ( neghexisttoforallneg F ) ) . apply impred .   intro x . apply isapropneg . apply isapropneg . Defined . 

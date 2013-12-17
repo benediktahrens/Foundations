@@ -42,7 +42,7 @@ Proof. intros. set ( P1 := fun XY : dirprod UU UU => ( match XY with  tpair X Y 
 set ( h := fun a1 : Z1 =>  pr1 ( pr1 a1 ) ) .
 assert ( egf0 : forall a1 : Z1 ,  paths ( pr1 ( g ( f a1 ) ) ) (  pr1 a1 ) ). intro. apply  idpath.  
 assert ( egf1 : forall a1 a1' : Z1 ,  paths ( pr1 a1' ) (  pr1 a1 ) ->  paths a1' a1 ). intros.  set ( X' :=  maponpaths ( @pr1 _ _ ) X ). 
-assert ( is : isweq h ).  apply isweqpr1pr1 . apply ( invmaponpathsweq ( weqpair h is ) _ _ X' ).
+assert ( is : isweq h ).  exact (isweqpr1pr1 UU). apply ( invmaponpathsweq ( weqpair h is ) _ _ X' ).
 set ( egf := fun a1  => ( egf1 _ _ ( egf0 a1 ) ) ). 
 set ( is2 := gradth _ _ egf efg ). 
 apply ( isweqtotaltofib P1 P2  ( fun XY : dirprod UU UU => match XY with  tpair X Y => @eqweqmap X Y end ) is2 ( dirprodpair T1 T2 ) ). Defined. 

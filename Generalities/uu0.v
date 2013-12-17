@@ -21,7 +21,7 @@ Require Export Foundations.Generalities.uuu.
 
 (** Universe structure *)
 
-Definition UU := Type .
+Notation UU := Type (only parsing).
 
 (* end of "Preambule". *)
 
@@ -1649,7 +1649,7 @@ end.
 
 Theorem hlevelretract (n:nat) { X Y : UU } ( p : X -> Y ) ( s : Y -> X ) ( eps : forall y : Y , paths ( p ( s y ) ) y ) : isofhlevel n X -> isofhlevel n Y .
 Proof. intro. induction n as [ | n IHn ].  intros X Y p s eps X0. unfold isofhlevel.  apply ( iscontrretract p s eps X0). 
- unfold isofhlevel. intros X Y p s eps X0 x x'. unfold isofhlevel in X0. assert (is: isofhlevel n (paths (s x) (s x'))).  apply X0. set (s':= @maponpaths _ _ s x x'). set (p':= pathssec2  s p eps x x').  set (eps':= @pathssec3 _ _  s p eps x x' ). simpl. apply (IHn  _ _ p' s' eps' is). Defined. 
+ unfold isofhlevel. intros X Y p s eps X0 x x'. unfold isofhlevel in X0. assert (is: isofhlevel n (paths (s x) (s x'))).  exact (X0 (s x) (s x')). set (s':= @maponpaths _ _ s x x'). set (p':= pathssec2  s p eps x x').  set (eps':= @pathssec3 _ _  s p eps x x' ). simpl. apply (IHn  _ _ p' s' eps' is). Defined. 
 
 Corollary  isofhlevelweqf (n:nat) { X Y : UU } ( f : weq X Y ) : isofhlevel n X  ->  isofhlevel n Y .
 Proof. intros n X Y f X0.  apply (hlevelretract n  f (invmap f ) (homotweqinvweq  f )). assumption. Defined. 
@@ -1710,7 +1710,7 @@ intros y xe xe' .  destruct xe as [ t x ]. apply (is4 y t xe' x). Defined.
 
 Theorem isofhlevelXfromfY ( n : nat ) { X Y : UU } ( f : X -> Y ) : isofhlevelf n f -> isofhlevel n Y -> isofhlevel n X.
 Proof. intro. induction n as [ | n IHn ] .  intros X Y f X0 X1.  apply (iscontrweqb ( weqpair f X0 ) X1). intros X Y f X0 X1. simpl.
-assert (is1: forall (y:Y)(xe xe': hfiber  f y), isofhlevel n (paths xe xe')). intros. apply (X0 y). 
+assert (is1: forall (y:Y)(xe xe': hfiber  f y), isofhlevel n (paths xe xe')). intros. apply (X0 y xe xe'). 
 assert (is2: forall (y:Y)(x:X)(xe': hfiber  f y), isofhlevelf n  (d2g  f x xe')). intros. unfold isofhlevel. intro y0.
 apply (isofhlevelweqf n ( ezweq3g  f x xe' y0 ) (is1 y (hfiberpair  f x y0) xe')). 
 assert (is3: forall (y' y : Y), isofhlevel n (paths y' y)). simpl in X1. assumption.
@@ -2109,7 +2109,7 @@ Proof. intros . apply ( proofirrelevance _ ( is x x' ) e e' ) . Defined .
 
 
 Lemma isofhlevelssnset (n:nat) ( X : UU ) ( is : isaset X ) : isofhlevel ( S (S n) ) X.
-Proof. intros n X X0. simpl. unfold isaset in X0.   intros x x' . apply isofhlevelsnprop. set ( int := X0 x x'). assumption . Defined. 
+Proof. intros n X X0. simpl. unfold isaset in X0.   intros x x' . apply (isofhlevelsnprop n (X0 x x')). Defined. 
 
 Lemma isasetifiscontrloops (X:UU): (forall x:X, iscontr (paths x x)) -> isaset X.
 Proof. intros X X0. unfold isaset. unfold isofhlevel. intros x x' x0 x0' .   destruct x0. set (is:= X0 x). apply isapropifcontr. assumption.  Defined. 
@@ -3009,7 +3009,7 @@ Definition funextfun { X Y:UU } (f g:X->Y) : (forall x:X, paths (f x) (g x)) -> 
 (** I do not know at the moment whether [funextfun] is equal (homotopic) to [funextfunax]. It is advisable in all cases to use [funextfun] or, equivalently, [funextsec], since it can be produced from [funcontr] and therefore is well defined up to a canonbical equivalence.  In addition it is a homotopy inverse of [toforallpaths] which may be true or not for [funextsecax]. *) 
 
 Theorem isweqfunextsec { T : UU } (P:T -> UU)(f g : forall t:T, P t) : isweq (funextsec P f g).
-Proof. intros. apply (isweqinvmap ( weqtoforallpaths _  f g ) ). Defined. 
+Proof. intros. exact (isweqinvmap (weqtoforallpaths P f g)). Defined. 
 
 Definition weqfunextsec { T : UU } (P:T -> UU)(f g : forall t:T, P t) : weq  (forall t:T, paths (f t) (g t)) (paths f g) := weqpair _ ( isweqfunextsec P f g ) .
 
@@ -3110,7 +3110,7 @@ set (map1:= totalfun (fun pointover : forall x : X, P x =>
 
 set (map2 := totaltoforall P (fun x:X => (fun pointover : P x => paths (f x pointover) (s x)))).  
 
-set (themap := fun a:_ => map2 (map1 a)). assumption. Defined. 
+exact (fun a:_ => map2 (map1 a)). Defined. 
 
 
 
@@ -3121,7 +3121,7 @@ set (map2inv := foralltototal P (fun x:X => (fun pointover : P x => paths (f x p
 set (map1inv :=  totalfun (fun pointover : forall x : X, P x =>
       forall x:X, paths  ((f x) (pointover x)) (s x)) (fun pointover : forall x : X, P x =>
       paths (fun x : X => f x (pointover x)) s) (fun pointover: forall x:X, P x => funextsec _ (fun x : X => f x (pointover x)) s)).
-set (themap := fun a:_=> map1inv (map2inv a)). assumption. Defined. 
+exact (fun a => map1inv (map2inv a)). Defined. 
 
 
 Theorem isweqhfibertoforall  { X : UU } (P Q :X -> UU) (f: forall x:X, P x -> Q x)(s: forall x:X, Q x): isweq (hfibertoforall _ _ f s).
@@ -3393,9 +3393,9 @@ Definition weqfunfromdirprod ( X X' Y : UU ) : weq ( dirprod X X' -> Y ) ( foral
 Theorem impred (n:nat) { T : UU } (P:T -> UU): (forall t:T, isofhlevel n (P t)) -> (isofhlevel n (forall t:T, P t)).
 Proof. intro. induction n as [ | n IHn ] . intros T P X.  apply (funcontr P X). intros T P X. unfold isofhlevel in X.  unfold isofhlevel. intros x x' . 
 
-assert (is: forall t:T, isofhlevel n (paths (x t) (x' t))).  intro. apply (X t (x t) (x' t)).  
+assert (is: forall t:T, isofhlevel n (paths (x t) (x' t))).  intro. exact (X t (x t) (x' t)).  
 assert (is2: isofhlevel n (forall t:T, paths (x t) (x' t))). apply (IHn _ (fun t0:T => paths (x t0) (x' t0)) is).
-set (u:=toforallpaths P x x').  assert (is3:isweq u). apply isweqtoforallpaths.  set (v:= invmap ( weqpair u is3) ). assert (is4: isweq v). apply isweqinvmap. apply (isofhlevelweqf n  ( weqpair v is4 )). assumption. Defined.
+set (u:=toforallpaths P x x').  assert (is3:isweq u). apply isweqtoforallpaths.  set (v:= invmap ( weqpair u is3) ). assert (is4: isweq v). apply isweqinvmap. apply (isofhlevelweqf n  ( weqpair v is4 ) is2). Defined.
 
 Corollary impredtwice  (n:nat) { T T' : UU } (P:T -> T' -> UU): (forall (t:T)(t':T'), isofhlevel n (P t t')) -> (isofhlevel n (forall (t:T)(t':T'), P t t')).
 Proof.  intros n T T' P X. assert (is1: forall t:T, isofhlevel n (forall t':T', P t t')). intro. apply (impred n _ (X t)). apply (impred n _ is1). Defined.
@@ -3411,7 +3411,7 @@ assert (s1: forall x:X, paths (t x) (pr1  (X0 x))). intro. apply proofirrelevanc
 apply funextsec. assumption. 
 
 intros X Y X0. simpl. assert (X1: X -> isofhlevel (S n) (X -> Y)). intro X1 . apply impred. assumption. intros x x' .
-assert (s1: isofhlevel n (forall xx:X, paths (x xx) (x' xx))). apply impred. intro t . apply (X0 t). 
+assert (s1: isofhlevel n (forall xx:X, paths (x xx) (x' xx))). apply impred. intro t . exact (X0 t (x t) (x' t)). 
 assert (w: weq (forall xx:X, paths (x xx) (x' xx)) (paths x x')). apply (weqfunextsec  _ x x' ). apply (isofhlevelweqf n w s1). Defined. 
 
 
@@ -3458,7 +3458,7 @@ unfold isaprop in is2. unfold isofhlevel in is2. intro x . apply (is2 x cntr).
 apply funcontr. assumption. 
 
 set (f:= @pr1 X (fun cntr:X => forall x:X, paths x cntr)). 
-assert (X1:isweq f).  apply isweqpr1. assumption. change (total2 (fun cntr : X => forall x : X, paths x cntr)) with (iscontr X) in X1.  apply (iscontrweqb ( weqpair f X1 ) ) . assumption.  Defined. 
+assert (X1:isweq f).  apply (isweqpr1 _ is1). apply (iscontrweqb ( weqpair f X1 ) ) . assumption.  Defined. 
 
 
 
@@ -3493,7 +3493,7 @@ assert (is1:
          match n0 with
          | O => iscontr X1
          | S m => forall x0 x'0 : X1, isofhlevel m (paths x0 x'0)
-         end) n (paths x x')))). intro.  apply (impred ( S O ) _  (X0 x)). apply (impred (S O) _ is1). Defined. 
+         end) n (paths x x')))). intro.  exact (impred ( S O ) _  (X0 x)). apply (impred (S O) _ is1). Defined. 
 
 Corollary isapropisaprop (X:UU) : isaprop (isaprop X).
 Proof. intro. apply (isapropisofhlevel (S O)). Defined. 
