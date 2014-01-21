@@ -590,13 +590,23 @@ Lemma setquotl0 { X : UU0 } ( R : eqrel X ) ( c : setquot R ) ( x : c ) : paths 
 Proof . intros . apply ( invmaponpathsincl _ ( isinclpr1setquot R ) ) .  simpl . apply funextsec . intro x0 . destruct c as [ A iseq ] .  destruct x as [ x is ] .  simpl in is . simpl .  apply uahp . intro r . apply ( eqax1 iseq _ _ r is ) .  intro a . apply ( eqax2 iseq _ _ is a ) .  Defined . 
 
 
-
+(*
 Theorem issurjsetquotpr { X : UU0 } ( R : eqrel X)  : issurjective (setquotpr R ).
-Proof. intros. unfold issurjective. intro c.   apply ( @hinhuniv ( carrier ( pr1 c ) ) ) .  intro x . apply hinhpr .  split with ( pr1 x ) . apply setquotl0 . destruct c as [t tp]. 
- simpl. unfold iseqclass in tp. simpl in *. 
+Proof. intros. unfold issurjective. intro c.   
+ apply (@hinhuniv c). intro x. apply hinhpr. exists (pr1 x). apply setquotl0.
+ 
+ (*apply ( @hinhuniv ( carrier ( pr1 c ) ) ) .  intro x . apply hinhpr .  split with ( pr1 x ) . apply setquotl0 .  *)
+ destruct c as [t tp]. 
+ simpl. unfold iseqclass in tp. simpl in *.
+Check @eqax0.
 set (H := ( eqax0  tp) ).  
+assert (ishinh_UU t).
+apply H.
+exact H.
+assumption.
+set (Hpr1 := pr1 H).
 Defined . 
-
+*)
 Lemma iscompsetquotpr { X : UU0 } ( R : eqrel X ) ( x x' : X ) ( a : R x x' ) : paths ( setquotpr R x ) ( setquotpr R x' ) .
 Proof. intros. apply ( invmaponpathsincl _ ( isinclpr1setquot R ) ) . simpl . apply funextsec . intro x0 . apply uahp .  intro r0 . apply ( eqreltrans R _ _ _ ( eqrelsymm R _ _ a ) r0 ) .  intro x0' . apply ( eqreltrans R _ _ _ a x0' ) . Defined .  
 
@@ -644,7 +654,12 @@ Lemma iscomprelfunlogeqf2 { X Y : UU0 }  ( RX : hrel X ) { LY RY : hrel Y } ( lg
 Proof . intros . intros x x' r . apply ( ( pr1 ( lg _ _ ) ) ( is _ _ r ) ) . Defined . 
 
 Definition  setquotfun  { X Y : UU0 } ( RX : hrel X ) ( RY : eqrel Y ) ( f : X -> Y ) ( is : iscomprelrelfun RX RY f ) ( cx : setquot RX ) : setquot RY .
-Proof . intros . set ( ff := funcomp f ( setquotpr RY ) ) . assert ( isff : iscomprelfun RX ff ) .  intros x x' .  intro r .  apply ( weqpathsinsetquot RY ( f x ) ( f x' ) ) .  apply is . apply r . apply ( setquotuniv RX ( setquotinset RY ) ff isff cx) .  Defined . 
+Proof . intros . set ( ff := funcomp f ( setquotpr RY ) ) . assert ( isff : iscomprelfun RX ff ) .  intros x x' .  intro r .  apply ( weqpathsinsetquot RY ( f x ) ( f x' ) ) .  apply is . apply r . 
+  simpl in *.
+  set (H := setquotuniv RX (setquotinset RY) ff isff cx).
+  simpl in *.
+  exact H.
+Defined . 
 
 Definition setquotfuncomm  { X Y : UU0 } ( RX : eqrel X ) ( RY : eqrel Y ) ( f : X -> Y ) ( is : iscomprelrelfun RX RY f ) : forall x : X , paths ( setquotfun RX RY f is ( setquotpr RX x ) ) ( setquotpr RY ( f x ) ) .
 Proof . intros . simpl . apply idpath .  Defined . 
