@@ -434,10 +434,11 @@ Definition iscoasymmresrel { X : UU0 } ( L : hrel X ) ( P : hsubtypes X ) ( isl 
 Proof . intros . intros x1 x2 r12 . apply ( isl _ _ r12 ) . Defined . 
 
 Definition istotalresrel { X : UU0 } ( L : hrel X ) ( P : hsubtypes X ) ( isl : istotal L ) : istotal ( resrel L P ) . 
-Proof . intros . intros x1 x2 . apply isl . Defined . 
+Proof . intros . intros x1 x2 . destruct x1 as [x1 p1]. destruct x2 as [x2 p2]. simpl; apply isl.
+Defined . 
 
 Definition iscotransresrel { X : UU0 } ( L : hrel X ) ( P : hsubtypes X ) ( isl : iscotrans L ) : iscotrans ( resrel L P ) . 
-Proof . intros . intros x1 x2 x3 r13 . apply ( isl _ _ _ r13 ) .  Defined .
+Proof . intros . intros x1 x2 x3 r13 . destruct x1; destruct x2; destruct x3; simpl; apply ( isl _ _ _ r13 ) .  Defined .
 
 Definition isdecrelresrel { X : UU0 } ( L : hrel X ) ( P : hsubtypes X ) ( isl : isdecrel L ) : isdecrel ( resrel L P ) . 
 Proof . intros . intros x1 x2 . apply isl . Defined . 
@@ -591,7 +592,9 @@ Proof . intros . apply ( invmaponpathsincl _ ( isinclpr1setquot R ) ) .  simpl .
 
 
 Theorem issurjsetquotpr { X : UU0 } ( R : eqrel X)  : issurjective (setquotpr R ).
-Proof. intros. unfold issurjective. intro c.   apply ( @hinhuniv ( carrier ( pr1 c ) ) ) .  intro x . apply hinhpr .  split with ( pr1 x ) . apply setquotl0 .  apply ( eqax0 ( pr2 c ) ) .  
+Proof. intros. unfold issurjective. intro c.   apply ( @hinhuniv ( carrier ( pr1 c ) ) ) .  intro x . apply hinhpr .  split with ( pr1 x ) . apply setquotl0 . destruct c as [t tp]. 
+ simpl. unfold iseqclass in tp. simpl in *. 
+set (H := ( eqax0  tp) ).  
 Defined . 
 
 Lemma iscompsetquotpr { X : UU0 } ( R : eqrel X ) ( x x' : X ) ( a : R x x' ) : paths ( setquotpr R x ) ( setquotpr R x' ) .

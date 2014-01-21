@@ -93,7 +93,9 @@ Definition ishinh ( X : UU0 ) : hProp := hProppair ( ishinh_UU X ) ( isapropishi
 (* Canonical Structure ishinh .  (** RR1 *) *)
 
 
-Definition hinhpr ( X : UU0 ) : X -> ishinh X := fun x : X => fun P : hProp  => fun f : X -> P => f x .
+(* Definition hinhpr ( X : UU0 ) : X -> ishinh X := fun x : X => fun P : hProp  => fun f : X -> P => f x .*)
+Definition hinhpr ( X : UU0 ) : X -> ishinh X.
+Proof . intros X x P f . exact (f x) . Qed.
 
 Definition hinhfun { X Y : UU0 } ( f : X -> Y ) : ishinh_UU X -> ishinh_UU Y := fun isx : ishinh X => fun P : _ =>  fun yp : Y -> P => isx P ( fun x : X => yp ( f x ) ) .
 
@@ -189,13 +191,12 @@ Proof. intros X F nf . change ( ( ishinh_UU ( total2 F ) ) -> hfalse ) . apply h
 
 Lemma neghexisttoforallneg { X : UU0 } ( F : X -> UU0 ) : neg ( hexists F ) -> forall x : X , neg ( F x ) .
 Proof . intros X F nhe x . intro fx .  
-
+apply nhe.
+unfold hexists.
 assert ( s : ishinh (total2 F) ).
   exact (hinhpr _ (tpair F x fx)).
-set (f := nhe).
-unfold neg, hexists in f.
-exact (f s).
-Defined . 
+exact s.
+Defined.
 
 Definition weqforallnegtonegexists { X : UU0 } ( F : X -> UU0 ) : weq ( forall x : X , neg ( F x ) ) ( neg ( hexists F ) ) .
 Proof . intros . apply ( weqimplimpl ( forallnegtoneghexists F ) ( neghexisttoforallneg F ) ) . apply impred .   intro x . apply isapropneg . apply isapropneg . Defined . 
